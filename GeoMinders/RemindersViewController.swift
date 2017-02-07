@@ -55,6 +55,7 @@ class RemindersViewController: UITableViewController {
                 } else {
                     cell.checkmark.image = UIImage()
                 }
+            cell.accessoryType = UITableViewCellAccessoryType.DetailButton
                 
             
 
@@ -144,6 +145,7 @@ extension RemindersViewController: NewReminderCellDelegate {
         let indexPath = NSIndexPath(forRow: checklist.count - 1, inSection: 0)
         let indexPaths = [indexPath]
         self.tableView.insertRowsAtIndexPaths(indexPaths, withRowAnimation: .Automatic)
+        controller.textField.text = ""
     }
     
     func newReminderCellDidCancelWithTap(controller: NewReminderCell) {
