@@ -21,20 +21,9 @@
                             <outlet property="delegate" destination="WR2-hx-Ta0" id="aRo-B3-XAs"/>
                         </connections>
                     </textField>
-                    <button opaque="NO" contentMode="scaleToFill" enabled="NO" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="detailDisclosure" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="qLd-GU-T5L">
-                        <rect key="frame" x="290" y="21" width="22" height="22"/>
-                        <state key="normal">
-                            <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
-                        </state>
-                    </button>
                 </subviews>
-                <constraints>
-                    <constraint firstAttribute="trailing" secondItem="qLd-GU-T5L" secondAttribute="trailing" constant="8" id="Bpe-FB-K3t"/>
-                    <constraint firstAttribute="centerY" secondItem="qLd-GU-T5L" secondAttribute="centerY" id="QTF-TI-U0e"/>
-                </constraints>
             </tableViewCellContentView>
             <connections>
-                <outlet property="disclosureButton" destination="qLd-GU-T5L" id="1Td-jH-2uA"/>
                 <outlet property="textField" destination="u1B-L1-rxu" id="QsY-ZX-3Cj"/>
             </connections>
             <point key="canvasLocation" x="634" y="369"/>

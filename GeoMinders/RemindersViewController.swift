@@ -20,6 +20,16 @@ class RemindersViewController: UITableViewController {
     @IBAction func detailButton(sender: AnyObject) {
         performSegueWithIdentifier("ShowDetail", sender: sender)
     }
+    
+    required init(coder aDecoder: NSCoder) {
+        checklist = [ReminderItem]()
+        super.init(coder: aDecoder)
+        loadReminderItems()
+    }
+    
+    override func viewWillAppear(animated: Bool) {
+        super.viewWillAppear(animated)
+    }
     override func viewDidLoad() {
         super.viewDidLoad()
         var cellNib = UINib(nibName: "NewReminderCell", bundle: nil)
@@ -44,6 +54,7 @@ class RemindersViewController: UITableViewController {
             let controller = navigationController.topViewController as! ReminderItemDetailViewController
             if let indexPath = tableView.indexPathForCell(sender as! UITableViewCell) {
                 controller.reminderItem = checklist[indexPath.row]
+                controller.delegate = self
             }
         }
     }
@@ -64,14 +75,9 @@ class RemindersViewController: UITableViewController {
             let cell = tableView.dequeueReusableCellWithIdentifier("ReminderItemCell", forIndexPath: indexPath) as! UITableViewCell
             let reminderText = cell.viewWithTag(1001) as! UILabel
             let reminderDetailText = cell.viewWithTag(1002) as! UILabel
-            let reminderCheckbox = cell.viewWithTag(1000) as! UIImageView
-                reminderText.text = item.reminderText
-                reminderDetailText.text = item.detailText
-                if item.checked {
-                    reminderCheckbox.image = UIImage(named: "checkmark-512")
-                } else {
-                    reminderCheckbox.image = UIImage()
-                }
+            reminderText.text = item.reminderText
+            reminderDetailText.text = item.detailText
+            updateCheckmarkForCell(cell, withReminderItem: checklist[indexPath.row])
             return cell
             
         } else {
@@ -84,24 +90,50 @@ class RemindersViewController: UITableViewController {
     override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
         if indexPath.row < checklist.count {
             checklist[indexPath.row].checked = !checklist[indexPath.row].checked
-            tableView.reloadData()
             tableView.deselectRowAtIndexPath(indexPath, animated: true)
+            saveReminderItems()
+            tableView.reloadData()
         }
     }
     
+    func documentsDirectory() -> String {
+        let paths = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true) as! [String]
+        println("Directory: \(paths[0])")
+        return paths[0]
+    }
     
-    func configureCells() {
-        let item0 = ReminderItem()
-        item0.checked = false
-        item0.reminderText = "Something"
-        item0.detailText = ""
-        checklist.append(item0)
+    func dataFilePath() -> String {
+        return documentsDirectory().stringByAppendingPathComponent("GeoMinders.plist")
+    }
+    
+    func saveReminderItems() {
+        let data = NSMutableData()
+        let archiver = NSKeyedArchiver(forWritingWithMutableData: data)
+        archiver.encodeObject(checklist, forKey: "Checklist")
+        archiver.finishEncoding()
+        data.writeToFile(dataFilePath(), atomically: true)
+    }
+    
+    func loadReminderItems() {
+        let path = dataFilePath()
+        if NSFileManager.defaultManager().fileExistsAtPath(path) {
+            if let data = NSData(contentsOfFile: path) {
+                let unarchiver = NSKeyedUnarchiver(forReadingWithData: data)
+                checklist = unarchiver.decodeObjectForKey("Checklist") as! [ReminderItem]
+                unarchiver.finishDecoding()
+            }
+        }
+    }
+    
+    func updateCheckmarkForCell(cell: UITableViewCell, withReminderItem reminder: ReminderItem) {
+        let checkmark = cell.viewWithTag(1000) as! UIImageView
+        if reminder.checked {
+            checkmark.image = UIImage(named: "checkmark-512")
+        } else {
+            checkmark.image = UIImage()
+        }
         
-        let item1 = ReminderItem()
-        item1.checked = false
-        item1.reminderText = "Something else"
-        item1.detailText = "test"
-        checklist.append(item1)
+        
     }
     
 
@@ -159,10 +191,21 @@ extension RemindersViewController: NewReminderCellDelegate {
         let indexPaths = [indexPath]
         self.tableView.insertRowsAtIndexPaths(indexPaths, withRowAnimation: .Automatic)
         controller.textField.text = ""
+        saveReminderItems()
     }
     
     func newReminderCellDidCancelWithTap(controller: NewReminderCell) {
         
+    }
+}
+
+extension RemindersViewController: ReminderItemDetailViewControllerDelegate {
+    func reminderItemDetailViewController(controller: ReminderItemDetailViewController, didFinishEditingReminder reminder: ReminderItem) {
+        dismissViewControllerAnimated(true, completion: nil)
+    }
+    
+    func reminderItemDetailViewControllerDidCancel(controller: ReminderItemDetailViewController) {
+        dismissViewControllerAnimated(true, completion: nil)
     }
 }
 

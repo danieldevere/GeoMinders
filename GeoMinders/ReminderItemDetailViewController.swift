@@ -8,14 +8,34 @@
 
 import UIKit
 
+protocol ReminderItemDetailViewControllerDelegate: class {
+    func reminderItemDetailViewController(controller: ReminderItemDetailViewController, didFinishEditingReminder reminder: ReminderItem)
+    func reminderItemDetailViewControllerDidCancel(controller: ReminderItemDetailViewController)
+}
+
 class ReminderItemDetailViewController: UITableViewController {
     
     var reminderItem: ReminderItem?
+    
+    weak var delegate: ReminderItemDetailViewControllerDelegate?
+    
+    @IBOutlet weak var textField: UITextField!
+    
+    @IBAction func done() {
+        if let delegate = delegate {
+            delegate.reminderItemDetailViewController(self, didFinishEditingReminder: reminderItem!)
+        }
+    }
+    
+    @IBAction func cancel() {
+        delegate?.reminderItemDetailViewControllerDidCancel(self)
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
         if let item = reminderItem {
             println("Worked: \(item.reminderText)")
+            textField.text = item.reminderText
         }
 
         // Uncomment the following line to preserve selection between presentations
@@ -30,20 +50,7 @@ class ReminderItemDetailViewController: UITableViewController {
         // Dispose of any resources that can be recreated.
     }
 
-    // MARK: - Table view data source
-
-    override func numberOfSectionsInTableView(tableView: UITableView) -> Int {
-        // #warning Potentially incomplete method implementation.
-        // Return the number of sections.
-        return 0
-    }
-
-    override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        // #warning Incomplete method implementation.
-        // Return the number of rows in the section.
-        return 0
-    }
-
+    
     /*
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCellWithIdentifier("reuseIdentifier", forIndexPath: indexPath) as! UITableViewCell

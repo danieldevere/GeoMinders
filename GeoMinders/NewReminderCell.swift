@@ -18,8 +18,7 @@ class NewReminderCell: UITableViewCell {
     weak var delegate: NewReminderCellDelegate?
 
     @IBOutlet weak var textField: UITextField!
-    @IBOutlet weak var disclosureButton: UIButton!
-    
+
     @IBAction func done() {
         println("Text: \(textField.text)")
         textField.resignFirstResponder()
@@ -43,15 +42,3 @@ class NewReminderCell: UITableViewCell {
 
 }
 
-extension NewReminderCell: UITextFieldDelegate {
-    func textField(textField: UITextField, shouldChangeCharactersInRange range: NSRange, replacementString string: String) -> Bool {
-        let oldText: NSString = textField.text
-        let newText: NSString = oldText.stringByReplacingCharactersInRange(range, withString: string)
-        if newText.length > 0 {
-            disclosureButton.enabled = true
-        } else {
-            disclosureButton.enabled = false
-        }
-        return true
-    }
-}
