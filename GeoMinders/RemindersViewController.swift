@@ -11,18 +11,21 @@ import UIKit
 class RemindersViewController: UITableViewController {
 
     var checklist = [ReminderItem]()
+    @IBOutlet weak var reminderNameLabel: UILabel!
+    @IBOutlet weak var reminderDetailLabel: UILabel!
+    @IBOutlet weak var reminderCheckbox: UIImageView!
     
     
 
     @IBAction func detailButton(sender: AnyObject) {
-        
+        performSegueWithIdentifier("ShowDetail", sender: sender)
     }
     override func viewDidLoad() {
         super.viewDidLoad()
         var cellNib = UINib(nibName: "NewReminderCell", bundle: nil)
         tableView.registerNib(cellNib, forCellReuseIdentifier: "NewReminderCell")
-        cellNib = UINib(nibName: "ReminderItemCell", bundle: nil)
-        tableView.registerNib(cellNib, forCellReuseIdentifier: "ReminderItemCell")
+    //    cellNib = UINib(nibName: "ReminderItemCell", bundle: nil)
+    //    tableView.registerNib(cellNib, forCellReuseIdentifier: "ReminderItemCell")
         // Uncomment the following line to preserve selection between presentations
         // self.clearsSelectionOnViewWillAppear = false
 
@@ -34,6 +37,17 @@ class RemindersViewController: UITableViewController {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
+    
+    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+        if segue.identifier == "ShowDetail" {
+            let navigationController = segue.destinationViewController as! UINavigationController
+            let controller = navigationController.topViewController as! ReminderItemDetailViewController
+            if let indexPath = tableView.indexPathForCell(sender as! UITableViewCell) {
+                controller.reminderItem = checklist[indexPath.row]
+            }
+        }
+    }
+    
 
     // MARK: - Table view data source
 
@@ -47,18 +61,17 @@ class RemindersViewController: UITableViewController {
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         if indexPath.row < checklist.count {
             let item = checklist[indexPath.row]
-            let cell = tableView.dequeueReusableCellWithIdentifier("ReminderItemCell", forIndexPath: indexPath) as! ReminderItemCell
-                cell.reminderLabel.text = item.reminderText
-                cell.detailLabel.text = item.detailText
+            let cell = tableView.dequeueReusableCellWithIdentifier("ReminderItemCell", forIndexPath: indexPath) as! UITableViewCell
+            let reminderText = cell.viewWithTag(1001) as! UILabel
+            let reminderDetailText = cell.viewWithTag(1002) as! UILabel
+            let reminderCheckbox = cell.viewWithTag(1000) as! UIImageView
+                reminderText.text = item.reminderText
+                reminderDetailText.text = item.detailText
                 if item.checked {
-                    cell.checkmark.image = UIImage(named: "checkmark-512")
+                    reminderCheckbox.image = UIImage(named: "checkmark-512")
                 } else {
-                    cell.checkmark.image = UIImage()
+                    reminderCheckbox.image = UIImage()
                 }
-            cell.accessoryType = UITableViewCellAccessoryType.DetailButton
-                
-            
-
             return cell
             
         } else {

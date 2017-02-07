@@ -18,6 +18,7 @@
 		56573DD61E47DA200053822B /* NewReminderCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56573DD51E47DA200053822B /* NewReminderCell.swift */; };
 		56573DD91E47DA9E0053822B /* ReminderItemCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56573DD71E47DA9E0053822B /* ReminderItemCell.swift */; };
 		56573DDA1E47DA9E0053822B /* ReminderItemCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 56573DD81E47DA9E0053822B /* ReminderItemCell.xib */; };
+		56CB4A1F1E49815D0078E69F /* ReminderItemDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56CB4A1E1E49815D0078E69F /* ReminderItemDetailViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -46,6 +47,7 @@
 		56573DD51E47DA200053822B /* NewReminderCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NewReminderCell.swift; sourceTree = "<group>"; };
 		56573DD71E47DA9E0053822B /* ReminderItemCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReminderItemCell.swift; sourceTree = "<group>"; };
 		56573DD81E47DA9E0053822B /* ReminderItemCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ReminderItemCell.xib; sourceTree = "<group>"; };
+		56CB4A1E1E49815D0078E69F /* ReminderItemDetailViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReminderItemDetailViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -98,6 +100,7 @@
 				56573DD51E47DA200053822B /* NewReminderCell.swift */,
 				56573DD71E47DA9E0053822B /* ReminderItemCell.swift */,
 				56573DD81E47DA9E0053822B /* ReminderItemCell.xib */,
+				56CB4A1E1E49815D0078E69F /* ReminderItemDetailViewController.swift */,
 			);
 			path = GeoMinders;
 			sourceTree = "<group>";
@@ -233,6 +236,7 @@
 				56573DD01E47C49B0053822B /* RemindersViewController.swift in Sources */,
 				56573DD91E47DA9E0053822B /* ReminderItemCell.swift in Sources */,
 				56573DD21E47D2FC0053822B /* ReminderItem.swift in Sources */,
+				56CB4A1F1E49815D0078E69F /* ReminderItemDetailViewController.swift in Sources */,
 				56573DAE1E47C32B0053822B /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -429,6 +433,7 @@
 				56573DC91E47C32B0053822B /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		56573DCA1E47C32B0053822B /* Build configuration list for PBXNativeTarget "GeoMindersTests" */ = {
 			isa = XCConfigurationList;
@@ -437,6 +442,7 @@
 				56573DCC1E47C32B0053822B /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
