@@ -10,9 +10,17 @@ import UIKit
 import MapKit
 import CoreLocation
 
-class MapViewController: UIViewController {
+class MapViewController: UIViewController, MKMapViewDelegate {
     
     let locationManager = CLLocationManager()
+    
+    var searchResults = MKLocalSearchResponse()
+    
+    @IBOutlet weak var map: MKMapView!
+    
+    @IBAction func cancel() {
+        dismissViewControllerAnimated(true, completion: nil)
+    }
 
 
     override func viewDidLoad() {
@@ -29,6 +37,28 @@ class MapViewController: UIViewController {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
+    
+    func mapView(mapView: MKMapView!, viewForAnnotation annotation: MKAnnotation!) -> MKAnnotationView! {
+        if let annotation = mapView.dequeueReusableAnnotationViewWithIdentifier("Pin") as? MKPinAnnotationView {
+            return annotation
+        } else {
+            let annotation = MKPinAnnotationView(annotation: annotation, reuseIdentifier: "Pin")
+            return annotation
+        }
+    }
+    
+    func addAnnotations() {
+        let point = MKPointAnnotation()
+        let mapItem = searchResults.mapItems[0] as! MKMapItem
+        let placemark = mapItem.placemark
+        point.coordinate.latitude = placemark.coordinate.latitude
+        point.coordinate.longitude = placemark.coordinate.longitude
+        
+        let pin = MKPinAnnotationView(annotation: point, reuseIdentifier: "Pin")
+        map.addAnnotation(point)
+        
+    }
+    
     
 
     /*
@@ -54,6 +84,8 @@ extension MapViewController: UISearchBarDelegate {
                 println("Error: \(error)")
             } else {
                 println("Response: \(response)")
+                self.searchResults = response
+                self.addAnnotations()
             }
         })
     }

@@ -151,8 +151,15 @@
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" id="frt-YZ-6yu">
-                        <barButtonItem key="leftBarButtonItem" systemItem="cancel" id="WKa-pu-ajh"/>
+                        <barButtonItem key="leftBarButtonItem" systemItem="cancel" id="WKa-pu-ajh">
+                            <connections>
+                                <action selector="cancel" destination="Yy2-cj-TSF" id="TRe-Jy-DMq"/>
+                            </connections>
+                        </barButtonItem>
                     </navigationItem>
+                    <connections>
+                        <outlet property="map" destination="186-Tn-BHw" id="dhl-ih-q4T"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dnW-BJ-WS7" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
