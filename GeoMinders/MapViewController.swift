@@ -43,19 +43,16 @@ class MapViewController: UIViewController, MKMapViewDelegate {
             return annotation
         } else {
             let annotation = MKPinAnnotationView(annotation: annotation, reuseIdentifier: "Pin")
+            annotation.canShowCallout = true
             return annotation
         }
     }
     
     func addAnnotations() {
-        let point = MKPointAnnotation()
-        let mapItem = searchResults.mapItems[0] as! MKMapItem
-        let placemark = mapItem.placemark
-        point.coordinate.latitude = placemark.coordinate.latitude
-        point.coordinate.longitude = placemark.coordinate.longitude
-        
-        let pin = MKPinAnnotationView(annotation: point, reuseIdentifier: "Pin")
-        map.addAnnotation(point)
+        for mapItem in searchResults.mapItems as! [MKMapItem]{
+            let location = Location(name: "", placemark: mapItem.placemark, longitude: mapItem.placemark.coordinate.longitude, latitude: mapItem.placemark.coordinate.latitude)
+            map.addAnnotation(location)
+        }
         
     }
     
