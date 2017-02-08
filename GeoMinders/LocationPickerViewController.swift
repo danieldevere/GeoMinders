@@ -78,8 +78,11 @@ class LocationPickerViewController: UITableViewController {
     }
     
     override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        reminderItem?.location = locations[indexPath.row]
-        delegate?.locationPickerViewController(self, didPickLocationForReminder: reminderItem!)
+        if indexPath.row < locations.count {
+            reminderItem?.location = locations[indexPath.row]
+            delegate?.locationPickerViewController(self, didPickLocationForReminder: reminderItem!)
+        }
+        
     }
     
 }

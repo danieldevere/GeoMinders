@@ -90,6 +90,9 @@
                                         </label>
                                     </subviews>
                                 </tableViewCellContentView>
+                                <connections>
+                                    <segue destination="mlu-Uf-d6i" kind="presentation" identifier="ShowMap" id="NM7-o3-8dX"/>
+                                </connections>
                             </tableViewCell>
                         </prototypes>
                         <connections>
@@ -108,6 +111,52 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="h8E-Ps-f65" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="3951" y="-279"/>
+        </scene>
+        <!--Map View Controller-->
+        <scene sceneID="1YH-2A-Jk4">
+            <objects>
+                <viewController id="Yy2-cj-TSF" customClass="MapViewController" customModule="GeoMinders" customModuleProvider="target" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="YIY-vy-6a0"/>
+                        <viewControllerLayoutGuide type="bottom" id="9fx-eE-xeX"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="hP2-rK-lRV">
+                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <searchBar contentMode="redraw" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="AhM-5Y-bgd">
+                                <rect key="frame" x="0.0" y="-11" width="600" height="44"/>
+                                <textInputTraits key="textInputTraits"/>
+                            </searchBar>
+                            <searchBar contentMode="redraw" searchBarStyle="minimal" translatesAutoresizingMaskIntoConstraints="NO" id="BjP-38-Pwu">
+                                <rect key="frame" x="0.0" y="64" width="600" height="44"/>
+                                <textInputTraits key="textInputTraits" enablesReturnKeyAutomatically="YES"/>
+                                <connections>
+                                    <outlet property="delegate" destination="Yy2-cj-TSF" id="hOg-u8-YJa"/>
+                                </connections>
+                            </searchBar>
+                            <mapView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" mapType="standard" showsUserLocation="YES" translatesAutoresizingMaskIntoConstraints="NO" id="186-Tn-BHw">
+                                <rect key="frame" x="0.0" y="108" width="600" height="492"/>
+                            </mapView>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstAttribute="trailing" secondItem="BjP-38-Pwu" secondAttribute="trailing" id="49b-GN-EXA"/>
+                            <constraint firstItem="186-Tn-BHw" firstAttribute="leading" secondItem="hP2-rK-lRV" secondAttribute="leading" id="Fab-Zq-fc4"/>
+                            <constraint firstItem="BjP-38-Pwu" firstAttribute="leading" secondItem="hP2-rK-lRV" secondAttribute="leading" id="W5h-Ij-whi"/>
+                            <constraint firstItem="9fx-eE-xeX" firstAttribute="top" secondItem="186-Tn-BHw" secondAttribute="bottom" id="YtF-qe-LEU"/>
+                            <constraint firstItem="BjP-38-Pwu" firstAttribute="top" secondItem="YIY-vy-6a0" secondAttribute="bottom" id="gmY-7w-Xw0"/>
+                            <constraint firstAttribute="trailing" secondItem="186-Tn-BHw" secondAttribute="trailing" id="iPU-Lq-bNH"/>
+                            <constraint firstItem="186-Tn-BHw" firstAttribute="top" secondItem="BjP-38-Pwu" secondAttribute="bottom" id="wFm-G8-b11"/>
+                        </constraints>
+                    </view>
+                    <navigationItem key="navigationItem" id="frt-YZ-6yu">
+                        <barButtonItem key="leftBarButtonItem" systemItem="cancel" id="WKa-pu-ajh"/>
+                    </navigationItem>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="dnW-BJ-WS7" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="5462" y="-279"/>
         </scene>
         <!--Reminder Item Detail View Controller-->
         <scene sceneID="vxs-Mu-rW1">
@@ -246,7 +295,7 @@
                 </navigationController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Vwc-Sg-3nz" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="353" y="421"/>
+            <point key="canvasLocation" x="333" y="421"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="fdc-93-YvK">
@@ -283,6 +332,24 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="5w7-1W-EsZ" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="2687" y="-379"/>
+        </scene>
+        <!--Navigation Controller-->
+        <scene sceneID="fmM-C7-8F4">
+            <objects>
+                <navigationController automaticallyAdjustsScrollViewInsets="NO" id="mlu-Uf-d6i" sceneMemberID="viewController">
+                    <toolbarItems/>
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="6SO-D9-jA5">
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <nil name="viewControllers"/>
+                    <connections>
+                        <segue destination="Yy2-cj-TSF" kind="relationship" relationship="rootViewController" id="0sz-7R-1EX"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="N1g-mq-PTw" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="4650" y="-279"/>
         </scene>
     </scenes>
     <inferredMetricsTieBreakers>
