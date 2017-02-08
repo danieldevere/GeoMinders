@@ -46,6 +46,9 @@
                         </connections>
                     </tableView>
                     <navigationItem key="navigationItem" id="L8C-Iu-rpT"/>
+                    <connections>
+                        <segue destination="iF5-8P-T5L" kind="presentation" identifier="PickLocation" id="JcH-9C-4ou"/>
+                    </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="FSC-gd-goa" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
@@ -279,7 +282,10 @@
                 </navigationController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="5w7-1W-EsZ" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="3139" y="-279"/>
+            <point key="canvasLocation" x="2687" y="-379"/>
         </scene>
     </scenes>
+    <inferredMetricsTieBreakers>
+        <segue reference="JcH-9C-4ou"/>
+    </inferredMetricsTieBreakers>
 </document>

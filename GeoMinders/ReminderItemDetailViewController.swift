@@ -17,6 +17,8 @@ class ReminderItemDetailViewController: UITableViewController {
     
     var reminderItem: ReminderItem?
     
+    var locations = [Location]()
+    
     weak var delegate: ReminderItemDetailViewControllerDelegate?
     
     @IBOutlet weak var textField: UITextField!
@@ -39,6 +41,7 @@ class ReminderItemDetailViewController: UITableViewController {
         if let item = reminderItem {
             textField.text = item.reminderText
         }
+        
     }
     
     
@@ -54,6 +57,13 @@ class ReminderItemDetailViewController: UITableViewController {
             let navigationController = segue.destinationViewController as! UINavigationController
             let controller = navigationController.topViewController as! LocationPickerViewController
             controller.delegate = self
+            
+            controller.locations = locations
+            controller.reminderItem = reminderItem
+
+
+
+            
         }
     }
     
@@ -75,14 +85,15 @@ class ReminderItemDetailViewController: UITableViewController {
 }
 
 extension ReminderItemDetailViewController: LocationPickerViewControllerDelegate {
-    func locationPickerViewController(controller: LocationPickerViewController, didPickLocation location: Location) {
+    func locationPickerViewController(controller: LocationPickerViewController, didPickLocationForReminder reminder: ReminderItem) {
+        reminderItem?.location = reminder.location
         dismissViewControllerAnimated(true, completion: nil)
     }
     
     func locationPickerViewControllerDidCancel(controller: LocationPickerViewController) {
-        println("before dismiss")
+     //   println("before dismiss")
         dismissViewControllerAnimated(true, completion: nil)
         controller.delegate = nil
-        println("after dismiss")
+    //    println("after dismiss")
     }
 }

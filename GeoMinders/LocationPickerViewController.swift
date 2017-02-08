@@ -10,12 +10,14 @@ import UIKit
 
 protocol LocationPickerViewControllerDelegate: class {
     func locationPickerViewControllerDidCancel(controller: LocationPickerViewController)
-    func locationPickerViewController(controller: LocationPickerViewController, didPickLocation location: Location)
+    func locationPickerViewController(controller: LocationPickerViewController, didPickLocationForReminder reminder: ReminderItem)
 }
 
 class LocationPickerViewController: UITableViewController {
     
     var locations = [Location]()
+    
+    var reminderItem: ReminderItem?
     
     weak var delegate: LocationPickerViewControllerDelegate?
     
@@ -29,7 +31,6 @@ class LocationPickerViewController: UITableViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-      
         let location0 = Location()
         location0.name = "Kroger"
         locations.append(location0)
@@ -38,6 +39,11 @@ class LocationPickerViewController: UITableViewController {
         location1.name = "Meijer"
         locations.append(location1)
 
+    }
+    
+    override func viewWillAppear(animated: Bool) {
+        super.viewWillAppear(animated)
+        tableView.reloadData()
     }
 
     override func didReceiveMemoryWarning() {
@@ -59,11 +65,21 @@ class LocationPickerViewController: UITableViewController {
         if indexPath.row < locations.count {
             let cell = tableView.dequeueReusableCellWithIdentifier("LocationCell", forIndexPath: indexPath) as! UITableViewCell
             cell.textLabel?.text = locations[indexPath.row].name
+            if reminderItem?.location?.name == locations[indexPath.row].name {
+                cell.accessoryType = .Checkmark
+            } else {
+                cell.accessoryType = .None
+            }
             return cell
         } else {
             let cell = tableView.dequeueReusableCellWithIdentifier("AddLocationButtonCell", forIndexPath: indexPath) as! UITableViewCell
             return cell
         }
+    }
+    
+    override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+        reminderItem?.location = locations[indexPath.row]
+        delegate?.locationPickerViewController(self, didPickLocationForReminder: reminderItem!)
     }
     
 }

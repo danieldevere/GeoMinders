@@ -32,6 +32,11 @@ class Location: NSObject, NSCoding {
         aCoder.encodeDouble(longitude, forKey: "Longitude")
         aCoder.encodeDouble(latitude, forKey: "Latitude")
     }
+    
+    convenience init(name: String) {
+        self.init()
+        self.name = name
+    }
 
     
 }

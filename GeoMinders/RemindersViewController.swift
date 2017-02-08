@@ -56,7 +56,14 @@ class RemindersViewController: UITableViewController {
                 controller.reminderItem = checklist[indexPath.row]
                 controller.delegate = self
             }
+        } else if segue.identifier == "PickLocation" {
+            let navigationController = segue.destinationViewController as! UINavigationController
+            let controller = navigationController.topViewController as! LocationPickerViewController
+            let index = sender as! NSIndexPath
+            controller.reminderItem = checklist[index.row]
+            controller.delegate = self
         }
+        
     }
     
 
@@ -192,6 +199,8 @@ extension RemindersViewController: NewReminderCellDelegate {
         self.tableView.insertRowsAtIndexPaths(indexPaths, withRowAnimation: .Automatic)
         controller.textField.text = ""
         saveReminderItems()
+        
+        performSegueWithIdentifier("PickLocation", sender: indexPath)
     }
     
     func newReminderCellDidCancelWithTap(controller: NewReminderCell) {
@@ -206,6 +215,16 @@ extension RemindersViewController: ReminderItemDetailViewControllerDelegate {
     }
     
     func reminderItemDetailViewControllerDidCancel(controller: ReminderItemDetailViewController) {
+        dismissViewControllerAnimated(true, completion: nil)
+    }
+}
+
+extension RemindersViewController: LocationPickerViewControllerDelegate {
+    func locationPickerViewController(controller: LocationPickerViewController, didPickLocationForReminder reminder: ReminderItem) {
+        dismissViewControllerAnimated(true, completion: nil)
+    }
+    
+    func locationPickerViewControllerDidCancel(controller: LocationPickerViewController) {
         dismissViewControllerAnimated(true, completion: nil)
     }
 }
