@@ -83,7 +83,7 @@ class RemindersViewController: UITableViewController {
             let reminderText = cell.viewWithTag(1001) as! UILabel
             let reminderDetailText = cell.viewWithTag(1002) as! UILabel
             reminderText.text = item.reminderText
-            reminderDetailText.text = item.detailText
+            reminderDetailText.text = item.location?.name
             updateCheckmarkForCell(cell, withReminderItem: checklist[indexPath.row])
             return cell
             
@@ -101,6 +101,13 @@ class RemindersViewController: UITableViewController {
             saveReminderItems()
             tableView.reloadData()
         }
+    }
+    
+    override func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
+        checklist.removeAtIndex(indexPath.row)
+        let indexPaths = [indexPath]
+        tableView.deleteRowsAtIndexPaths(indexPaths, withRowAnimation: .Automatic)
+        saveReminderItems()
     }
     
     func documentsDirectory() -> String {
@@ -198,7 +205,6 @@ extension RemindersViewController: NewReminderCellDelegate {
         let indexPaths = [indexPath]
         self.tableView.insertRowsAtIndexPaths(indexPaths, withRowAnimation: .Automatic)
         controller.textField.text = ""
-        saveReminderItems()
         
         performSegueWithIdentifier("PickLocation", sender: indexPath)
     }
@@ -212,6 +218,7 @@ extension RemindersViewController: ReminderItemDetailViewControllerDelegate {
     func reminderItemDetailViewController(controller: ReminderItemDetailViewController, didFinishEditingReminder reminder: ReminderItem) {
         dismissViewControllerAnimated(true, completion: nil)
         tableView.reloadData()
+        saveReminderItems()
     }
     
     func reminderItemDetailViewControllerDidCancel(controller: ReminderItemDetailViewController) {
@@ -222,6 +229,8 @@ extension RemindersViewController: ReminderItemDetailViewControllerDelegate {
 extension RemindersViewController: LocationPickerViewControllerDelegate {
     func locationPickerViewController(controller: LocationPickerViewController, didPickLocationForReminder reminder: ReminderItem) {
         dismissViewControllerAnimated(true, completion: nil)
+        tableView.reloadData()
+        saveReminderItems()
     }
     
     func locationPickerViewControllerDidCancel(controller: LocationPickerViewController) {

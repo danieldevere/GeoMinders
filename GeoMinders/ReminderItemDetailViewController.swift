@@ -44,6 +44,13 @@ class ReminderItemDetailViewController: UITableViewController {
         
     }
     
+    override func viewWillAppear(animated: Bool) {
+        super.viewWillAppear(animated)
+        let indexPath = NSIndexPath(forRow: 0, inSection: 2)
+        let cell = tableView.cellForRowAtIndexPath(indexPath)
+        cell?.detailTextLabel?.text = reminderItem?.location?.name
+    }
+    
     
 
     override func didReceiveMemoryWarning() {
