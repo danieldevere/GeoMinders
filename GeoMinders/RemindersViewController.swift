@@ -202,6 +202,7 @@ extension RemindersViewController: NewReminderCellDelegate {
 extension RemindersViewController: ReminderItemDetailViewControllerDelegate {
     func reminderItemDetailViewController(controller: ReminderItemDetailViewController, didFinishEditingReminder reminder: ReminderItem) {
         dismissViewControllerAnimated(true, completion: nil)
+        tableView.reloadData()
     }
     
     func reminderItemDetailViewControllerDidCancel(controller: ReminderItemDetailViewController) {
