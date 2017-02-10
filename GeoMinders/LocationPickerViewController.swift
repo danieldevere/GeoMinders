@@ -47,7 +47,7 @@ class LocationPickerViewController: UITableViewController {
     }
 
     override func didReceiveMemoryWarning() {
-        println("***DID RECEIVE MEMORY WARNING***")
+    //    println("***DID RECEIVE MEMORY WARNING***")
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }

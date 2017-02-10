@@ -22,6 +22,10 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     
     var toggleTaggedAnnotationsButtonSelected = false
     
+    var isTaggingLocation = false
+    
+    var locationToTag = Location()
+    
     enum moveMapCases: Int {
         case currentLocation = 0
         case untaggedLocations = 1
@@ -38,6 +42,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     
     @IBOutlet weak var searchBar: UISearchBar!
     
+    
      @IBAction func cancel() {
         dismissViewControllerAnimated(true, completion: nil)
     }
@@ -48,8 +53,24 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     }
     
     @IBAction func currentLocationButton() {
+        let placemark = MKPlacemark(coordinate: map.userLocation.coordinate, addressDictionary: nil)
+        let location = Location(name: "", placemark: placemark, longitude: map.userLocation.coordinate.longitude, latitude: map.userLocation.coordinate.latitude)
+        addRadiusOverlayForLocation(location, withRadius: 100)
         
+
         moveMap(forMapCase: .currentLocation)
+    }
+    
+    @IBAction func segmentChanged() {
+        let placemark = MKPlacemark(coordinate: locationToTag.coordinate, addressDictionary: nil)
+        let location = Location(name: "", placemark: placemark, longitude: locationToTag.coordinate.longitude, latitude: locationToTag.coordinate.latitude)
+        map.removeOverlays(map.overlays)
+ //       removeRadiusOverlayForGeotification(location, withRadius: (Double(radiusSegmentedControl.selectedSegmentIndex) + 1) * 100.0)
+        addRadiusOverlayForLocation(location, withRadius: (Double(radiusSegmentedControl.selectedSegmentIndex) + 1) * 100.0)
+    //    moveMap(forMapCase: .untaggedLocations)
+        println("User Location: \(map.userLocation.location.coordinate.latitude)")
+        println("Tag Location: \(locationToTag.coordinate.latitude)")
+        println("Tag Latitude: \(locationToTag.latitude)")
     }
 
 
@@ -59,9 +80,9 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         if authStatus == .NotDetermined {
             locationManager.requestAlwaysAuthorization()
         }
+        map.delegate = self
         bottomBar.hidden = true
         stateForToggleButton()
-
         // Do any additional setup after loading the view.
     }
 
@@ -85,8 +106,9 @@ class MapViewController: UIViewController, MKMapViewDelegate {
             annotationButton.addTarget(self, action: Selector("chooseRadiusForTag:"), forControlEvents: .TouchUpInside)
             annotationView.rightCalloutAccessoryView = annotationButton
             let button = annotationView.rightCalloutAccessoryView as! UIButton
-            if let index = find(locations, annotation as! Location) {
+            if let index = find(searchedLocations, annotation as! Location) {
                 button.tag = index
+                
             }
             return annotationView
         }
@@ -95,10 +117,11 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     func chooseRadiusForTag(sender: UIButton) {
         bottomBar.hidden = false
         let button = sender as UIButton
-        let location = locations[button.tag]
+        let location = searchedLocations[button.tag]
         searchBar.hidden = true
-        
-      //  removeSearchedAnnotationsExcept(location)
+        locationToTag = location
+        removeSearchedAnnotationsExcept(locationToTag)
+     //   println("LocationToTag: \(locationToTag)")
         moveMap(forMapCase: .untaggedLocations)
     }
     
@@ -149,6 +172,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     func moveMap(forMapCase mapCase: moveMapCases) {
         var myCount: Int
         var mapLocations = searchedLocations
+        var thisLocation = Location()
         switch mapCase {
         case .currentLocation:
             myCount = 0
@@ -160,17 +184,17 @@ class MapViewController: UIViewController, MKMapViewDelegate {
             mapLocations = locations
         }
         var region: MKCoordinateRegion
-        println("Count of searchedLocations: \(searchedLocations.count)")
+    //    println("Count of searchedLocations: \(searchedLocations.count)")
         switch myCount {
         case 0:
             region = MKCoordinateRegionMakeWithDistance(map.userLocation.coordinate, 1000, 1000)
-            println("User location: \(map.userLocation.coordinate.latitude)")
+     //       println("User location: \(map.userLocation.coordinate.latitude)")
         case 1:
-            println("Ran case 1")
+      //      println("Ran case 1")
             let location = mapLocations[mapLocations.count - 1]
             region = MKCoordinateRegionMakeWithDistance(location.placemark!.coordinate, 1000, 1000)
         default:
-            println("Ran default")
+      //      println("Ran default")
             var topLeftCoord = CLLocationCoordinate2D(latitude: -90, longitude: 180)
             var bottomRightCoord = CLLocationCoordinate2D(latitude: 90, longitude: -180)
             for location in mapLocations {
@@ -188,6 +212,37 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         map.setRegion(regionThatFits, animated: true)
     }
     
+    func mapView(mapView: MKMapView!, rendererForOverlay overlay: MKOverlay!) -> MKOverlayRenderer! {
+        if overlay is MKCircle {
+            var circleRenderer = MKCircleRenderer(overlay: overlay)
+            circleRenderer.lineWidth = 1.0
+            circleRenderer.strokeColor = UIColor.purpleColor()
+            circleRenderer.fillColor = UIColor.purpleColor().colorWithAlphaComponent(1.0)
+            return circleRenderer
+        }
+        return nil
+    }
+    
+    func addRadiusOverlayForLocation(location: Location, withRadius radius: CLLocationDistance) {
+        map.removeAnnotation(location)
+        map.addOverlay(MKCircle(centerCoordinate: location.coordinate, radius: radius), level: MKOverlayLevel.AboveLabels)
+    }
+
+    func removeRadiusOverlayForGeotification(location: Location, withRadius radius: CLLocationDistance) {
+        // Find exactly one overlay which has the same coordinates & radius to remove
+        if let overlays = map.overlays {
+            for overlay in overlays {
+                if let circleOverlay = overlay as? MKCircle {
+                    var coord = circleOverlay.coordinate
+                    if coord.latitude == location.placemark!.coordinate.latitude && coord.longitude == location.placemark!.coordinate.longitude && circleOverlay.radius == radius {
+                        map.removeOverlay(circleOverlay)
+                        break
+                    }
+                }
+            }
+        }
+    }
+
 
     
     
@@ -214,7 +269,7 @@ extension MapViewController: UISearchBarDelegate {
             if let error = error {
                 println("Error: \(error)")
             } else {
-                println("Response: \(response)")
+          //      println("Response: \(response)")
                 self.searchResults = response
                 self.addAnnotations()
             }

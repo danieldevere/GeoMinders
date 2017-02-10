@@ -20,7 +20,7 @@ class NewReminderCell: UITableViewCell {
     @IBOutlet weak var textField: UITextField!
 
     @IBAction func done() {
-        println("Text: \(textField.text)")
+     //   println("Text: \(textField.text)")
         textField.resignFirstResponder()
         let item = ReminderItem()
         item.reminderText = textField.text

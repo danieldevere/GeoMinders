@@ -13,9 +13,8 @@ import CoreLocation
 class Location: NSObject, NSCoding, MKAnnotation {
     var name = ""
     var placemark: MKPlacemark?
-    var longitude: Double = 0.0
     var latitude: Double = 0.0
-    
+    var longitude: Double = 0.0
     var coordinate: CLLocationCoordinate2D {
         return CLLocationCoordinate2DMake(latitude, longitude)
     }
@@ -30,7 +29,7 @@ class Location: NSObject, NSCoding, MKAnnotation {
     
     var subtitle: String! {
         var string = stringFromPlacemark(placemark!)
-        println("Placemark \(placemark)")
+    //    println("Placemark \(placemark)")
 
         return stringFromPlacemark(placemark!)
     }
@@ -54,8 +53,8 @@ class Location: NSObject, NSCoding, MKAnnotation {
     func encodeWithCoder(aCoder: NSCoder) {
         aCoder.encodeObject(name, forKey: "Name")
         aCoder.encodeObject(placemark, forKey: "Placemark")
-        aCoder.encodeDouble(longitude, forKey: "Longitude")
-        aCoder.encodeDouble(latitude, forKey: "Latitude")
+    //    aCoder.encodeDouble(longitude, forKey: "Longitude")
+    //    aCoder.encodeDouble(latitude, forKey: "Latitude")
     }
     
     convenience init(name: String, placemark: MKPlacemark?, longitude: Double, latitude: Double) {
