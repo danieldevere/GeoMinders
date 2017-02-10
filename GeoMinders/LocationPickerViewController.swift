@@ -51,6 +51,17 @@ class LocationPickerViewController: UITableViewController {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
+    
+    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+        if let indexPath = tableView.indexPathForCell(sender as! UITableViewCell) {
+            if indexPath.row == locations.count {
+                let navigationController = segue.destinationViewController as! UINavigationController
+                let controller = navigationController.topViewController as! MapViewController
+                controller.locations = locations
+                
+            }
+        }
+    }
 
     // MARK: - Table view data source
 

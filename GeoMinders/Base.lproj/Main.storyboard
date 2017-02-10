@@ -137,28 +137,80 @@
                             </searchBar>
                             <mapView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" mapType="standard" showsUserLocation="YES" translatesAutoresizingMaskIntoConstraints="NO" id="186-Tn-BHw">
                                 <rect key="frame" x="0.0" y="108" width="600" height="492"/>
+                                <connections>
+                                    <outlet property="delegate" destination="Yy2-cj-TSF" id="fBi-jh-AqZ"/>
+                                </connections>
                             </mapView>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="onQ-4a-nkZ">
+                                <rect key="frame" x="0.0" y="556" width="600" height="44"/>
+                                <subviews>
+                                    <segmentedControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="18f-Rz-mnZ">
+                                        <rect key="frame" x="8" y="8" width="584" height="29"/>
+                                        <segments>
+                                            <segment title="100ft"/>
+                                            <segment title="200ft"/>
+                                            <segment title="300ft"/>
+                                            <segment title="400ft"/>
+                                            <segment title="500ft"/>
+                                        </segments>
+                                    </segmentedControl>
+                                </subviews>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <constraints>
+                                    <constraint firstAttribute="centerY" secondItem="18f-Rz-mnZ" secondAttribute="centerY" id="7S5-ai-wCz"/>
+                                    <constraint firstItem="18f-Rz-mnZ" firstAttribute="leading" secondItem="onQ-4a-nkZ" secondAttribute="leading" constant="8" id="uxm-7s-HuK"/>
+                                    <constraint firstAttribute="height" constant="44" id="xzm-Bi-cg1"/>
+                                    <constraint firstAttribute="trailing" secondItem="18f-Rz-mnZ" secondAttribute="trailing" constant="8" id="y7u-5t-hrr"/>
+                                </constraints>
+                            </view>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="E3b-Oq-ASI">
+                                <rect key="frame" x="541" y="123" width="44" height="44"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="44" id="QbP-I3-ULm"/>
+                                    <constraint firstAttribute="height" constant="44" id="mA3-8y-OJs"/>
+                                </constraints>
+                                <state key="normal" image="currentLocation"/>
+                                <connections>
+                                    <action selector="currentLocationButton" destination="Yy2-cj-TSF" eventType="touchUpInside" id="RzE-3D-6M4"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
                             <constraint firstAttribute="trailing" secondItem="BjP-38-Pwu" secondAttribute="trailing" id="49b-GN-EXA"/>
+                            <constraint firstAttribute="trailing" secondItem="E3b-Oq-ASI" secondAttribute="trailing" constant="15" id="5Xz-3W-M2H"/>
+                            <constraint firstItem="onQ-4a-nkZ" firstAttribute="leading" secondItem="hP2-rK-lRV" secondAttribute="leading" id="Blx-4Z-G5U"/>
                             <constraint firstItem="186-Tn-BHw" firstAttribute="leading" secondItem="hP2-rK-lRV" secondAttribute="leading" id="Fab-Zq-fc4"/>
+                            <constraint firstItem="9fx-eE-xeX" firstAttribute="top" secondItem="onQ-4a-nkZ" secondAttribute="bottom" id="Jp2-df-q7t"/>
+                            <constraint firstItem="E3b-Oq-ASI" firstAttribute="top" secondItem="BjP-38-Pwu" secondAttribute="bottom" constant="15" id="VTI-1X-FLG"/>
                             <constraint firstItem="BjP-38-Pwu" firstAttribute="leading" secondItem="hP2-rK-lRV" secondAttribute="leading" id="W5h-Ij-whi"/>
+                            <constraint firstAttribute="trailing" secondItem="onQ-4a-nkZ" secondAttribute="trailing" id="Yly-a4-cer"/>
                             <constraint firstItem="9fx-eE-xeX" firstAttribute="top" secondItem="186-Tn-BHw" secondAttribute="bottom" id="YtF-qe-LEU"/>
                             <constraint firstItem="BjP-38-Pwu" firstAttribute="top" secondItem="YIY-vy-6a0" secondAttribute="bottom" id="gmY-7w-Xw0"/>
                             <constraint firstAttribute="trailing" secondItem="186-Tn-BHw" secondAttribute="trailing" id="iPU-Lq-bNH"/>
                             <constraint firstItem="186-Tn-BHw" firstAttribute="top" secondItem="BjP-38-Pwu" secondAttribute="bottom" id="wFm-G8-b11"/>
                         </constraints>
                     </view>
+                    <toolbarItems/>
                     <navigationItem key="navigationItem" id="frt-YZ-6yu">
                         <barButtonItem key="leftBarButtonItem" systemItem="cancel" id="WKa-pu-ajh">
                             <connections>
                                 <action selector="cancel" destination="Yy2-cj-TSF" id="TRe-Jy-DMq"/>
                             </connections>
                         </barButtonItem>
+                        <barButtonItem key="rightBarButtonItem" title="Item" id="a0o-7E-OyL">
+                            <connections>
+                                <action selector="toggleTaggedAnnotations" destination="Yy2-cj-TSF" id="H0T-mz-d9H"/>
+                            </connections>
+                        </barButtonItem>
                     </navigationItem>
+                    <nil key="simulatedBottomBarMetrics"/>
                     <connections>
+                        <outlet property="bottomBar" destination="onQ-4a-nkZ" id="MXQ-pY-g5O"/>
                         <outlet property="map" destination="186-Tn-BHw" id="dhl-ih-q4T"/>
+                        <outlet property="radiusSegmentedControl" destination="18f-Rz-mnZ" id="GBe-Vu-hR5"/>
+                        <outlet property="searchBar" destination="BjP-38-Pwu" id="iIj-w2-ujG"/>
+                        <outlet property="toggleTaggedAnnotationsButton" destination="a0o-7E-OyL" id="WEx-eB-4eA"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dnW-BJ-WS7" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -359,6 +411,9 @@
             <point key="canvasLocation" x="4650" y="-279"/>
         </scene>
     </scenes>
+    <resources>
+        <image name="currentLocation" width="128" height="128"/>
+    </resources>
     <inferredMetricsTieBreakers>
         <segue reference="JcH-9C-4ou"/>
     </inferredMetricsTieBreakers>
