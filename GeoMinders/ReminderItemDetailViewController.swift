@@ -17,7 +17,7 @@ class ReminderItemDetailViewController: UITableViewController {
     
     var reminderItem: ReminderItem?
     
-    var locations = [Location]()
+
     
     weak var delegate: ReminderItemDetailViewControllerDelegate?
     
@@ -64,8 +64,6 @@ class ReminderItemDetailViewController: UITableViewController {
             let navigationController = segue.destinationViewController as! UINavigationController
             let controller = navigationController.topViewController as! LocationPickerViewController
             controller.delegate = self
-            
-            controller.locations = locations
             controller.reminderItem = reminderItem
 
 

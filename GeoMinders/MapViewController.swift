@@ -10,6 +10,10 @@ import UIKit
 import MapKit
 import CoreLocation
 
+protocol MapViewControllerDelegate: class {
+    func mapViewControllerDidExit(controller: MapViewController)
+}
+
 class MapViewController: UIViewController, MKMapViewDelegate {
     
     let locationManager = CLLocationManager()
@@ -22,9 +26,9 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     
     var toggleTaggedAnnotationsButtonSelected = false
     
-    var isTaggingLocation = false
-    
     var locationToTag = Location()
+    
+    var overlay: MKOverlay?
     
     enum moveMapCases: Int {
         case currentLocation = 0
@@ -34,6 +38,8 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     
     @IBOutlet weak var toggleTaggedAnnotationsButton: UIBarButtonItem!
     
+    @IBOutlet weak var cancelButton: UIBarButtonItem!
+    
     @IBOutlet weak var map: MKMapView!
     
     @IBOutlet weak var bottomBar: UIView!
@@ -42,20 +48,12 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     
     @IBOutlet weak var searchBar: UISearchBar!
     
+    var delegate: MapViewControllerDelegate?
     
-     @IBAction func cancel() {
-        dismissViewControllerAnimated(true, completion: nil)
-    }
     
-    @IBAction func toggleTaggedAnnotations() {
-        toggleTaggedAnnotationsButtonSelected = !toggleTaggedAnnotationsButtonSelected
-        stateForToggleButton()
-    }
     
     @IBAction func currentLocationButton() {
-        let placemark = MKPlacemark(coordinate: map.userLocation.coordinate, addressDictionary: nil)
-        let location = Location(name: "", placemark: placemark, longitude: map.userLocation.coordinate.longitude, latitude: map.userLocation.coordinate.latitude)
-        addRadiusOverlayForLocation(location, withRadius: 100)
+
         
 
         moveMap(forMapCase: .currentLocation)
@@ -65,12 +63,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         let placemark = MKPlacemark(coordinate: locationToTag.coordinate, addressDictionary: nil)
         let location = Location(name: "", placemark: placemark, longitude: locationToTag.coordinate.longitude, latitude: locationToTag.coordinate.latitude)
         map.removeOverlays(map.overlays)
- //       removeRadiusOverlayForGeotification(location, withRadius: (Double(radiusSegmentedControl.selectedSegmentIndex) + 1) * 100.0)
         addRadiusOverlayForLocation(location, withRadius: (Double(radiusSegmentedControl.selectedSegmentIndex) + 1) * 100.0)
-    //    moveMap(forMapCase: .untaggedLocations)
-        println("User Location: \(map.userLocation.location.coordinate.latitude)")
-        println("Tag Location: \(locationToTag.coordinate.latitude)")
-        println("Tag Latitude: \(locationToTag.latitude)")
     }
 
 
@@ -81,14 +74,26 @@ class MapViewController: UIViewController, MKMapViewDelegate {
             locationManager.requestAlwaysAuthorization()
         }
         map.delegate = self
-        bottomBar.hidden = true
+        regularView()
+    }
+    
+    override func viewDidAppear(animated: Bool) {
         stateForToggleButton()
-        // Do any additional setup after loading the view.
+        println("Locations array: \(locations)")
+
     }
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
+    }
+    
+    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+        if segue.identifier == "TagLocation" {
+            let navigationController = segue.destinationViewController as! UINavigationController
+            let controller = navigationController.topViewController as! TagLocationViewController
+            controller.taggedLocation = locationToTag
+            controller.delegate = self
+        }
     }
     
     
@@ -114,15 +119,69 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         }
     }
     
-    func chooseRadiusForTag(sender: UIButton) {
+    func regularView() {
+        bottomBar.hidden = true
+        searchBar.hidden = false
+        cancelButton.title = "Back"
+        cancelButton.action = Selector("cancel")
+        cancelButton.target = self
+        toggleTaggedAnnotationsButton.title = stateForToggleButton()
+        toggleTaggedAnnotationsButton.action = Selector("toggleTaggedAnnotations")
+        toggleTaggedAnnotationsButton.target = self
+    }
+    
+    func taggingLocationView() {
         bottomBar.hidden = false
+        searchBar.hidden = false
+        cancelButton.action = Selector("tagCancelButtonPressed")
+        cancelButton.target = self
+        toggleTaggedAnnotationsButton.title = "Tag"
+        toggleTaggedAnnotationsButton.action = Selector("tagButtonPressed")
+        toggleTaggedAnnotationsButton.target = self
+    }
+    
+    func cancel() {
+        dismissViewControllerAnimated(true, completion: nil)
+        delegate?.mapViewControllerDidExit(self)
+    }
+    
+    func toggleTaggedAnnotations() {
+        toggleTaggedAnnotationsButtonSelected = !toggleTaggedAnnotationsButtonSelected
+        stateForToggleButton()
+    }
+
+    
+    
+    func tagButtonPressed() {
+        locationToTag.radius = (Double(radiusSegmentedControl.selectedSegmentIndex) + 1) * 100
+        performSegueWithIdentifier("TagLocation", sender: nil)
+    }
+    
+    func tagCancelButtonPressed() {
+        regularView()
+        moveMap(forMapCase: .untaggedLocations)
+        map.removeOverlay(overlay)
+    }
+    
+    func stateForToggleButton() -> String {
+        if toggleTaggedAnnotationsButtonSelected {
+            return "Hide Tags"
+        } else {
+            return "Show Tags"
+        }
+        
+    }
+
+
+    
+    func chooseRadiusForTag(sender: UIButton) {
+        taggingLocationView()
         let button = sender as UIButton
         let location = searchedLocations[button.tag]
-        searchBar.hidden = true
         locationToTag = location
-        removeSearchedAnnotationsExcept(locationToTag)
-     //   println("LocationToTag: \(locationToTag)")
-        moveMap(forMapCase: .untaggedLocations)
+        radiusSegmentedControl.selectedSegmentIndex = 0
+        addRadiusOverlayForLocation(location, withRadius: (Double(radiusSegmentedControl.selectedSegmentIndex) + 1) * 100.0)
+        moveMapToLocation(locationToTag)
     }
     
     func addAnnotations() {
@@ -130,7 +189,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
             removeAnnotationsForLocations(searchedLocations)
         }
         for mapItem in searchResults.mapItems as! [MKMapItem]{
-            let location = Location(name: "", placemark: mapItem.placemark, longitude: mapItem.placemark.coordinate.longitude, latitude: mapItem.placemark.coordinate.latitude)
+            let location = Location(name: mapItem.placemark.name, placemark: mapItem.placemark, longitude: mapItem.placemark.coordinate.longitude, latitude: mapItem.placemark.coordinate.latitude)
             searchedLocations.append(location)
             map.addAnnotation(location)
         }
@@ -160,13 +219,11 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         
     }
     
-    func stateForToggleButton() {
-        if toggleTaggedAnnotationsButtonSelected {
-            toggleTaggedAnnotationsButton.title = "Hide Tags"
-        } else {
-            toggleTaggedAnnotationsButton.title = "Show Tags"
-        }
-
+    
+    func moveMapToLocation(location: Location) {
+        let region = MKCoordinateRegionMakeWithDistance(location.coordinate, 1000, 1000)
+        let regionThatFits = map.regionThatFits(region)
+        map.setRegion(regionThatFits, animated: true)
     }
     
     func moveMap(forMapCase mapCase: moveMapCases) {
@@ -184,24 +241,20 @@ class MapViewController: UIViewController, MKMapViewDelegate {
             mapLocations = locations
         }
         var region: MKCoordinateRegion
-    //    println("Count of searchedLocations: \(searchedLocations.count)")
         switch myCount {
         case 0:
             region = MKCoordinateRegionMakeWithDistance(map.userLocation.coordinate, 1000, 1000)
-     //       println("User location: \(map.userLocation.coordinate.latitude)")
         case 1:
-      //      println("Ran case 1")
             let location = mapLocations[mapLocations.count - 1]
-            region = MKCoordinateRegionMakeWithDistance(location.placemark!.coordinate, 1000, 1000)
+            region = MKCoordinateRegionMakeWithDistance(location.coordinate, 1000, 1000)
         default:
-      //      println("Ran default")
             var topLeftCoord = CLLocationCoordinate2D(latitude: -90, longitude: 180)
             var bottomRightCoord = CLLocationCoordinate2D(latitude: 90, longitude: -180)
             for location in mapLocations {
-                topLeftCoord.latitude = max(topLeftCoord.latitude, location.placemark!.coordinate.latitude)
-                topLeftCoord.longitude = min(topLeftCoord.longitude, location.placemark!.coordinate.longitude)
-                bottomRightCoord.latitude = min(bottomRightCoord.latitude, location.placemark!.coordinate.latitude)
-                bottomRightCoord.longitude = max(bottomRightCoord.longitude, location.placemark!.coordinate.longitude)
+                topLeftCoord.latitude = max(topLeftCoord.latitude, location.coordinate.latitude)
+                topLeftCoord.longitude = min(topLeftCoord.longitude, location.coordinate.longitude)
+                bottomRightCoord.latitude = min(bottomRightCoord.latitude, location.coordinate.latitude)
+                bottomRightCoord.longitude = max(bottomRightCoord.longitude, location.coordinate.longitude)
             }
             let center = CLLocationCoordinate2D(latitude: topLeftCoord.latitude - (topLeftCoord.latitude  - bottomRightCoord.latitude) / 2, longitude: topLeftCoord.longitude - (topLeftCoord.longitude - bottomRightCoord.longitude) / 2)
             let extraSpace = 1.1
@@ -217,45 +270,16 @@ class MapViewController: UIViewController, MKMapViewDelegate {
             var circleRenderer = MKCircleRenderer(overlay: overlay)
             circleRenderer.lineWidth = 1.0
             circleRenderer.strokeColor = UIColor.purpleColor()
-            circleRenderer.fillColor = UIColor.purpleColor().colorWithAlphaComponent(1.0)
+            circleRenderer.fillColor = UIColor.purpleColor().colorWithAlphaComponent(0.4)
             return circleRenderer
         }
         return nil
     }
     
     func addRadiusOverlayForLocation(location: Location, withRadius radius: CLLocationDistance) {
-        map.removeAnnotation(location)
-        map.addOverlay(MKCircle(centerCoordinate: location.coordinate, radius: radius), level: MKOverlayLevel.AboveLabels)
+        overlay = MKCircle(centerCoordinate: location.coordinate, radius: radius)
+        map.addOverlay(overlay)
     }
-
-    func removeRadiusOverlayForGeotification(location: Location, withRadius radius: CLLocationDistance) {
-        // Find exactly one overlay which has the same coordinates & radius to remove
-        if let overlays = map.overlays {
-            for overlay in overlays {
-                if let circleOverlay = overlay as? MKCircle {
-                    var coord = circleOverlay.coordinate
-                    if coord.latitude == location.placemark!.coordinate.latitude && coord.longitude == location.placemark!.coordinate.longitude && circleOverlay.radius == radius {
-                        map.removeOverlay(circleOverlay)
-                        break
-                    }
-                }
-            }
-        }
-    }
-
-
-    
-    
-
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-        // Get the new view controller using segue.destinationViewController.
-        // Pass the selected object to the new view controller.
-    }
-    */
 
 }
 
@@ -269,10 +293,23 @@ extension MapViewController: UISearchBarDelegate {
             if let error = error {
                 println("Error: \(error)")
             } else {
-          //      println("Response: \(response)")
                 self.searchResults = response
                 self.addAnnotations()
+                searchBar.resignFirstResponder()
             }
         })
+    }
+}
+
+extension MapViewController: TagLocationViewControllerDelegate {
+    func tagLocationViewControllerDidGoBack(controller: TagLocationViewController) {
+        dismissViewControllerAnimated(true, completion: nil)
+    }
+    
+    func tagLocationViewController(controller: TagLocationViewController, didSaveTag tag: Location) {
+        locations.append(tag)
+        dismissViewControllerAnimated(true, completion: nil)
+        regularView()
+        map.removeOverlay(overlay)
     }
 }

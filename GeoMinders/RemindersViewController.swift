@@ -34,13 +34,6 @@ class RemindersViewController: UITableViewController {
         super.viewDidLoad()
         var cellNib = UINib(nibName: "NewReminderCell", bundle: nil)
         tableView.registerNib(cellNib, forCellReuseIdentifier: "NewReminderCell")
-    //    cellNib = UINib(nibName: "ReminderItemCell", bundle: nil)
-    //    tableView.registerNib(cellNib, forCellReuseIdentifier: "ReminderItemCell")
-        // Uncomment the following line to preserve selection between presentations
-        // self.clearsSelectionOnViewWillAppear = false
-
-        // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
-        // self.navigationItem.rightBarButtonItem = self.editButtonItem()
     }
 
     override func didReceiveMemoryWarning() {
@@ -70,8 +63,6 @@ class RemindersViewController: UITableViewController {
     // MARK: - Table view data source
 
     override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        // #warning Incomplete method implementation.
-        // Return the number of rows in the section.
         return checklist.count + 1
     }
 
@@ -84,6 +75,7 @@ class RemindersViewController: UITableViewController {
             let reminderDetailText = cell.viewWithTag(1002) as! UILabel
             reminderText.text = item.reminderText
             reminderDetailText.text = item.location?.name
+            cell.accessoryType = UITableViewCellAccessoryType.DetailButton
             updateCheckmarkForCell(cell, withReminderItem: checklist[indexPath.row])
             return cell
             
@@ -110,16 +102,7 @@ class RemindersViewController: UITableViewController {
         saveReminderItems()
     }
     
-    func documentsDirectory() -> String {
-        let paths = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true) as! [String]
-        println("Directory: \(paths[0])")
-        return paths[0]
-    }
-    
-    func dataFilePath() -> String {
-        return documentsDirectory().stringByAppendingPathComponent("GeoMinders.plist")
-    }
-    
+        
     func saveReminderItems() {
         let data = NSMutableData()
         let archiver = NSKeyedArchiver(forWritingWithMutableData: data)
@@ -133,7 +116,9 @@ class RemindersViewController: UITableViewController {
         if NSFileManager.defaultManager().fileExistsAtPath(path) {
             if let data = NSData(contentsOfFile: path) {
                 let unarchiver = NSKeyedUnarchiver(forReadingWithData: data)
-                checklist = unarchiver.decodeObjectForKey("Checklist") as! [ReminderItem]
+                if let list = unarchiver.decodeObjectForKey("Checklist") as? [ReminderItem] {
+                    checklist = list
+                }
                 unarchiver.finishDecoding()
             }
         }
@@ -149,54 +134,19 @@ class RemindersViewController: UITableViewController {
         
         
     }
+    func documentsDirectory() -> String {
+        let paths = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true) as! [String]
+        println("Directory: \(paths[0])")
+        return paths[0]
+    }
     
-
-    /*
-    // Override to support conditional editing of the table view.
-    override func tableView(tableView: UITableView, canEditRowAtIndexPath indexPath: NSIndexPath) -> Bool {
-        // Return NO if you do not want the specified item to be editable.
-        return true
+    func dataFilePath() -> String {
+        return documentsDirectory().stringByAppendingPathComponent("GeoMindersItems.plist")
     }
-    */
-
-    /*
-    // Override to support editing the table view.
-    override func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
-        if editingStyle == .Delete {
-            // Delete the row from the data source
-            tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Fade)
-        } else if editingStyle == .Insert {
-            // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
-        }    
-    }
-    */
-
-    /*
-    // Override to support rearranging the table view.
-    override func tableView(tableView: UITableView, moveRowAtIndexPath fromIndexPath: NSIndexPath, toIndexPath: NSIndexPath) {
-
-    }
-    */
-
-    /*
-    // Override to support conditional rearranging of the table view.
-    override func tableView(tableView: UITableView, canMoveRowAtIndexPath indexPath: NSIndexPath) -> Bool {
-        // Return NO if you do not want the item to be re-orderable.
-        return true
-    }
-    */
-
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-        // Get the new view controller using [segue destinationViewController].
-        // Pass the selected object to the new view controller.
-    }
-    */
 
 }
+
+
 
 extension RemindersViewController: NewReminderCellDelegate {
     func newReminderCell(controller: NewReminderCell, didPressDoneAddingReminder reminder: ReminderItem) {

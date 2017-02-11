@@ -15,6 +15,7 @@ class Location: NSObject, NSCoding, MKAnnotation {
     var placemark: MKPlacemark?
     var latitude: Double = 0.0
     var longitude: Double = 0.0
+    var radius: Double = 0.0
     var coordinate: CLLocationCoordinate2D {
         return CLLocationCoordinate2DMake(latitude, longitude)
     }
@@ -39,6 +40,7 @@ class Location: NSObject, NSCoding, MKAnnotation {
         placemark = aDecoder.decodeObjectForKey("Placemark") as? MKPlacemark
         longitude = aDecoder.decodeDoubleForKey("Longitude")
         latitude = aDecoder.decodeDoubleForKey("Latitude")
+        radius = aDecoder.decodeDoubleForKey("Radius")
         super.init()
     }
     
@@ -46,15 +48,21 @@ class Location: NSObject, NSCoding, MKAnnotation {
         super.init()
     }
     
-    func stringFromPlacemark(placemark: CLPlacemark) -> String {
+    func stringFromPlacemark(placemark: MKPlacemark) -> String {
         return "\(placemark.subThoroughfare) \(placemark.thoroughfare)\n" + "\(placemark.locality), \(placemark.administrativeArea) \(placemark.postalCode)"
     }
     
     func encodeWithCoder(aCoder: NSCoder) {
         aCoder.encodeObject(name, forKey: "Name")
+        println("Name: \(name)")
         aCoder.encodeObject(placemark, forKey: "Placemark")
-    //    aCoder.encodeDouble(longitude, forKey: "Longitude")
-    //    aCoder.encodeDouble(latitude, forKey: "Latitude")
+        println("Placemark: \(placemark)")
+        aCoder.encodeDouble(longitude, forKey: "Longitude")
+        println("Longitude: \(longitude)")
+        aCoder.encodeDouble(latitude, forKey: "Latitude")
+        println("Latitude: \(latitude)")
+        aCoder.encodeDouble(radius, forKey: "Radius")
+        println("Radius: \(radius)")
     }
     
     convenience init(name: String, placemark: MKPlacemark?, longitude: Double, latitude: Double) {

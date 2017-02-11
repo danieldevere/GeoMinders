@@ -22,6 +22,8 @@
 		56573DD61E47DA200053822B /* NewReminderCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56573DD51E47DA200053822B /* NewReminderCell.swift */; };
 		56573DD91E47DA9E0053822B /* ReminderItemCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56573DD71E47DA9E0053822B /* ReminderItemCell.swift */; };
 		56573DDA1E47DA9E0053822B /* ReminderItemCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 56573DD81E47DA9E0053822B /* ReminderItemCell.xib */; };
+		56A96A301E4ECF0B0022C96F /* TagLocationViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56A96A2F1E4ECF0B0022C96F /* TagLocationViewController.swift */; };
+		56A96A321E4F9EA40022C96F /* AllListsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56A96A311E4F9EA40022C96F /* AllListsViewController.swift */; };
 		56CB4A1F1E49815D0078E69F /* ReminderItemDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56CB4A1E1E49815D0078E69F /* ReminderItemDetailViewController.swift */; };
 		56EEA7981E4A291300EF00EA /* DocumentFunctions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56EEA7971E4A291300EF00EA /* DocumentFunctions.swift */; };
 /* End PBXBuildFile section */
@@ -56,6 +58,8 @@
 		56573DD51E47DA200053822B /* NewReminderCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NewReminderCell.swift; sourceTree = "<group>"; };
 		56573DD71E47DA9E0053822B /* ReminderItemCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReminderItemCell.swift; sourceTree = "<group>"; };
 		56573DD81E47DA9E0053822B /* ReminderItemCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ReminderItemCell.xib; sourceTree = "<group>"; };
+		56A96A2F1E4ECF0B0022C96F /* TagLocationViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TagLocationViewController.swift; sourceTree = "<group>"; };
+		56A96A311E4F9EA40022C96F /* AllListsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AllListsViewController.swift; sourceTree = "<group>"; };
 		56CB4A1E1E49815D0078E69F /* ReminderItemDetailViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReminderItemDetailViewController.swift; sourceTree = "<group>"; };
 		56EEA7971E4A291300EF00EA /* DocumentFunctions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DocumentFunctions.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -117,6 +121,8 @@
 				562E41191E4AC90D0096B0A3 /* LocationPickerViewController.swift */,
 				562E411B1E4AC9700096B0A3 /* Location.swift */,
 				562E41211E4B90980096B0A3 /* MapViewController.swift */,
+				56A96A2F1E4ECF0B0022C96F /* TagLocationViewController.swift */,
+				56A96A311E4F9EA40022C96F /* AllListsViewController.swift */,
 			);
 			path = GeoMinders;
 			sourceTree = "<group>";
@@ -248,7 +254,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				56A96A301E4ECF0B0022C96F /* TagLocationViewController.swift in Sources */,
 				56573DD61E47DA200053822B /* NewReminderCell.swift in Sources */,
+				56A96A321E4F9EA40022C96F /* AllListsViewController.swift in Sources */,
 				56573DD01E47C49B0053822B /* RemindersViewController.swift in Sources */,
 				56573DD91E47DA9E0053822B /* ReminderItemCell.swift in Sources */,
 				562E41221E4B90980096B0A3 /* MapViewController.swift in Sources */,
