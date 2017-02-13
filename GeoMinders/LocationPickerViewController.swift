@@ -10,19 +10,19 @@ import UIKit
 
 protocol LocationPickerViewControllerDelegate: class {
     func locationPickerViewControllerDidCancel(controller: LocationPickerViewController)
-    func locationPickerViewController(controller: LocationPickerViewController, didPickLocationForReminder reminder: ReminderItem)
+    func locationPickerViewController(controller: LocationPickerViewController, didPickLocation location: Location)
 }
 
 class LocationPickerViewController: UITableViewController {
     
     var locations = [Location]()
     
-    var reminderItem: ReminderItem?
+    var location: Location?
     
     weak var delegate: LocationPickerViewControllerDelegate?
     
     @IBAction func cancel() {
-  //      dismissViewControllerAnimated(true, completion: nil)
+        dismissViewControllerAnimated(true, completion: nil)
         delegate?.locationPickerViewControllerDidCancel(self)
         
     }
@@ -85,7 +85,7 @@ class LocationPickerViewController: UITableViewController {
         if indexPath.row < locations.count {
             let cell = tableView.dequeueReusableCellWithIdentifier("LocationCell", forIndexPath: indexPath) as! UITableViewCell
             cell.textLabel?.text = locations[indexPath.row].name
-            if reminderItem?.location?.name == locations[indexPath.row].name {
+            if location?.name == locations[indexPath.row].name {
                 cell.accessoryType = .Checkmark
             } else {
                 cell.accessoryType = .None
@@ -99,8 +99,8 @@ class LocationPickerViewController: UITableViewController {
     
     override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
         if indexPath.row < locations.count {
-            reminderItem?.location = locations[indexPath.row]
-            delegate?.locationPickerViewController(self, didPickLocationForReminder: reminderItem!)
+            location = locations[indexPath.row]
+            delegate?.locationPickerViewController(self, didPickLocation: location!)
         }
         
     }

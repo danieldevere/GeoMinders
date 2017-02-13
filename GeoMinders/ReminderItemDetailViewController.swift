@@ -17,15 +17,23 @@ class ReminderItemDetailViewController: UITableViewController {
     
     var reminderItem: ReminderItem?
     
-
+    var tempLocation: Location?
     
     weak var delegate: ReminderItemDetailViewControllerDelegate?
     
     @IBOutlet weak var textField: UITextField!
     
+    @IBOutlet weak var locationLabel: UILabel!
+    
+    @IBOutlet weak var locationDetailLabel: UILabel!
+    
+    @IBOutlet weak var listLabel: UILabel!
+    
+    
     @IBAction func done() {
         if let delegate = delegate {
             reminderItem?.reminderText = textField.text
+            reminderItem?.location = tempLocation
             delegate.reminderItemDetailViewController(self, didFinishEditingReminder: reminderItem!)
         }
     }
@@ -40,15 +48,14 @@ class ReminderItemDetailViewController: UITableViewController {
         super.viewDidLoad()
         if let item = reminderItem {
             textField.text = item.reminderText
+            locationLabel.text = item.location?.name
+            locationDetailLabel.text = item.location?.subtitle
         }
         
     }
     
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(animated)
-        let indexPath = NSIndexPath(forRow: 0, inSection: 2)
-        let cell = tableView.cellForRowAtIndexPath(indexPath)
-        cell?.detailTextLabel?.text = reminderItem?.location?.name
     }
     
     
@@ -64,40 +71,26 @@ class ReminderItemDetailViewController: UITableViewController {
             let navigationController = segue.destinationViewController as! UINavigationController
             let controller = navigationController.topViewController as! LocationPickerViewController
             controller.delegate = self
-            controller.reminderItem = reminderItem
-
-
-
+            if let location = tempLocation {
+                controller.location = tempLocation
+            } else {
+                controller.location = reminderItem?.location
+            }
             
         }
     }
-    
-    override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-   //     println("cellForRowAtIndexPath")
-        return super.tableView(tableView, cellForRowAtIndexPath: indexPath)
-    }
-    
-    override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-   //    println("numberOfRowsInSection")
-        return 1
-    }
-    
-    override func numberOfSectionsInTableView(tableView: UITableView) -> Int {
-   //     println("numberOfSectionsInTableView")
-        return 4
-    }
-
 }
-
 extension ReminderItemDetailViewController: LocationPickerViewControllerDelegate {
-    func locationPickerViewController(controller: LocationPickerViewController, didPickLocationForReminder reminder: ReminderItem) {
-        reminderItem?.location = reminder.location
+    func locationPickerViewController(controller: LocationPickerViewController, didPickLocation location: Location) {
+        tempLocation = location
+        locationLabel.text = tempLocation?.name
+        locationDetailLabel.text = tempLocation?.subtitle
         dismissViewControllerAnimated(true, completion: nil)
     }
     
     func locationPickerViewControllerDidCancel(controller: LocationPickerViewController) {
      //   println("before dismiss")
-        dismissViewControllerAnimated(true, completion: nil)
+  //      dismissViewControllerAnimated(true, completion: nil)
         controller.delegate = nil
     //    println("after dismiss")
     }

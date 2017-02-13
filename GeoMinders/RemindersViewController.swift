@@ -8,9 +8,18 @@
 
 import UIKit
 
+protocol RemindersViewControllerDelegate: class {
+    func remindersViewControllerWantsToSave(controller: RemindersViewController)
+}
+
 class RemindersViewController: UITableViewController {
 
-    var checklist = [ReminderItem]()
+    var reminderList: ReminderList
+    
+    var tempReminder = ReminderItem()
+    
+    var delegate: RemindersViewControllerDelegate?
+    
     @IBOutlet weak var reminderNameLabel: UILabel!
     @IBOutlet weak var reminderDetailLabel: UILabel!
     @IBOutlet weak var reminderCheckbox: UIImageView!
@@ -20,13 +29,13 @@ class RemindersViewController: UITableViewController {
     @IBAction func detailButton(sender: AnyObject) {
         performSegueWithIdentifier("ShowDetail", sender: sender)
     }
-    
+  
     required init(coder aDecoder: NSCoder) {
-        checklist = [ReminderItem]()
+        reminderList = ReminderList()
         super.init(coder: aDecoder)
-        loadReminderItems()
+ //       loadReminderItems()
     }
-    
+
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(animated)
     }
@@ -46,15 +55,14 @@ class RemindersViewController: UITableViewController {
             let navigationController = segue.destinationViewController as! UINavigationController
             let controller = navigationController.topViewController as! ReminderItemDetailViewController
             if let indexPath = tableView.indexPathForCell(sender as! UITableViewCell) {
-                controller.reminderItem = checklist[indexPath.row]
+                controller.reminderItem = reminderList.checklist[indexPath.row]
                 controller.delegate = self
             }
         } else if segue.identifier == "PickLocation" {
             let navigationController = segue.destinationViewController as! UINavigationController
             let controller = navigationController.topViewController as! LocationPickerViewController
-            let index = sender as! NSIndexPath
-            controller.reminderItem = checklist[index.row]
             controller.delegate = self
+            println("Pick Location Segue")
         }
         
     }
@@ -63,20 +71,21 @@ class RemindersViewController: UITableViewController {
     // MARK: - Table view data source
 
     override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return checklist.count + 1
+        println("Number of row: \(reminderList.checklist.count)")
+        return reminderList.checklist.count + 1
     }
 
     
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        if indexPath.row < checklist.count {
-            let item = checklist[indexPath.row]
+        if indexPath.row < reminderList.checklist.count {
+            let item = reminderList.checklist[indexPath.row]
             let cell = tableView.dequeueReusableCellWithIdentifier("ReminderItemCell", forIndexPath: indexPath) as! UITableViewCell
             let reminderText = cell.viewWithTag(1001) as! UILabel
             let reminderDetailText = cell.viewWithTag(1002) as! UILabel
             reminderText.text = item.reminderText
             reminderDetailText.text = item.location?.name
             cell.accessoryType = UITableViewCellAccessoryType.DetailButton
-            updateCheckmarkForCell(cell, withReminderItem: checklist[indexPath.row])
+            updateCheckmarkForCell(cell, withReminderItem: reminderList.checklist[indexPath.row])
             return cell
             
         } else {
@@ -87,43 +96,25 @@ class RemindersViewController: UITableViewController {
     }
     
     override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        if indexPath.row < checklist.count {
-            checklist[indexPath.row].checked = !checklist[indexPath.row].checked
+        if indexPath.row < reminderList.checklist.count {
+            reminderList.checklist[indexPath.row].checked = !reminderList.checklist[indexPath.row].checked
             tableView.deselectRowAtIndexPath(indexPath, animated: true)
-            saveReminderItems()
+            delegate?.remindersViewControllerWantsToSave(self)
+    //        saveReminderItems()
             tableView.reloadData()
         }
     }
     
     override func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
-        checklist.removeAtIndex(indexPath.row)
+        reminderList.checklist.removeAtIndex(indexPath.row)
         let indexPaths = [indexPath]
         tableView.deleteRowsAtIndexPaths(indexPaths, withRowAnimation: .Automatic)
-        saveReminderItems()
+        delegate?.remindersViewControllerWantsToSave(self)
+    //    saveReminderItems()
     }
     
-        
-    func saveReminderItems() {
-        let data = NSMutableData()
-        let archiver = NSKeyedArchiver(forWritingWithMutableData: data)
-        archiver.encodeObject(checklist, forKey: "Checklist")
-        archiver.finishEncoding()
-        data.writeToFile(dataFilePath(), atomically: true)
-    }
-    
-    func loadReminderItems() {
-        let path = dataFilePath()
-        if NSFileManager.defaultManager().fileExistsAtPath(path) {
-            if let data = NSData(contentsOfFile: path) {
-                let unarchiver = NSKeyedUnarchiver(forReadingWithData: data)
-                if let list = unarchiver.decodeObjectForKey("Checklist") as? [ReminderItem] {
-                    checklist = list
-                }
-                unarchiver.finishDecoding()
-            }
-        }
-    }
-    
+  /*
+        */
     func updateCheckmarkForCell(cell: UITableViewCell, withReminderItem reminder: ReminderItem) {
         let checkmark = cell.viewWithTag(1000) as! UIImageView
         if reminder.checked {
@@ -134,29 +125,18 @@ class RemindersViewController: UITableViewController {
         
         
     }
-    func documentsDirectory() -> String {
-        let paths = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true) as! [String]
-        println("Directory: \(paths[0])")
-        return paths[0]
-    }
     
-    func dataFilePath() -> String {
-        return documentsDirectory().stringByAppendingPathComponent("GeoMindersItems.plist")
-    }
-
 }
 
 
 
 extension RemindersViewController: NewReminderCellDelegate {
     func newReminderCell(controller: NewReminderCell, didPressDoneAddingReminder reminder: ReminderItem) {
-        checklist.append(reminder)
-        let indexPath = NSIndexPath(forRow: checklist.count - 1, inSection: 0)
-        let indexPaths = [indexPath]
-        self.tableView.insertRowsAtIndexPaths(indexPaths, withRowAnimation: .Automatic)
-        controller.textField.text = ""
+        println("pressedDone")
+        tempReminder = reminder
+                controller.textField.text = ""
         
-        performSegueWithIdentifier("PickLocation", sender: indexPath)
+        performSegueWithIdentifier("PickLocation", sender: nil)
     }
     
     func newReminderCellDidCancelWithTap(controller: NewReminderCell) {
@@ -168,7 +148,7 @@ extension RemindersViewController: ReminderItemDetailViewControllerDelegate {
     func reminderItemDetailViewController(controller: ReminderItemDetailViewController, didFinishEditingReminder reminder: ReminderItem) {
         dismissViewControllerAnimated(true, completion: nil)
         tableView.reloadData()
-        saveReminderItems()
+  //      saveReminderItems()
     }
     
     func reminderItemDetailViewControllerDidCancel(controller: ReminderItemDetailViewController) {
@@ -177,10 +157,18 @@ extension RemindersViewController: ReminderItemDetailViewControllerDelegate {
 }
 
 extension RemindersViewController: LocationPickerViewControllerDelegate {
-    func locationPickerViewController(controller: LocationPickerViewController, didPickLocationForReminder reminder: ReminderItem) {
+    func locationPickerViewController(controller: LocationPickerViewController, didPickLocation location: Location) {
+        tempReminder.location = location
+        reminderList.checklist.append(tempReminder)
         dismissViewControllerAnimated(true, completion: nil)
+        let indexPath = NSIndexPath(forRow: reminderList.checklist.count - 1, inSection: 0)
+        let indexPaths = [indexPath]
+        self.tableView.insertRowsAtIndexPaths(indexPaths, withRowAnimation: .Automatic)
+
+
         tableView.reloadData()
-        saveReminderItems()
+        delegate?.remindersViewControllerWantsToSave(self)
+ //       saveReminderItems()
     }
     
     func locationPickerViewControllerDidCancel(controller: LocationPickerViewController) {
