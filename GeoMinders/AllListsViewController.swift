@@ -116,6 +116,21 @@ class AllListsViewController: UITableViewController {
         }
     }
     
+    override func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
+        let alert = UIAlertController(title: "Deleting List", message: "This will delete all the items in the list", preferredStyle: UIAlertControllerStyle.Alert)
+        let deleteAction = UIAlertAction(title: "Delete", style: UIAlertActionStyle.Destructive, handler: {
+            _ in
+            self.lists.removeAtIndex(indexPath.row)
+            let indexPaths = [indexPath]
+            tableView.deleteRowsAtIndexPaths(indexPaths, withRowAnimation: .Automatic)
+            self.saveReminderItems()
+        })
+        alert.addAction(deleteAction)
+        let cancelAction = UIAlertAction(title: "Cancel", style: UIAlertActionStyle.Cancel, handler: nil)
+        alert.addAction(cancelAction)
+        presentViewController(alert, animated: true, completion: nil)
+    }
+    
     
     
     func documentsDirectory() -> String {

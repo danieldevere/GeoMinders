@@ -18,7 +18,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     
     let locationManager = CLLocationManager()
     
-    var searchResults = MKLocalSearchResponse()
+
     
     var locations = [Location]()
     
@@ -125,7 +125,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         cancelButton.title = "Back"
         cancelButton.action = Selector("cancel")
         cancelButton.target = self
-        toggleTaggedAnnotationsButton.title = stateForToggleButton()
+        stateForToggleButton()
         toggleTaggedAnnotationsButton.action = Selector("toggleTaggedAnnotations")
         toggleTaggedAnnotationsButton.target = self
     }
@@ -138,14 +138,20 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         toggleTaggedAnnotationsButton.title = "Tag"
         toggleTaggedAnnotationsButton.action = Selector("tagButtonPressed")
         toggleTaggedAnnotationsButton.target = self
+        
     }
     
     func cancel() {
-        dismissViewControllerAnimated(true, completion: nil)
         delegate?.mapViewControllerDidExit(self)
     }
     
     func toggleTaggedAnnotations() {
+        if toggleTaggedAnnotationsButtonSelected {
+            removeAnnotationsForLocations(locations)
+        } else {
+            addAnnotations(locations)
+            moveMap(forMapCase: .taggedLocations)
+        }
         toggleTaggedAnnotationsButtonSelected = !toggleTaggedAnnotationsButtonSelected
         stateForToggleButton()
     }
@@ -163,11 +169,11 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         map.removeOverlay(overlay)
     }
     
-    func stateForToggleButton() -> String {
+    func stateForToggleButton() {
         if toggleTaggedAnnotationsButtonSelected {
-            return "Hide Tags"
+            toggleTaggedAnnotationsButton.title = "Hide Tags"
         } else {
-            return "Show Tags"
+            toggleTaggedAnnotationsButton.title = "Show Tags"
         }
         
     }
@@ -184,39 +190,17 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         moveMapToLocation(locationToTag)
     }
     
-    func addAnnotations() {
-        if searchedLocations.count > 0 {
-            removeAnnotationsForLocations(searchedLocations)
+    func addAnnotations(theseLocations: [Location]) {
+        if theseLocations.count > 0 {
+            removeAnnotationsForLocations(theseLocations)
         }
-        for mapItem in searchResults.mapItems as! [MKMapItem]{
-            let location = Location(name: mapItem.placemark.name, placemark: mapItem.placemark, longitude: mapItem.placemark.coordinate.longitude, latitude: mapItem.placemark.coordinate.latitude)
-            searchedLocations.append(location)
-            map.addAnnotation(location)
-        }
-        moveMap(forMapCase: .untaggedLocations)
-        
-    }
-    
-    func addTaggedLocationAnnotations() {
-        map.addAnnotations(locations)
-    }
-    
-    func removeSearchedAnnotationsExcept(chosenLocation: Location) {
-        for location in searchedLocations {
-            if location != chosenLocation {
-                map.removeAnnotation(location)
-            }
-        }
+        map.addAnnotations(theseLocations)
     }
     
     func removeAnnotationsForLocations(locations: [Location]) {
-        for location in locations {
-            map.removeAnnotation(location)
+        if locations.count > 0 {
+            map.removeAnnotations(locations)
         }
-    }
-    
-    func toggleSavedLocationAnnotations() {
-        
     }
     
     
@@ -293,8 +277,12 @@ extension MapViewController: UISearchBarDelegate {
             if let error = error {
                 println("Error: \(error)")
             } else {
-                self.searchResults = response
-                self.addAnnotations()
+                for mapItem in response.mapItems as! [MKMapItem] {
+                    let location = Location(name: mapItem.placemark.name, placemark: mapItem.placemark, longitude: mapItem.placemark.coordinate.longitude, latitude: mapItem.placemark.coordinate.latitude)
+                    self.searchedLocations.append(location)
+                }
+                self.addAnnotations(self.searchedLocations)
+                self.moveMap(forMapCase: .untaggedLocations)
                 searchBar.resignFirstResponder()
             }
         })
@@ -308,8 +296,8 @@ extension MapViewController: TagLocationViewControllerDelegate {
     
     func tagLocationViewController(controller: TagLocationViewController, didSaveTag tag: Location) {
         locations.append(tag)
+
         dismissViewControllerAnimated(true, completion: nil)
-        regularView()
-        map.removeOverlay(overlay)
+        delegate?.mapViewControllerDidExit(self)
     }
 }

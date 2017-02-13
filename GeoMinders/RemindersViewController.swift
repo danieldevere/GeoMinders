@@ -163,7 +163,7 @@ extension RemindersViewController: LocationPickerViewControllerDelegate {
         dismissViewControllerAnimated(true, completion: nil)
         let indexPath = NSIndexPath(forRow: reminderList.checklist.count - 1, inSection: 0)
         let indexPaths = [indexPath]
-        self.tableView.insertRowsAtIndexPaths(indexPaths, withRowAnimation: .Automatic)
+        tableView.insertRowsAtIndexPaths(indexPaths, withRowAnimation: .Automatic)
 
 
         tableView.reloadData()

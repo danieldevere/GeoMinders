@@ -22,6 +22,8 @@ class TagLocationViewController: UITableViewController {
     
     @IBOutlet weak var textField: UITextField!
     
+    @IBOutlet weak var addressLabel: UILabel!
+    
     
     @IBAction func goBack(sender: AnyObject) {
         delegate?.tagLocationViewControllerDidGoBack(self)
@@ -40,6 +42,10 @@ class TagLocationViewController: UITableViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        textField.text = taggedLocation?.name
+        textField.becomeFirstResponder()
+        addressLabel.text = taggedLocation?.subtitle
 
         // Uncomment the following line to preserve selection between presentations
         // self.clearsSelectionOnViewWillAppear = false
@@ -51,6 +57,10 @@ class TagLocationViewController: UITableViewController {
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
+    }
+    
+    override func tableView(tableView: UITableView, willSelectRowAtIndexPath indexPath: NSIndexPath) -> NSIndexPath? {
+        return nil
     }
 
     // MARK: - Table view data source

@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import CoreLocation
 
 protocol LocationPickerViewControllerDelegate: class {
     func locationPickerViewControllerDidCancel(controller: LocationPickerViewController)
@@ -19,12 +20,31 @@ class LocationPickerViewController: UITableViewController {
     
     var location: Location?
     
+    let locationManager = CLLocationManager()
+    
     weak var delegate: LocationPickerViewControllerDelegate?
+    
+    @IBOutlet weak var editButton: UIBarButtonItem!
     
     @IBAction func cancel() {
         dismissViewControllerAnimated(true, completion: nil)
         delegate?.locationPickerViewControllerDidCancel(self)
         
+    }
+    
+    func edit() {
+        editButton.title = "Done"
+        tableView.editing = true
+        editButton.style = UIBarButtonItemStyle.Done
+        
+        editButton.action = Selector("done")
+    }
+    
+    func done() {
+        tableView.editing = false
+        editButton.style = .Plain
+        editButton.title = "Edit"
+        editButton.action = Selector("edit")
     }
     
     required init!(coder aDecoder: NSCoder!) {
@@ -38,6 +58,9 @@ class LocationPickerViewController: UITableViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        editButton.target = self
+        editButton.action = Selector("edit")
+        self.navigationItem.rightBarButtonItem = editButton
 
   /*      let location0 = Location()
         location0.name = "Kroger"
@@ -98,13 +121,32 @@ class LocationPickerViewController: UITableViewController {
     }
     
     override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        if indexPath.row < locations.count {
+        if indexPath.row < locations.count && delegate != nil {
             location = locations[indexPath.row]
             delegate?.locationPickerViewController(self, didPickLocation: location!)
+            tableView.deselectRowAtIndexPath(indexPath, animated: true)
+        } else {
+            tableView.deselectRowAtIndexPath(indexPath, animated: true)
         }
         
     }
+ 
+    override func tableView(tableView: UITableView, editingStyleForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCellEditingStyle {
+        if indexPath.row < locations.count {
+            if tableView.editing {
+                return UITableViewCellEditingStyle.Delete
+            }
+        }
+            return UITableViewCellEditingStyle.None
+        
+    }
     
+    override func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
+        locations.removeAtIndex(indexPath.row)
+        saveLocationItems()
+        let indexPaths = [indexPath]
+        tableView.deleteRowsAtIndexPaths(indexPaths, withRowAnimation: .Automatic)
+    }
     func saveLocationItems() {
         let data = NSMutableData()
         let archiver = NSKeyedArchiver(forWritingWithMutableData: data)
@@ -138,6 +180,26 @@ class LocationPickerViewController: UITableViewController {
     func dataFilePath() -> String {
         return documentsDirectory().stringByAppendingPathComponent("GeoMindersLocations.plist")
     }
+    
+    func region(#location: Location) -> CLCircularRegion {
+        let region = CLCircularRegion(center: location.coordinate, radius: location.radius, identifier: location.name)
+        region.notifyOnEntry = true
+        region.notifyOnExit = false
+        return region
+    }
+    
+    func startMonitoring(location: Location) {
+        let region = self.region(location: location)
+        locationManager.startMonitoringForRegion(region)
+    }
+    
+    func stopMonitoring(location: Location) {
+        for region in locationManager.monitoredRegions {
+            if region as? CLCircularRegion == location.name {
+                locationManager.stopMonitoringForRegion(region as? CLCircularRegion)
+            }
+        }
+    }
 
 
 
@@ -146,9 +208,11 @@ class LocationPickerViewController: UITableViewController {
 
 extension LocationPickerViewController: MapViewControllerDelegate {
     func mapViewControllerDidExit(controller: MapViewController) {
+        dismissViewControllerAnimated(true, completion: nil)
         locations = controller.locations
         saveLocationItems()
     }
 }
+
 
 
