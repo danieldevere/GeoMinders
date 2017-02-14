@@ -58,5 +58,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 }
 
-
+extension AppDelegate: CLLocationManagerDelegate {
+    func locationManager(manager: CLLocationManager!, didEnterRegion region: CLRegion!) {
+        println("Entered the region")
+    }
+}
 
