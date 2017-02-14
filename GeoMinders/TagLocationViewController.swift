@@ -34,6 +34,15 @@ class TagLocationViewController: UITableViewController {
             if !textField.text.isEmpty {
                 location.name = textField.text
             }
+            if NSUserDefaults.standardUserDefaults().objectForKey("LocationIndex") != nil {
+                let locationIndex = NSUserDefaults.standardUserDefaults().integerForKey("LocationIndex")
+                location.myID = locationIndex + 1
+                NSUserDefaults.standardUserDefaults().setInteger(locationIndex + 1, forKey: "LocationIndex")
+                
+            } else {
+                location.myID = 0
+                NSUserDefaults.standardUserDefaults().setInteger(0, forKey: "LocationIndex")
+            }
             delegate?.tagLocationViewController(self, didSaveTag: location)
         } else {
             println("Error: No location passed")

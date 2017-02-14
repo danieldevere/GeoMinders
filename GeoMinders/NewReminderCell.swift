@@ -25,6 +25,14 @@ class NewReminderCell: UITableViewCell {
         let item = ReminderItem()
         item.reminderText = textField.text
         item.checked = false
+        if NSUserDefaults.standardUserDefaults().objectForKey("ReminderIndex") != nil {
+            let reminderIndex = NSUserDefaults.standardUserDefaults().integerForKey("ReminderIndex")
+            item.myID = reminderIndex + 1
+            NSUserDefaults.standardUserDefaults().setInteger(reminderIndex + 1, forKey: "ReminderIndex")
+        } else {
+            item.myID = 0
+            NSUserDefaults.standardUserDefaults().setInteger(0, forKey: "ReminderIndex")
+        }
         delegate?.newReminderCell(self, didPressDoneAddingReminder: item)
     }
     

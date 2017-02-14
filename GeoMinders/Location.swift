@@ -11,6 +11,8 @@ import MapKit
 import CoreLocation
 
 class Location: NSObject, NSCoding, MKAnnotation {
+    var myID: Int = 0
+    var reminderIDs = [Int]()
     var name = ""
     var placemark: MKPlacemark?
     var latitude: Double = 0.0
@@ -41,6 +43,8 @@ class Location: NSObject, NSCoding, MKAnnotation {
         longitude = aDecoder.decodeDoubleForKey("Longitude")
         latitude = aDecoder.decodeDoubleForKey("Latitude")
         radius = aDecoder.decodeDoubleForKey("Radius")
+        reminderIDs = aDecoder.decodeObjectForKey("ReminderIDs") as! [Int]
+        myID = aDecoder.decodeIntegerForKey("MyID")
         super.init()
     }
     
@@ -63,6 +67,8 @@ class Location: NSObject, NSCoding, MKAnnotation {
         println("Latitude: \(latitude)")
         aCoder.encodeDouble(radius, forKey: "Radius")
         println("Radius: \(radius)")
+        aCoder.encodeInteger(myID, forKey: "MyID")
+        aCoder.encodeObject(reminderIDs, forKey: "ReminderIDs")
     }
     
     convenience init(name: String, placemark: MKPlacemark?, longitude: Double, latitude: Double) {
@@ -71,6 +77,7 @@ class Location: NSObject, NSCoding, MKAnnotation {
         self.placemark = placemark
         self.longitude = longitude
         self.latitude = latitude
+        
     }
 
     

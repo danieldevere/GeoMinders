@@ -19,6 +19,8 @@ class ReminderItemDetailViewController: UITableViewController {
     
     var tempLocation: Location?
     
+    var dataModel: DataModel!
+    
     weak var delegate: ReminderItemDetailViewControllerDelegate?
     
     @IBOutlet weak var textField: UITextField!
@@ -33,7 +35,14 @@ class ReminderItemDetailViewController: UITableViewController {
     @IBAction func done() {
         if let delegate = delegate {
             reminderItem?.reminderText = textField.text
-            reminderItem?.location = tempLocation
+            if let location = tempLocation {
+                reminderItem?.locationID = location.myID
+                if let item = reminderItem {
+                    location.reminderIDs.append(item.myID)
+                }
+            }
+            
+            
             delegate.reminderItemDetailViewController(self, didFinishEditingReminder: reminderItem!)
         }
     }
@@ -48,8 +57,8 @@ class ReminderItemDetailViewController: UITableViewController {
         super.viewDidLoad()
         if let item = reminderItem {
             textField.text = item.reminderText
-            locationLabel.text = item.location?.name
-            locationDetailLabel.text = item.location?.subtitle
+    //        locationLabel.text = item.location?.name
+            locationDetailLabel.text = item.detailText
         }
         
     }
@@ -71,10 +80,11 @@ class ReminderItemDetailViewController: UITableViewController {
             let navigationController = segue.destinationViewController as! UINavigationController
             let controller = navigationController.topViewController as! LocationPickerViewController
             controller.delegate = self
+            controller.dataModel = dataModel
             if let location = tempLocation {
-                controller.location = tempLocation
+                controller.locationID = location.myID
             } else {
-                controller.location = reminderItem?.location
+                controller.locationID = reminderItem?.locationID
             }
             
         }

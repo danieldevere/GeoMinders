@@ -20,6 +20,8 @@ class RemindersViewController: UITableViewController {
     
     var delegate: RemindersViewControllerDelegate?
     
+    var dataModel: DataModel!
+    
     @IBOutlet weak var reminderNameLabel: UILabel!
     @IBOutlet weak var reminderDetailLabel: UILabel!
     @IBOutlet weak var reminderCheckbox: UIImageView!
@@ -56,12 +58,14 @@ class RemindersViewController: UITableViewController {
             let controller = navigationController.topViewController as! ReminderItemDetailViewController
             if let indexPath = tableView.indexPathForCell(sender as! UITableViewCell) {
                 controller.reminderItem = reminderList.checklist[indexPath.row]
+                controller.dataModel = dataModel
                 controller.delegate = self
             }
         } else if segue.identifier == "PickLocation" {
             let navigationController = segue.destinationViewController as! UINavigationController
             let controller = navigationController.topViewController as! LocationPickerViewController
             controller.delegate = self
+            controller.dataModel = dataModel
             println("Pick Location Segue")
         }
         
@@ -83,7 +87,7 @@ class RemindersViewController: UITableViewController {
             let reminderText = cell.viewWithTag(1001) as! UILabel
             let reminderDetailText = cell.viewWithTag(1002) as! UILabel
             reminderText.text = item.reminderText
-            reminderDetailText.text = item.location?.name
+            reminderDetailText.text = item.detailText
             cell.accessoryType = UITableViewCellAccessoryType.DetailButton
             updateCheckmarkForCell(cell, withReminderItem: reminderList.checklist[indexPath.row])
             return cell
@@ -106,9 +110,26 @@ class RemindersViewController: UITableViewController {
     }
     
     override func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
+        let locations = dataModel.locations
+        
+        for location in locations {
+            if location.myID == reminderList.checklist[indexPath.row].locationID {
+             /*   for index in 0...location.reminderIDs.count-1 {
+                    if location.reminderIDs[index] == reminderList.checklist[indexPath.row].myID {
+                        location.reminderIDs.removeAtIndex(index)
+                    }
+                }*/
+                location.reminderIDs = location.reminderIDs.filter({
+                    $0 != self.reminderList.checklist[indexPath.row].myID
+                })
+            }
+        }
+        println("Locations: \(locations[0].reminderIDs.count)")
         reminderList.checklist.removeAtIndex(indexPath.row)
         let indexPaths = [indexPath]
+
         tableView.deleteRowsAtIndexPaths(indexPaths, withRowAnimation: .Automatic)
+        dataModel.saveLocationItems()
         delegate?.remindersViewControllerWantsToSave(self)
     //    saveReminderItems()
     }
@@ -158,7 +179,9 @@ extension RemindersViewController: ReminderItemDetailViewControllerDelegate {
 
 extension RemindersViewController: LocationPickerViewControllerDelegate {
     func locationPickerViewController(controller: LocationPickerViewController, didPickLocation location: Location) {
-        tempReminder.location = location
+        tempReminder.detailText = location.name
+        tempReminder.locationID = location.myID
+        location.reminderIDs.append(tempReminder.myID)
         reminderList.checklist.append(tempReminder)
         dismissViewControllerAnimated(true, completion: nil)
         let indexPath = NSIndexPath(forRow: reminderList.checklist.count - 1, inSection: 0)

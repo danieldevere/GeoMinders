@@ -10,7 +10,7 @@ import UIKit
 
 class AllListsViewController: UITableViewController {
     
-    var lists: [ReminderList]
+    var dataModel: DataModel!
     
     var addingList = false
     
@@ -27,7 +27,7 @@ class AllListsViewController: UITableViewController {
         locationButton.target = self
         locationButton.action = Selector("cancelNewList")
         addButton.enabled = false
-        let indexPath = NSIndexPath(forRow: lists.count, inSection: 0)
+        let indexPath = NSIndexPath(forRow: dataModel.lists.count, inSection: 0)
         let indexPaths = [indexPath]
         tableView.insertRowsAtIndexPaths(indexPaths, withRowAnimation: .Automatic)
         let textField = tableView.viewWithTag(3000) as! UITextField
@@ -37,8 +37,8 @@ class AllListsViewController: UITableViewController {
     @IBAction func done() {
         let textField = tableView.viewWithTag(3000) as! UITextField
         let newList = ReminderList(name: textField.text)
-        lists.append(newList)
-        saveReminderItems()
+        dataModel.lists.append(newList)
+        dataModel.saveReminderItems()
         cancelNewList()
     }
     
@@ -56,13 +56,7 @@ class AllListsViewController: UITableViewController {
     }
     
     
-    required init(coder aDecoder: NSCoder) {
-        lists = [ReminderList]()
-        super.init(coder: aDecoder)
-        loadReminderItems()
-        
-    }
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -85,8 +79,9 @@ class AllListsViewController: UITableViewController {
             let controller = navigationController.topViewController as! RemindersViewController
             let cell = sender as! UITableViewCell
             let indexPath = tableView.indexPathForCell(cell)
-            controller.reminderList = lists[indexPath!.row]
+            controller.reminderList = dataModel.lists[indexPath!.row]
             controller.delegate = self
+            controller.dataModel = dataModel
             println("Sender: \(sender)")
         }
     }
@@ -100,15 +95,15 @@ class AllListsViewController: UITableViewController {
 
 
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        if indexPath.row < lists.count {
+        if indexPath.row < dataModel.lists.count {
             let cell = tableView.dequeueReusableCellWithIdentifier("ListCell", forIndexPath: indexPath) as! UITableViewCell
-            cell.textLabel?.text = lists[indexPath.row].name
+            cell.textLabel?.text = dataModel.lists[indexPath.row].name
             return cell
-        } else if (atStore) && (indexPath.row == lists.count) {
+        } else if (atStore) && (indexPath.row == dataModel.lists.count) {
             let cell = tableView.dequeueReusableCellWithIdentifier("ItemsToDoAtLocationCell", forIndexPath: indexPath) as! UITableViewCell
             cell.textLabel?.text = "Items to Buy Here"
             return cell
-        } else if (addingList) && (indexPath.row >= lists.count) {
+        } else if (addingList) && (indexPath.row >= dataModel.lists.count) {
             let cell = tableView.dequeueReusableCellWithIdentifier("NewListCell", forIndexPath: indexPath) as! UITableViewCell
             return cell
         } else {
@@ -120,10 +115,10 @@ class AllListsViewController: UITableViewController {
         let alert = UIAlertController(title: "Deleting List", message: "This will delete all the items in the list", preferredStyle: UIAlertControllerStyle.Alert)
         let deleteAction = UIAlertAction(title: "Delete", style: UIAlertActionStyle.Destructive, handler: {
             _ in
-            self.lists.removeAtIndex(indexPath.row)
+            self.dataModel.lists.removeAtIndex(indexPath.row)
             let indexPaths = [indexPath]
             tableView.deleteRowsAtIndexPaths(indexPaths, withRowAnimation: .Automatic)
-            self.saveReminderItems()
+            self.dataModel.saveReminderItems()
         })
         alert.addAction(deleteAction)
         let cancelAction = UIAlertAction(title: "Cancel", style: UIAlertActionStyle.Cancel, handler: nil)
@@ -133,39 +128,9 @@ class AllListsViewController: UITableViewController {
     
     
     
-    func documentsDirectory() -> String {
-        let paths = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true) as! [String]
-        println("Directory: \(paths[0])")
-        return paths[0]
-    }
-    
-    func dataFilePath() -> String {
-        return documentsDirectory().stringByAppendingPathComponent("GeoMindersItems.plist")
-    }
-    
-    func saveReminderItems() {
-        let data = NSMutableData()
-        let archiver = NSKeyedArchiver(forWritingWithMutableData: data)
-        archiver.encodeObject(lists, forKey: "Checklists")
-        archiver.finishEncoding()
-        data.writeToFile(dataFilePath(), atomically: true)
-    }
-    
-    func loadReminderItems() {
-        let path = dataFilePath()
-        if NSFileManager.defaultManager().fileExistsAtPath(path) {
-            if let data = NSData(contentsOfFile: path) {
-                let unarchiver = NSKeyedUnarchiver(forReadingWithData: data)
-                if let checklists = unarchiver.decodeObjectForKey("Checklists") as? [ReminderList] {
-                    lists = checklists
-                }
-                unarchiver.finishDecoding()
-            }
-        }
-    }
-    
+        
     func numberOfRows() -> Int {
-        var number = lists.count
+        var number = dataModel.lists.count
         if addingList {
             number += 1
         }
@@ -226,6 +191,6 @@ class AllListsViewController: UITableViewController {
 
 extension AllListsViewController: RemindersViewControllerDelegate {
     func remindersViewControllerWantsToSave(controller: RemindersViewController) {
-        saveReminderItems()
+        dataModel.saveReminderItems()
     }
 }
