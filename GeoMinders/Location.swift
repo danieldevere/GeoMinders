@@ -7,15 +7,16 @@
 //
 
 import Foundation
+import CoreData
 import MapKit
 import CoreLocation
 
-class Location: NSObject, NSCoding, MKAnnotation {
-    var name = ""
-    var placemark: MKPlacemark?
-    var latitude: Double = 0.0
-    var longitude: Double = 0.0
-    var radius: Double = 0.0
+class Location: NSManagedObject, MKAnnotation {
+    @NSManaged var name: String
+    @NSManaged var placemark: MKPlacemark?
+    @NSManaged var latitude: Double
+    @NSManaged var longitude: Double
+    @NSManaged var radius: Double
     var coordinate: CLLocationCoordinate2D {
         return CLLocationCoordinate2DMake(latitude, longitude)
     }
@@ -29,13 +30,13 @@ class Location: NSObject, NSCoding, MKAnnotation {
     }
     
     var subtitle: String! {
-        var string = stringFromPlacemark(placemark!)
+        var string = stringFromPlacemark()
     //    println("Placemark \(placemark)")
 
-        return stringFromPlacemark(placemark!)
+        return stringFromPlacemark()
     }
     
-    required init(coder aDecoder: NSCoder) {
+ /*   required init(coder aDecoder: NSCoder) {
         name = aDecoder.decodeObjectForKey("Name") as! String
         placemark = aDecoder.decodeObjectForKey("Placemark") as? MKPlacemark
         longitude = aDecoder.decodeDoubleForKey("Longitude")
@@ -43,15 +44,20 @@ class Location: NSObject, NSCoding, MKAnnotation {
         radius = aDecoder.decodeDoubleForKey("Radius")
         super.init()
     }
-    
+
     override init() {
         super.init()
     }
-    
-    func stringFromPlacemark(placemark: MKPlacemark) -> String {
-        return "\(placemark.subThoroughfare) \(placemark.thoroughfare)\n" + "\(placemark.locality), \(placemark.administrativeArea) \(placemark.postalCode)"
+    */
+    func stringFromPlacemark() -> String {
+        if let placemark = self.placemark {
+            return "\(placemark.subThoroughfare) \(placemark.thoroughfare)\n" + "\(placemark.locality), \(placemark.administrativeArea) \(placemark.postalCode)"
+        } else {
+            return "No Address Found"
+        }
+        
     }
-    
+    /*
     func encodeWithCoder(aCoder: NSCoder) {
         aCoder.encodeObject(name, forKey: "Name")
         println("Name: \(name)")
@@ -64,7 +70,7 @@ class Location: NSObject, NSCoding, MKAnnotation {
         aCoder.encodeDouble(radius, forKey: "Radius")
         println("Radius: \(radius)")
     }
-    
+    */
     convenience init(name: String, placemark: MKPlacemark?, longitude: Double, latitude: Double) {
         self.init()
         self.name = name

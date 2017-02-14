@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model userDefinedModelVersionIdentifier="" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="7701" systemVersion="14D136" minimumToolsVersion="Xcode 4.3" macOSVersion="Automatic" iOSVersion="Automatic">
+    <entity name="Location" representedClassName="GeoMinders.Location" syncable="YES">
+        <attribute name="latitude" attributeType="Double" defaultValueString="0.0" syncable="YES"/>
+        <attribute name="longitude" attributeType="Double" defaultValueString="0.0" syncable="YES"/>
+        <attribute name="name" attributeType="String" syncable="YES"/>
+        <attribute name="placemark" optional="YES" attributeType="Transformable" syncable="YES"/>
+        <relationship name="reminderID" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="ReminderItem" inverseName="locationID" inverseEntity="ReminderItem" syncable="YES"/>
+    </entity>
+    <entity name="ReminderItem" representedClassName="GeoMinders.ReminderItem" syncable="YES">
+        <attribute name="checked" optional="YES" attributeType="Boolean" syncable="YES"/>
+        <attribute name="detailText" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="reminderText" optional="YES" attributeType="String" syncable="YES"/>
+        <relationship name="locationID" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Location" inverseName="reminderID" inverseEntity="Location" syncable="YES"/>
+    </entity>
+    <elements>
+        <element name="Location" positionX="-63" positionY="-18" width="128" height="118"/>
+        <element name="ReminderItem" positionX="322" positionY="-75" width="128" height="103"/>
+    </elements>
+</model>

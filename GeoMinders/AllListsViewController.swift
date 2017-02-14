@@ -7,10 +7,13 @@
 //
 
 import UIKit
+import CoreData
 
 class AllListsViewController: UITableViewController {
     
     var lists: [ReminderList]
+    
+    var managedObjectContext: NSManagedObjectContext!
     
     var addingList = false
     
@@ -38,7 +41,7 @@ class AllListsViewController: UITableViewController {
         let textField = tableView.viewWithTag(3000) as! UITextField
         let newList = ReminderList(name: textField.text)
         lists.append(newList)
-        saveReminderItems()
+ //       saveReminderItems()
         cancelNewList()
     }
     
@@ -55,10 +58,11 @@ class AllListsViewController: UITableViewController {
         performSegueWithIdentifier("ShowLocations", sender: nil)
     }
     
-    
+  
     required init(coder aDecoder: NSCoder) {
         lists = [ReminderList]()
         super.init(coder: aDecoder)
+        
         loadReminderItems()
         
     }
@@ -87,6 +91,7 @@ class AllListsViewController: UITableViewController {
             let indexPath = tableView.indexPathForCell(cell)
             controller.reminderList = lists[indexPath!.row]
             controller.delegate = self
+            controller.managedObjectContext = managedObjectContext
             println("Sender: \(sender)")
         }
     }
@@ -123,7 +128,7 @@ class AllListsViewController: UITableViewController {
             self.lists.removeAtIndex(indexPath.row)
             let indexPaths = [indexPath]
             tableView.deleteRowsAtIndexPaths(indexPaths, withRowAnimation: .Automatic)
-            self.saveReminderItems()
+  //          self.saveReminderItems()
         })
         alert.addAction(deleteAction)
         let cancelAction = UIAlertAction(title: "Cancel", style: UIAlertActionStyle.Cancel, handler: nil)
@@ -132,7 +137,7 @@ class AllListsViewController: UITableViewController {
     }
     
     
-    
+  /*
     func documentsDirectory() -> String {
         let paths = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true) as! [String]
         println("Directory: \(paths[0])")
@@ -163,7 +168,7 @@ class AllListsViewController: UITableViewController {
             }
         }
     }
-    
+    */
     func numberOfRows() -> Int {
         var number = lists.count
         if addingList {
@@ -226,6 +231,6 @@ class AllListsViewController: UITableViewController {
 
 extension AllListsViewController: RemindersViewControllerDelegate {
     func remindersViewControllerWantsToSave(controller: RemindersViewController) {
-        saveReminderItems()
+    //    saveReminderItems()
     }
 }

@@ -8,6 +8,7 @@
 
 import UIKit
 import CoreLocation
+import CoreData
 
 protocol LocationPickerViewControllerDelegate: class {
     func locationPickerViewControllerDidCancel(controller: LocationPickerViewController)
@@ -15,6 +16,8 @@ protocol LocationPickerViewControllerDelegate: class {
 }
 
 class LocationPickerViewController: UITableViewController {
+    
+    var managedObjectContext: NSManagedObjectContext!
     
     var locations = [Location]()
     
@@ -47,14 +50,14 @@ class LocationPickerViewController: UITableViewController {
         editButton.action = Selector("edit")
     }
     
-    required init!(coder aDecoder: NSCoder!) {
+ /*   required init!(coder aDecoder: NSCoder!) {
         locations = [Location]()
         super.init(coder: aDecoder)
         loadLocationItems()
         println("required init")
     }
     
-    
+    */
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -143,11 +146,11 @@ class LocationPickerViewController: UITableViewController {
     
     override func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
         locations.removeAtIndex(indexPath.row)
-        saveLocationItems()
+       // saveLocationItems()
         let indexPaths = [indexPath]
         tableView.deleteRowsAtIndexPaths(indexPaths, withRowAnimation: .Automatic)
     }
-    func saveLocationItems() {
+  /*  func saveLocationItems() {
         let data = NSMutableData()
         let archiver = NSKeyedArchiver(forWritingWithMutableData: data)
         archiver.encodeObject(locations, forKey: "MyLocations")
@@ -170,7 +173,7 @@ class LocationPickerViewController: UITableViewController {
             }
         }
     }
-    
+
     func documentsDirectory() -> String {
         let paths = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true) as! [String]
         println("Directory: \(paths[0])")
@@ -180,7 +183,7 @@ class LocationPickerViewController: UITableViewController {
     func dataFilePath() -> String {
         return documentsDirectory().stringByAppendingPathComponent("GeoMindersLocations.plist")
     }
-    
+    */
     func region(#location: Location) -> CLCircularRegion {
         let region = CLCircularRegion(center: location.coordinate, radius: location.radius, identifier: location.name)
         region.notifyOnEntry = true
@@ -210,7 +213,7 @@ extension LocationPickerViewController: MapViewControllerDelegate {
     func mapViewControllerDidExit(controller: MapViewController) {
         dismissViewControllerAnimated(true, completion: nil)
         locations = controller.locations
-        saveLocationItems()
+    //    saveLocationItems()
     }
 }
 

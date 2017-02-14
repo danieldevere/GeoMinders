@@ -7,12 +7,14 @@
 //
 
 import Foundation
+import UIKit
+import CoreData
 
-class ReminderItem: NSObject, NSCoding {
-    var checked = false
-    var reminderText = ""
-    var detailText = ""
-    var location: Location?
+class ReminderItem: NSManagedObject {
+    @NSManaged var checked: Bool
+    @NSManaged var reminderText: String
+    @NSManaged var detailText: String
+    @NSManaged var location: Location?
     
     func encodeWithCoder(aCoder: NSCoder) {
         aCoder.encodeObject(reminderText, forKey: "ReminderText")
@@ -20,8 +22,11 @@ class ReminderItem: NSObject, NSCoding {
         aCoder.encodeBool(checked, forKey: "Checked")
         aCoder.encodeObject(location, forKey: "Location")
     }
-    
+  /*
     required init(coder aDecoder: NSCoder) {
+        let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
+        let context = appDelegate.managedObjectContext
+        
         reminderText = aDecoder.decodeObjectForKey("ReminderText") as! String
         detailText = aDecoder.decodeObjectForKey("DetailText") as! String
         checked = aDecoder.decodeBoolForKey("Checked")
@@ -31,5 +36,5 @@ class ReminderItem: NSObject, NSCoding {
     
     override init() {
         super.init()
-    }
+    }*/
 }

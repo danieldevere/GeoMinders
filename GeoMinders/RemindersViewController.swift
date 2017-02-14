@@ -7,12 +7,15 @@
 //
 
 import UIKit
+import CoreData
 
 protocol RemindersViewControllerDelegate: class {
     func remindersViewControllerWantsToSave(controller: RemindersViewController)
 }
 
 class RemindersViewController: UITableViewController {
+    
+    var managedObjectContext: NSManagedObjectContext!
 
     var reminderList: ReminderList
     
@@ -62,6 +65,7 @@ class RemindersViewController: UITableViewController {
             let navigationController = segue.destinationViewController as! UINavigationController
             let controller = navigationController.topViewController as! LocationPickerViewController
             controller.delegate = self
+            controller.managedObjectContext = managedObjectContext
             println("Pick Location Segue")
         }
         
@@ -99,7 +103,7 @@ class RemindersViewController: UITableViewController {
         if indexPath.row < reminderList.checklist.count {
             reminderList.checklist[indexPath.row].checked = !reminderList.checklist[indexPath.row].checked
             tableView.deselectRowAtIndexPath(indexPath, animated: true)
-            delegate?.remindersViewControllerWantsToSave(self)
+    //        delegate?.remindersViewControllerWantsToSave(self)
     //        saveReminderItems()
             tableView.reloadData()
         }
@@ -109,7 +113,7 @@ class RemindersViewController: UITableViewController {
         reminderList.checklist.removeAtIndex(indexPath.row)
         let indexPaths = [indexPath]
         tableView.deleteRowsAtIndexPaths(indexPaths, withRowAnimation: .Automatic)
-        delegate?.remindersViewControllerWantsToSave(self)
+    //    delegate?.remindersViewControllerWantsToSave(self)
     //    saveReminderItems()
     }
     
@@ -167,7 +171,7 @@ extension RemindersViewController: LocationPickerViewControllerDelegate {
 
 
         tableView.reloadData()
-        delegate?.remindersViewControllerWantsToSave(self)
+    //    delegate?.remindersViewControllerWantsToSave(self)
  //       saveReminderItems()
     }
     
