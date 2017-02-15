@@ -29,16 +29,24 @@ class ReminderItemDetailViewController: UITableViewController {
     
     @IBOutlet weak var locationDetailLabel: UILabel!
     
-    @IBOutlet weak var listLabel: UILabel!
     
     
     @IBAction func done() {
         if let delegate = delegate {
             reminderItem?.reminderText = textField.text
-            if let location = tempLocation {
-                reminderItem?.locationID = location.myID
-                if let item = reminderItem {
-                    location.reminderIDs.append(item.myID)
+            if let newLocation = tempLocation {
+                if reminderItem?.locationID != newLocation.myID {
+                    for location in dataModel.locations {
+                        if location.myID == reminderItem?.locationID {
+                            location.remindersCount = location.remindersCount - 1
+                            break
+                        }
+                    }
+                    reminderItem?.locationID = newLocation.myID
+                    newLocation.remindersCount = newLocation.remindersCount + 1
+                    reminderItem?.detailText = newLocation.name
+                    reminderItem?.locationAddress = newLocation.subtitle
+
                 }
             }
             
@@ -57,8 +65,8 @@ class ReminderItemDetailViewController: UITableViewController {
         super.viewDidLoad()
         if let item = reminderItem {
             textField.text = item.reminderText
-    //        locationLabel.text = item.location?.name
-            locationDetailLabel.text = item.detailText
+            locationLabel.text = item.detailText
+            locationDetailLabel.text = item.locationAddress
         }
         
     }

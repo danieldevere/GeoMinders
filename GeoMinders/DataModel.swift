@@ -15,7 +15,7 @@ class DataModel {
     
     func reminderDocumentsDirectory() -> String {
         let paths = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true) as! [String]
-        println("Directory: \(paths[0])")
+     //   println("Directory: \(paths[0])")
         return paths[0]
     }
     
@@ -70,7 +70,7 @@ class DataModel {
     
     func documentsDirectory() -> String {
         let paths = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true) as! [String]
-        println("Directory: \(paths[0])")
+    //    println("Directory: \(paths[0])")
         return paths[0]
     }
     

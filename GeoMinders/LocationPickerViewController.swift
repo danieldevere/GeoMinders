@@ -21,20 +21,18 @@ class LocationPickerViewController: UITableViewController {
     
     var locationID: Int?
     
-    lazy var location: Location = {
-        for location in self.dataModel.locations {
-            if let thisID = self.locationID {
+    var location: Location?
+    
+    func getLocation() -> Location? {
+        if let thisID = locationID {
+            for location in dataModel.locations {
                 if location.myID == thisID {
                     return location
                 }
-            } else {
-                return Location()
             }
         }
-        println("Error lazy var location didn't work")
-        return Location()
-    }()
-    
+        return nil
+    }
     let locationManager = CLLocationManager()
     
     weak var delegate: LocationPickerViewControllerDelegate?
@@ -69,9 +67,15 @@ class LocationPickerViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         editButton.target = self
+        editButton.title = "Edit"
         editButton.action = Selector("edit")
         self.navigationItem.rightBarButtonItem = editButton
-        
+        if let thisLocation = getLocation() {
+            location = thisLocation
+        }
+        if dataModel == nil {
+            println("DataModel not passed to locationPicker")
+        }
   /*      let location0 = Location()
         location0.name = "Kroger"
         locations.append(location0)
@@ -85,7 +89,7 @@ class LocationPickerViewController: UITableViewController {
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(animated)
         tableView.reloadData()
-        println("LocationPicker Locations: \(dataModel.locations)")
+    //    println("LocationPicker Locations: \(dataModel.locations)")
     }
 
     override func didReceiveMemoryWarning() {
@@ -110,6 +114,7 @@ class LocationPickerViewController: UITableViewController {
     override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // #warning Incomplete method implementation.
         // Return the number of rows in the section.
+      //  println("Number of locations in data model: \(dataModel.locations.count)")
         return dataModel.locations.count + 1
     }
 
@@ -118,10 +123,11 @@ class LocationPickerViewController: UITableViewController {
         if indexPath.row < dataModel.locations.count {
             let cell = tableView.dequeueReusableCellWithIdentifier("LocationCell", forIndexPath: indexPath) as! UITableViewCell
             cell.textLabel?.text = dataModel.locations[indexPath.row].name
-            if location.name == dataModel.locations[indexPath.row].name {
-                cell.accessoryType = .Checkmark
-            } else {
-                cell.accessoryType = .None
+            cell.accessoryType = .None
+            if let thisLocation = location {
+                if thisLocation.myID == dataModel.locations[indexPath.row].myID {
+                    cell.accessoryType = .Checkmark
+                }
             }
             return cell
         } else {
@@ -133,7 +139,7 @@ class LocationPickerViewController: UITableViewController {
     override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
         if indexPath.row < dataModel.locations.count && delegate != nil {
             location = dataModel.locations[indexPath.row]
-            delegate?.locationPickerViewController(self, didPickLocation: location)
+            delegate?.locationPickerViewController(self, didPickLocation: location!)
             tableView.deselectRowAtIndexPath(indexPath, animated: true)
         } else {
             tableView.deselectRowAtIndexPath(indexPath, animated: true)
@@ -152,33 +158,36 @@ class LocationPickerViewController: UITableViewController {
     }
     
     override func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
-        dataModel.locations.removeAtIndex(indexPath.row)
-        dataModel.saveLocationItems()
-        let indexPaths = [indexPath]
-        tableView.deleteRowsAtIndexPaths(indexPaths, withRowAnimation: .Automatic)
+        let alertView = UIAlertController(title: "Are you sure?", message: "Deleting a Location also deletes all events at that location", preferredStyle: UIAlertControllerStyle.Alert)
+        let alertAction = UIAlertAction(title: "Delete", style: UIAlertActionStyle.Destructive, handler: {
+            _ in
+            for list in self.dataModel.lists {
+                let checklistCount = list.checklist.count - 1
+                                    
+                  /*  if list.checklist[i].locationID == self.dataModel.locations[indexPath.row].myID {
+                        list.checklist.removeAtIndex(i)
+*/
+                        list.checklist = list.checklist.filter({
+                            $0.locationID != self.dataModel.locations[indexPath.row].myID
+                        })
+                    
+                
+            }
+            self.dataModel.saveReminderItems()
+            self.dataModel.locations.removeAtIndex(indexPath.row)
+            self.dataModel.saveLocationItems()
+            let indexPaths = [indexPath]
+            self.tableView.deleteRowsAtIndexPaths(indexPaths, withRowAnimation: .Automatic)
+        })
+        let cancelAction = UIAlertAction(title: "Cancel", style: .Default, handler: nil)
+        
+        alertView.addAction(cancelAction)
+        alertView.addAction(alertAction)
+        presentViewController(alertView, animated: true, completion: nil)
+        
     }
         
-    func region(#location: Location) -> CLCircularRegion {
-        var identifier = "\(location.myID)"
-        let region = CLCircularRegion(center: location.coordinate, radius: location.radius, identifier: identifier)
-        region.notifyOnEntry = true
-        region.notifyOnExit = false
-        return region
-    }
     
-    func startMonitoring(location: Location) {
-        let region = self.region(location: location)
-        locationManager.startMonitoringForRegion(region)
-    }
-    
-    func stopMonitoring(location: Location) {
-        for region in locationManager.monitoredRegions {
-            if region as? CLCircularRegion == location.name {
-                locationManager.stopMonitoringForRegion(region as? CLCircularRegion)
-            }
-        }
-    }
-
 
 
     

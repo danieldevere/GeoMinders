@@ -4,7 +4,7 @@
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="7703"/>
     </dependencies>
     <scenes>
-        <!--Title-->
+        <!--Title of the List-->
         <scene sceneID="su9-Zx-3mh">
             <objects>
                 <tableViewController id="oXk-Jr-K1S" customClass="RemindersViewController" customModule="GeoMinders" customModuleProvider="target" sceneMemberID="viewController">
@@ -45,7 +45,7 @@
                             <outlet property="delegate" destination="oXk-Jr-K1S" id="7O4-se-XkS"/>
                         </connections>
                     </tableView>
-                    <navigationItem key="navigationItem" title="Title" id="LIr-5A-Rwe"/>
+                    <navigationItem key="navigationItem" title="Title of the List" id="LIr-5A-Rwe"/>
                     <connections>
                         <segue destination="iF5-8P-T5L" kind="presentation" identifier="PickLocation" id="JcH-9C-4ou"/>
                     </connections>
@@ -327,40 +327,7 @@
                                 </cells>
                             </tableViewSection>
                             <tableViewSection id="asb-Fm-Yr0">
-                                <cells>
-                                    <tableViewCell contentMode="scaleToFill" selectionStyle="default" accessoryType="disclosureIndicator" indentationWidth="10" id="KZH-iT-pAG">
-                                        <autoresizingMask key="autoresizingMask"/>
-                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="KZH-iT-pAG" id="Vzj-ll-hgb">
-                                            <autoresizingMask key="autoresizingMask"/>
-                                            <subviews>
-                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="List Name" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="g7o-bh-E8z">
-                                                    <rect key="frame" x="15" y="0.0" width="471" height="43"/>
-                                                    <fontDescription key="fontDescription" style="UICTFontTextStyleHeadline"/>
-                                                    <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
-                                                    <nil key="highlightedColor"/>
-                                                </label>
-                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="List" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="9AK-xw-rMb">
-                                                    <rect key="frame" x="494" y="1" width="26" height="42"/>
-                                                    <constraints>
-                                                        <constraint firstAttribute="width" constant="26" id="I2v-3U-g0L"/>
-                                                    </constraints>
-                                                    <fontDescription key="fontDescription" type="system" pointSize="16"/>
-                                                    <color key="textColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
-                                                    <nil key="highlightedColor"/>
-                                                </label>
-                                            </subviews>
-                                            <constraints>
-                                                <constraint firstItem="9AK-xw-rMb" firstAttribute="leading" secondItem="g7o-bh-E8z" secondAttribute="trailing" constant="8" id="Kod-SU-JWb"/>
-                                                <constraint firstItem="g7o-bh-E8z" firstAttribute="leading" secondItem="Vzj-ll-hgb" secondAttribute="leading" constant="15" id="Mi2-yA-63Z"/>
-                                                <constraint firstItem="9AK-xw-rMb" firstAttribute="top" secondItem="Vzj-ll-hgb" secondAttribute="top" constant="1" id="SJw-8L-MJv"/>
-                                                <constraint firstItem="g7o-bh-E8z" firstAttribute="top" secondItem="Vzj-ll-hgb" secondAttribute="top" id="Ucd-Ao-HYu"/>
-                                                <constraint firstAttribute="bottom" secondItem="g7o-bh-E8z" secondAttribute="bottom" id="WTO-Fh-UrE"/>
-                                                <constraint firstAttribute="bottom" secondItem="9AK-xw-rMb" secondAttribute="bottom" id="aNJ-6a-Nuw"/>
-                                                <constraint firstAttribute="trailing" secondItem="9AK-xw-rMb" secondAttribute="trailing" constant="47" id="wlU-ue-tHr"/>
-                                            </constraints>
-                                        </tableViewCellContentView>
-                                    </tableViewCell>
-                                </cells>
+                                <cells/>
                             </tableViewSection>
                             <tableViewSection id="Reb-ed-j7Z">
                                 <cells>
@@ -432,7 +399,6 @@
                         </barButtonItem>
                     </navigationItem>
                     <connections>
-                        <outlet property="listLabel" destination="g7o-bh-E8z" id="I66-qd-XhK"/>
                         <outlet property="locationDetailLabel" destination="vZv-KE-86L" id="CAC-dz-mwl"/>
                         <outlet property="locationLabel" destination="9Nx-4x-PL4" id="5S9-Gj-reB"/>
                         <outlet property="textField" destination="QwQ-Hh-8YW" id="lo0-nl-Abl"/>
@@ -509,6 +475,9 @@
                                         </label>
                                     </subviews>
                                 </tableViewCellContentView>
+                                <connections>
+                                    <segue destination="yh4-xR-A1t" kind="show" identifier="ShowStoreList" id="fyu-5X-StX"/>
+                                </connections>
                             </tableViewCell>
                         </prototypes>
                         <connections>
@@ -650,6 +619,7 @@
         <image name="currentLocation" width="128" height="128"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="3j0-aE-2sZ"/>
+        <segue reference="fyu-5X-StX"/>
+        <segue reference="bRN-Te-4b3"/>
     </inferredMetricsTieBreakers>
 </document>

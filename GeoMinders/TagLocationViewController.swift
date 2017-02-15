@@ -18,6 +18,7 @@ class TagLocationViewController: UITableViewController {
     var delegate: TagLocationViewControllerDelegate?
     
     var taggedLocation: Location?
+
     
     
     @IBOutlet weak var textField: UITextField!
@@ -31,6 +32,7 @@ class TagLocationViewController: UITableViewController {
     
     @IBAction func saveTag(sender: AnyObject) {
         if let location = taggedLocation {
+            println("Location: \(location.name) id: \(location.myID)")
             if !textField.text.isEmpty {
                 location.name = textField.text
             }
@@ -48,6 +50,7 @@ class TagLocationViewController: UITableViewController {
             println("Error: No location passed")
         }
     }
+    
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -71,6 +74,8 @@ class TagLocationViewController: UITableViewController {
     override func tableView(tableView: UITableView, willSelectRowAtIndexPath indexPath: NSIndexPath) -> NSIndexPath? {
         return nil
     }
+    
+    
 
     // MARK: - Table view data source
 

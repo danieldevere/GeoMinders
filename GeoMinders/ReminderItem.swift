@@ -14,6 +14,7 @@ class ReminderItem: NSObject, NSCoding {
     var detailText = ""
     var myID: Int = 0
     var locationID: Int = 0
+    var locationAddress = ""
     
     func encodeWithCoder(aCoder: NSCoder) {
         aCoder.encodeObject(reminderText, forKey: "ReminderText")
@@ -21,6 +22,7 @@ class ReminderItem: NSObject, NSCoding {
         aCoder.encodeBool(checked, forKey: "Checked")
         aCoder.encodeInteger(locationID, forKey: "LocationID")
         aCoder.encodeInteger(myID, forKey: "MyID")
+        aCoder.encodeObject(locationAddress, forKey: "LocationAddress")
     }
     
     required init(coder aDecoder: NSCoder) {
@@ -29,6 +31,7 @@ class ReminderItem: NSObject, NSCoding {
         checked = aDecoder.decodeBoolForKey("Checked")
         myID = aDecoder.decodeIntegerForKey("MyID")
         locationID = aDecoder.decodeIntegerForKey("LocationID")
+        locationAddress = aDecoder.decodeObjectForKey("LocationAddress") as! String
         super.init()
     }
     

@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import CoreLocation
 
 class AllListsViewController: UITableViewController {
     
@@ -16,6 +17,10 @@ class AllListsViewController: UITableViewController {
     
     var atStore = false
     
+    var storeList: ReminderList?
+    
+    let locationManager = CLLocationManager()
+    
     @IBOutlet weak var locationButton: UIBarButtonItem!
     
     @IBOutlet weak var addButton: UIBarButtonItem!
@@ -23,13 +28,14 @@ class AllListsViewController: UITableViewController {
     
     @IBAction func addList() {
         addingList = true
-        locationButton.title = "Cancel"
+        
         locationButton.target = self
         locationButton.action = Selector("cancelNewList")
         addButton.enabled = false
         let indexPath = NSIndexPath(forRow: dataModel.lists.count, inSection: 0)
         let indexPaths = [indexPath]
         tableView.insertRowsAtIndexPaths(indexPaths, withRowAnimation: .Automatic)
+        locationButton.title = "Cancel"
         let textField = tableView.viewWithTag(3000) as! UITextField
         textField.becomeFirstResponder()
     }
@@ -38,6 +44,7 @@ class AllListsViewController: UITableViewController {
         let textField = tableView.viewWithTag(3000) as! UITextField
         let newList = ReminderList(name: textField.text)
         dataModel.lists.append(newList)
+        textField.text = ""
         dataModel.saveReminderItems()
         cancelNewList()
     }
@@ -55,13 +62,54 @@ class AllListsViewController: UITableViewController {
         performSegueWithIdentifier("ShowLocations", sender: nil)
     }
     
+    func remindersForLocation(location: Location) -> [ReminderItem] {
+        var reminders = [ReminderItem]()
+        for list in dataModel.lists {
+            for reminder in list.checklist {
+                if reminder.locationID == location.myID {
+                    if !reminder.checked {
+                        reminders.append(reminder)
+                    }
+                    
+                }
+            }
+        }
+        return reminders
+    }
+   /*
+    override func viewDidAppear(animated: Bool) {
+        super.viewDidAppear(animated)
+        for thisRegion in locationManager.monitoredRegions {
+            let region = thisRegion as! CLCircularRegion
+            if let currentLocation = locationManager.location {
+                if (currentLocation.coordinate.latitude == region.center.latitude) && (currentLocation.coordinate.longitude == region.center.longitude) {
+                    for location in dataModel.locations {
+                        if location.myID == region.identifier.toInt() {
+                            storeList?.checklist = remindersForLocation(location)
+                            storeList?.name = location.name
+                            atStore = true
+                            tableView.reloadData()
+                            break
+                        }
+                    }
+                    println("found current location in monitored regions")
+                    break
+                }
+                
+            } else {
+                println("No current location")
+            }
+        }
+        
+
+    }
+*/
+    
     
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        
-        // Uncomment the following line to preserve selection between presentations
+                // Uncomment the following line to preserve selection between presentations
         // self.clearsSelectionOnViewWillAppear = false
 
         // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
@@ -82,7 +130,23 @@ class AllListsViewController: UITableViewController {
             controller.reminderList = dataModel.lists[indexPath!.row]
             controller.delegate = self
             controller.dataModel = dataModel
-            println("Sender: \(sender)")
+            controller.title = dataModel.lists[indexPath!.row].name
+          //  println("Sender: \(sender)")
+        } else if segue.identifier == "ShowLocations" {
+            let navigationController = segue.destinationViewController as! UINavigationController
+            let controller = navigationController.topViewController as! LocationPickerViewController
+            controller.dataModel = dataModel
+        } else if segue.identifier == "ShowStoreList" {
+            let navigationController = segue.destinationViewController as! UINavigationController
+            let controller = navigationController.topViewController as! RemindersViewController
+            if let list = storeList {
+                println("sent storeList to reminder screen")
+                controller.reminderList = list
+                controller.title = list.name
+            }
+            controller.delegate = self
+            controller.dataModel = dataModel
+            controller.atStore = true
         }
     }
 
@@ -101,7 +165,8 @@ class AllListsViewController: UITableViewController {
             return cell
         } else if (atStore) && (indexPath.row == dataModel.lists.count) {
             let cell = tableView.dequeueReusableCellWithIdentifier("ItemsToDoAtLocationCell", forIndexPath: indexPath) as! UITableViewCell
-            cell.textLabel?.text = "Items to Buy Here"
+            cell.textLabel?.text = "\(storeList!.name)"
+            cell.detailTextLabel?.text = "\(storeList!.checklist.count) items"
             return cell
         } else if (addingList) && (indexPath.row >= dataModel.lists.count) {
             let cell = tableView.dequeueReusableCellWithIdentifier("NewListCell", forIndexPath: indexPath) as! UITableViewCell
@@ -115,6 +180,8 @@ class AllListsViewController: UITableViewController {
         let alert = UIAlertController(title: "Deleting List", message: "This will delete all the items in the list", preferredStyle: UIAlertControllerStyle.Alert)
         let deleteAction = UIAlertAction(title: "Delete", style: UIAlertActionStyle.Destructive, handler: {
             _ in
+            self.listDeleted(indexPath.row)
+            
             self.dataModel.lists.removeAtIndex(indexPath.row)
             let indexPaths = [indexPath]
             tableView.deleteRowsAtIndexPaths(indexPaths, withRowAnimation: .Automatic)
@@ -125,6 +192,43 @@ class AllListsViewController: UITableViewController {
         alert.addAction(cancelAction)
         presentViewController(alert, animated: true, completion: nil)
     }
+    
+    override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+        tableView.deselectRowAtIndexPath(indexPath, animated: true)
+    }
+    
+    func listDeleted(listIndex: Int) {
+        for item in dataModel.lists[listIndex].checklist {
+            for location in dataModel.locations {
+                if location.myID == item.locationID {
+                    location.remindersCount -= 1
+                }
+            }
+        }
+        dataModel.saveLocationItems()
+        updateLocationMonitoring()
+    //    println("Number of locations monitored after list deletion: \(locationManager.monitoredRegions.count)")
+    }
+    
+    func updateLocationMonitoring() {
+        for location in dataModel.locations {
+            if location.remindersCount <= 0 {
+                stopMonitoring(location)
+            }
+        }
+    }
+    
+    func stopMonitoring(location: Location) {
+        for region in locationManager.monitoredRegions {
+            if let region = region as? CLCircularRegion {
+                if region.identifier.toInt() == location.myID {
+                    locationManager.stopMonitoringForRegion(region)
+                }
+            }
+
+        }
+    }
+
     
     
     

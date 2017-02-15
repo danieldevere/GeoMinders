@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import CoreLocation
 
 protocol RemindersViewControllerDelegate: class {
     func remindersViewControllerWantsToSave(controller: RemindersViewController)
@@ -21,6 +22,10 @@ class RemindersViewController: UITableViewController {
     var delegate: RemindersViewControllerDelegate?
     
     var dataModel: DataModel!
+    
+    var atStore: Bool = false
+    
+    let locationManager = CLLocationManager()
     
     @IBOutlet weak var reminderNameLabel: UILabel!
     @IBOutlet weak var reminderDetailLabel: UILabel!
@@ -66,7 +71,7 @@ class RemindersViewController: UITableViewController {
             let controller = navigationController.topViewController as! LocationPickerViewController
             controller.delegate = self
             controller.dataModel = dataModel
-            println("Pick Location Segue")
+        //    println("Pick Location Segue")
         }
         
     }
@@ -75,8 +80,13 @@ class RemindersViewController: UITableViewController {
     // MARK: - Table view data source
 
     override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        println("Number of row: \(reminderList.checklist.count)")
-        return reminderList.checklist.count + 1
+    //    println("Number of row: \(reminderList.checklist.count)")
+        if atStore {
+            return reminderList.checklist.count
+        } else {
+            return reminderList.checklist.count + 1
+        }
+        
     }
 
     
@@ -88,7 +98,12 @@ class RemindersViewController: UITableViewController {
             let reminderDetailText = cell.viewWithTag(1002) as! UILabel
             reminderText.text = item.reminderText
             reminderDetailText.text = item.detailText
-            cell.accessoryType = UITableViewCellAccessoryType.DetailButton
+            if atStore {
+                cell.accessoryType = .None
+            } else {
+                cell.accessoryType = UITableViewCellAccessoryType.DetailButton
+            }
+            
             updateCheckmarkForCell(cell, withReminderItem: reminderList.checklist[indexPath.row])
             return cell
             
@@ -102,34 +117,40 @@ class RemindersViewController: UITableViewController {
     override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
         if indexPath.row < reminderList.checklist.count {
             reminderList.checklist[indexPath.row].checked = !reminderList.checklist[indexPath.row].checked
+            if reminderList.checklist[indexPath.row].checked {
+                removeReminderFromLocation(reminderList.checklist[indexPath.row])
+                updateLocationMonitoring()
+            } else {
+                addReminderToLocationCount(reminderList.checklist[indexPath.row])
+                updateLocationMonitoring()
+            }
             tableView.deselectRowAtIndexPath(indexPath, animated: true)
             delegate?.remindersViewControllerWantsToSave(self)
+            dataModel.saveLocationItems()
     //        saveReminderItems()
             tableView.reloadData()
+        }
+    }
+    
+    override func tableView(tableView: UITableView, canEditRowAtIndexPath indexPath: NSIndexPath) -> Bool {
+        if atStore {
+            return false
+        } else {
+            return true
         }
     }
     
     override func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
         let locations = dataModel.locations
         
-        for location in locations {
-            if location.myID == reminderList.checklist[indexPath.row].locationID {
-             /*   for index in 0...location.reminderIDs.count-1 {
-                    if location.reminderIDs[index] == reminderList.checklist[indexPath.row].myID {
-                        location.reminderIDs.removeAtIndex(index)
-                    }
-                }*/
-                location.reminderIDs = location.reminderIDs.filter({
-                    $0 != self.reminderList.checklist[indexPath.row].myID
-                })
-            }
-        }
-        println("Locations: \(locations[0].reminderIDs.count)")
+        removeReminderFromLocation(reminderList.checklist[indexPath.row])
+        dataModel.saveLocationItems()
+        updateLocationMonitoring()
+    //    println("Locations: \(locations[0].reminderIDs.count)")
         reminderList.checklist.removeAtIndex(indexPath.row)
         let indexPaths = [indexPath]
 
         tableView.deleteRowsAtIndexPaths(indexPaths, withRowAnimation: .Automatic)
-        dataModel.saveLocationItems()
         delegate?.remindersViewControllerWantsToSave(self)
     //    saveReminderItems()
     }
@@ -147,13 +168,73 @@ class RemindersViewController: UITableViewController {
         
     }
     
+    func region(#location: Location) -> CLCircularRegion {
+        var identifier = "\(location.myID)"
+        let region = CLCircularRegion(center: location.coordinate, radius: location.radius, identifier: identifier)
+        region.notifyOnEntry = true
+        region.notifyOnExit = false
+        return region
+    }
+    
+    func startMonitoring(location: Location) {
+        if !CLLocationManager.isMonitoringAvailableForClass(CLCircularRegion) {
+            println("geofencing not supported")
+            return
+        }
+        // 2
+           let region = self.region(location: location)
+        locationManager.startMonitoringForRegion(region)
+     //   println("Start monitoring location: \(location.name)")
+
+    }
+    
+    func stopMonitoring(location: Location) {
+        for region in locationManager.monitoredRegions {
+            if let region = region as? CLCircularRegion {
+                if region.identifier.toInt() == location.myID {
+                    locationManager.stopMonitoringForRegion(region)
+                }
+            }
+        }
+    }
+    
+    func addReminderToLocationCount(reminder: ReminderItem) {
+        for location in dataModel.locations {
+            if location.myID == reminder.locationID {
+                location.remindersCount = location.remindersCount + 1
+            }
+        }
+    }
+    
+    func removeReminderFromLocation(reminder: ReminderItem) {
+        for location in dataModel.locations {
+            if location.myID == reminder.locationID {
+                location.remindersCount = location.remindersCount - 1
+            }
+        }
+    }
+    
+    func updateLocationMonitoring() {
+        for location in dataModel.locations {
+            if location.remindersCount <= 0 {
+                stopMonitoring(location)
+           //     println("stopped monitoring \(location.name)")
+            } else {
+                stopMonitoring(location)
+                startMonitoring(location)
+            }
+        }
+     //   println("Locations being monitored \(locationManager.monitoredRegions.count)")
+    }
+
+    
 }
 
 
 
 extension RemindersViewController: NewReminderCellDelegate {
     func newReminderCell(controller: NewReminderCell, didPressDoneAddingReminder reminder: ReminderItem) {
-        println("pressedDone")
+     //   println("pressedDone")
         tempReminder = reminder
                 controller.textField.text = ""
         
@@ -168,6 +249,9 @@ extension RemindersViewController: NewReminderCellDelegate {
 extension RemindersViewController: ReminderItemDetailViewControllerDelegate {
     func reminderItemDetailViewController(controller: ReminderItemDetailViewController, didFinishEditingReminder reminder: ReminderItem) {
         dismissViewControllerAnimated(true, completion: nil)
+        updateLocationMonitoring()
+        println("After Edit Reminder: \(reminder.reminderText) LocationID: \(reminder.locationID)")
+        delegate?.remindersViewControllerWantsToSave(self)
         tableView.reloadData()
   //      saveReminderItems()
     }
@@ -180,8 +264,12 @@ extension RemindersViewController: ReminderItemDetailViewControllerDelegate {
 extension RemindersViewController: LocationPickerViewControllerDelegate {
     func locationPickerViewController(controller: LocationPickerViewController, didPickLocation location: Location) {
         tempReminder.detailText = location.name
+        tempReminder.locationAddress = location.subtitle
         tempReminder.locationID = location.myID
-        location.reminderIDs.append(tempReminder.myID)
+        addReminderToLocationCount(tempReminder)
+        println("After PickLocation Reminder: \(tempReminder.reminderText) LocationID: \(tempReminder.locationID)")
+        dataModel.saveLocationItems()
+        updateLocationMonitoring()
         reminderList.checklist.append(tempReminder)
         dismissViewControllerAnimated(true, completion: nil)
         let indexPath = NSIndexPath(forRow: reminderList.checklist.count - 1, inSection: 0)

@@ -18,6 +18,7 @@ class Location: NSObject, NSCoding, MKAnnotation {
     var latitude: Double = 0.0
     var longitude: Double = 0.0
     var radius: Double = 0.0
+    var remindersCount: Int = 0
     var coordinate: CLLocationCoordinate2D {
         return CLLocationCoordinate2DMake(latitude, longitude)
     }
@@ -31,9 +32,6 @@ class Location: NSObject, NSCoding, MKAnnotation {
     }
     
     var subtitle: String! {
-        var string = stringFromPlacemark(placemark!)
-    //    println("Placemark \(placemark)")
-
         return stringFromPlacemark(placemark!)
     }
     
@@ -45,6 +43,7 @@ class Location: NSObject, NSCoding, MKAnnotation {
         radius = aDecoder.decodeDoubleForKey("Radius")
         reminderIDs = aDecoder.decodeObjectForKey("ReminderIDs") as! [Int]
         myID = aDecoder.decodeIntegerForKey("MyID")
+        remindersCount = aDecoder.decodeIntegerForKey("RemindersCount")
         super.init()
     }
     
@@ -58,17 +57,18 @@ class Location: NSObject, NSCoding, MKAnnotation {
     
     func encodeWithCoder(aCoder: NSCoder) {
         aCoder.encodeObject(name, forKey: "Name")
-        println("Name: \(name)")
+     //   println("Name: \(name)")
         aCoder.encodeObject(placemark, forKey: "Placemark")
-        println("Placemark: \(placemark)")
+    //    println("Placemark: \(placemark)")
         aCoder.encodeDouble(longitude, forKey: "Longitude")
-        println("Longitude: \(longitude)")
+    //    println("Longitude: \(longitude)")
         aCoder.encodeDouble(latitude, forKey: "Latitude")
-        println("Latitude: \(latitude)")
+    //    println("Latitude: \(latitude)")
         aCoder.encodeDouble(radius, forKey: "Radius")
-        println("Radius: \(radius)")
+   //     println("Radius: \(radius)")
         aCoder.encodeInteger(myID, forKey: "MyID")
         aCoder.encodeObject(reminderIDs, forKey: "ReminderIDs")
+        aCoder.encodeInteger(remindersCount, forKey: "RemindersCount")
     }
     
     convenience init(name: String, placemark: MKPlacemark?, longitude: Double, latitude: Double) {

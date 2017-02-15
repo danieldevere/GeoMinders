@@ -15,13 +15,20 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
     
     let dataModel = DataModel()
+    
+    let locationManager = CLLocationManager()
 
 
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
         let navigationController = window!.rootViewController as! UINavigationController
         let controller = navigationController.topViewController as! AllListsViewController
+        dataModel.loadLocationItems()
+        locationManager.delegate = self
+        dataModel.loadReminderItems()
         controller.dataModel = dataModel
         // Override point for customization after application launch.
+        let notificationSettings = UIUserNotificationSettings(forTypes: .Alert | .Sound, categories: nil)
+        UIApplication.sharedApplication().registerUserNotificationSettings(notificationSettings)
         return true
     }
 
@@ -50,9 +57,31 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         saveData()
     }
     
+    func application(application: UIApplication, didReceiveLocalNotification notification: UILocalNotification) {
+        let alertView = UIAlertController(title: "You have arrived at \(notification.alertTitle)", message: notification.alertBody, preferredStyle: UIAlertControllerStyle.Alert)
+        let alertAction = UIAlertAction(title: "OK", style: UIAlertActionStyle.Default, handler: nil)
+        alertView.addAction(alertAction)
+        window?.rootViewController?.presentViewController(alertView, animated: true, completion: nil)
+    }
+    
     func saveData() {
         dataModel.saveReminderItems()
         dataModel.saveLocationItems()
+    }
+    
+    func remindersForLocation(location: Location) -> [ReminderItem] {
+        var reminders = [ReminderItem]()
+            for list in dataModel.lists {
+                for reminder in list.checklist {
+                    if reminder.locationID == location.myID {
+                        if !reminder.checked {
+                            reminders.append(reminder)
+                        }
+                        
+                    }
+                }
+            }
+        return reminders
     }
 
 
@@ -60,7 +89,57 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 extension AppDelegate: CLLocationManagerDelegate {
     func locationManager(manager: CLLocationManager!, didEnterRegion region: CLRegion!) {
-        println("Entered the region")
+        dataModel.loadLocationItems()
+        dataModel.loadReminderItems()
+        var locationEntered = Location()
+        let locationID = region.identifier.toInt()
+        for location in dataModel.locations {
+            if location.myID == locationID {
+                locationEntered = location
+                break
+            }
+        }
+        let date = NSDate(timeIntervalSinceNow: 5)
+        let localNotification = UILocalNotification()
+        localNotification.fireDate = date
+        localNotification.timeZone = NSTimeZone.defaultTimeZone()
+        let remindersForNotification = remindersForLocation(locationEntered)
+        let additionalReminders = remindersForNotification.count - 1
+        var alertString = "You have arried at " + locationEntered.name
+        alertString = alertString.stringByAppendingString(", you need to get \(remindersForNotification[0].reminderText)")
+        alertString = alertString.stringByAppendingString(" and \(additionalReminders)")
+        localNotification.alertBody = alertString.stringByAppendingString(" other items.")
+        localNotification.alertTitle = locationEntered.name
+        localNotification.soundName = UILocalNotificationDefaultSoundName
+        UIApplication.sharedApplication().scheduleLocalNotification(localNotification)
+        println("Entered the location: \(locationEntered.name)")
+        
+        let navigationController = window?.rootViewController as! UINavigationController
+        let controller = navigationController.topViewController as! AllListsViewController
+        controller.atStore = true
+        var reminderList = ReminderList()
+        reminderList.checklist = remindersForNotification
+        reminderList.name = "List for " + locationEntered.name
+        controller.storeList = reminderList
+        println("storelist \(controller.storeList?.checklist.count)")
+        controller.tableView.reloadData()
+        
+      //locationManager.startMonitoringForRegion(region)
     }
+    
+    func locationManager(manager: CLLocationManager!, monitoringDidFailForRegion region: CLRegion!, withError error: NSError!) {
+        println("monitoring failed")
+    }
+    
+    func locationManager(manager: CLLocationManager!, didStartMonitoringForRegion region: CLRegion!) {
+      //  println("didStartMonitoring: \(region.identifier)")
+        let locationID = region.identifier.toInt()
+        for location in dataModel.locations {
+            if location.myID == locationID {
+         ///       println("didStartMonitoring: \(region.identifier) location: \(location.name) locationID: \(location.myID)")
+            }
+        }
+    }
+    
 }
 

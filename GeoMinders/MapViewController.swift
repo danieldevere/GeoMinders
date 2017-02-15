@@ -79,7 +79,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     
     override func viewDidAppear(animated: Bool) {
         stateForToggleButton()
-        println("Locations array: \(locations)")
+     //   println("Locations array: \(locations)")
 
     }
 
@@ -100,8 +100,26 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     func mapView(mapView: MKMapView!, viewForAnnotation annotation: MKAnnotation!) -> MKAnnotationView! {
         if annotation.isKindOfClass(MKUserLocation) {
             return nil
-        } else if let annotation = mapView.dequeueReusableAnnotationViewWithIdentifier("Pin") as? MKPinAnnotationView {
-            return annotation
+        } else if let annotationView = mapView.dequeueReusableAnnotationViewWithIdentifier("Pin") as? MKPinAnnotationView {
+            let annotationButton = UIButton.buttonWithType(UIButtonType.ContactAdd) as! UIButton
+            annotationButton.addTarget(self, action: Selector("chooseRadiusForTag:"), forControlEvents: .TouchUpInside)
+            annotationView.rightCalloutAccessoryView = annotationButton
+            let button = annotationView.rightCalloutAccessoryView as! UIButton
+            var index = 0
+
+            for i in 0...searchedLocations.count-1 {
+                //  println("Annotation is: \(annotation.title) Location is: \(searchedLocations[i].title) Index is: \(i)")
+                if (annotation.coordinate.latitude == searchedLocations[i].coordinate.latitude) && (annotation.coordinate.longitude == searchedLocations[i].coordinate.longitude) && (annotation.title == searchedLocations[i].title) {
+                    index = i
+                    //  annotationView.tag = i
+                    button.tag = i
+               //     println("***Picked Annotation is: \(annotation.title) Location is: \(searchedLocations[i].title) Index is: \(i)")
+                    break
+                }
+            }
+
+        //    println("Dequed Annotation is: \(annotation.title) Location is: \(searchedLocations[annotationView.rightCalloutAccessoryView.tag].title) Index is: \(annotationView.rightCalloutAccessoryView.tag)")
+            return annotationView
         } else {
             let annotationView = MKPinAnnotationView(annotation: annotation, reuseIdentifier: "Pin")
             annotationView.canShowCallout = true
@@ -111,10 +129,18 @@ class MapViewController: UIViewController, MKMapViewDelegate {
             annotationButton.addTarget(self, action: Selector("chooseRadiusForTag:"), forControlEvents: .TouchUpInside)
             annotationView.rightCalloutAccessoryView = annotationButton
             let button = annotationView.rightCalloutAccessoryView as! UIButton
-            if let index = find(searchedLocations, annotation as! Location) {
-                button.tag = index
-                
+            var index = 0
+            for i in 0...searchedLocations.count-1 {
+              //  println("Annotation is: \(annotation.title) Location is: \(searchedLocations[i].title) Index is: \(i)")
+                if (annotation.coordinate.latitude == searchedLocations[i].coordinate.latitude) && (annotation.coordinate.longitude == searchedLocations[i].coordinate.longitude) && (annotation.title == searchedLocations[i].title) {
+                    index = i
+                  //  annotationView.tag = i
+                    button.tag = i
+            //        println("***Picked Annotation is: \(annotation.title) Location is: \(searchedLocations[i].title) Index is: \(i)")
+                    break
+                }
             }
+          //  button.tag = index
             return annotationView
         }
     }
@@ -165,8 +191,15 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     
     func tagCancelButtonPressed() {
         regularView()
+        locationToTag = Location()
         moveMap(forMapCase: .untaggedLocations)
         map.removeOverlay(overlay)
+        for annotation in map.annotations {
+         //   let annotationView = map.viewForAnnotation(annotation as! MKAnnotation)
+         //   println("Annotation is: \(annotation.title) Tag is: \(annotationView.rightCalloutAccessoryView.tag)")
+        }
+        
+    //    println("Annotations: \(map.annotations)")
     }
     
     func stateForToggleButton() {
@@ -182,8 +215,9 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     
     func chooseRadiusForTag(sender: UIButton) {
         taggingLocationView()
-        let button = sender as UIButton
+        let button = sender
         let location = searchedLocations[button.tag]
+   //     println("Plus symbol press. Location is: \(location.name) Index is: \(button.tag)")
         locationToTag = location
         radiusSegmentedControl.selectedSegmentIndex = 0
         addRadiusOverlayForLocation(location, withRadius: (Double(radiusSegmentedControl.selectedSegmentIndex) + 1) * 100.0)
