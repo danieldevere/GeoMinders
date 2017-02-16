@@ -48,6 +48,8 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     
     @IBOutlet weak var searchBar: UISearchBar!
     
+    @IBOutlet weak var currentLocation: UIButton!
+    
     var delegate: MapViewControllerDelegate?
     
     
@@ -63,12 +65,14 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         let placemark = MKPlacemark(coordinate: locationToTag.coordinate, addressDictionary: nil)
         let location = Location(name: "", placemark: placemark, longitude: locationToTag.coordinate.longitude, latitude: locationToTag.coordinate.latitude)
         map.removeOverlays(map.overlays)
-        addRadiusOverlayForLocation(location, withRadius: (Double(radiusSegmentedControl.selectedSegmentIndex) + 1) * 100.0)
+        addRadiusOverlayForLocation(location, withRadius: (Double(radiusSegmentedControl.selectedSegmentIndex) + 1) * 100.0 * 0.3048)
     }
-
+    
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        currentLocation.isEnabled = false
+        toggleTaggedAnnotationsButton.isEnabled = false
         let authStatus = CLLocationManager.authorizationStatus()
         if authStatus == .notDetermined {
             locationManager.requestAlwaysAuthorization()
@@ -78,7 +82,6 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     }
     
     override func viewDidAppear(_ animated: Bool) {
-        stateForToggleButton()
      //   println("Locations array: \(locations)")
 
     }
@@ -101,43 +104,47 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         if annotation.isKind(of: MKUserLocation.self) {
             return nil
         } else if let annotationView = mapView.dequeueReusableAnnotationView(withIdentifier: "Pin") as? MKPinAnnotationView {
-            let annotationButton = UIButton(type: UIButtonType.contactAdd)
-            annotationButton.addTarget(self, action: #selector(MapViewController.chooseRadiusForTag(_:)), for: .touchUpInside)
-            annotationView.rightCalloutAccessoryView = annotationButton
-            let button = annotationView.rightCalloutAccessoryView as! UIButton
-
-
-            for (arrayIndex, _) in searchedLocations.enumerated() {
-                //  println("Annotation is: \(annotation.title) Location is: \(searchedLocations[i].title) Index is: \(i)")
-                if (annotation.coordinate.latitude == searchedLocations[arrayIndex].coordinate.latitude) && (annotation.coordinate.longitude == searchedLocations[arrayIndex].coordinate.longitude) {
-                    //  annotationView.tag = i
-                    button.tag = arrayIndex
-               //     println("***Picked Annotation is: \(annotation.title) Location is: \(searchedLocations[i].title) Index is: \(i)")
-                    break
+            if !toggleTaggedAnnotationsButtonSelected {
+                let annotationButton = UIButton(type: UIButtonType.contactAdd)
+                annotationButton.addTarget(self, action: #selector(MapViewController.chooseRadiusForTag(_:)), for: .touchUpInside)
+                annotationView.rightCalloutAccessoryView = annotationButton
+                let button = annotationView.rightCalloutAccessoryView as! UIButton
+                
+                
+                for (arrayIndex, _) in searchedLocations.enumerated() {
+                    //  println("Annotation is: \(annotation.title) Location is: \(searchedLocations[i].title) Index is: \(i)")
+                    if (annotation.coordinate.latitude == searchedLocations[arrayIndex].coordinate.latitude) && (annotation.coordinate.longitude == searchedLocations[arrayIndex].coordinate.longitude) {
+                        //  annotationView.tag = i
+                        button.tag = arrayIndex
+                        //     println("***Picked Annotation is: \(annotation.title) Location is: \(searchedLocations[i].title) Index is: \(i)")
+                        break
+                    }
                 }
-            }
 
-        //    println("Dequed Annotation is: \(annotation.title) Location is: \(searchedLocations[annotationView.rightCalloutAccessoryView.tag].title) Index is: \(annotationView.rightCalloutAccessoryView.tag)")
+            }
             return annotationView
         } else {
             let annotationView = MKPinAnnotationView(annotation: annotation, reuseIdentifier: "Pin")
             annotationView.canShowCallout = true
             annotationView.isEnabled = true
             annotationView.animatesDrop = true
-            let annotationButton = UIButton(type: UIButtonType.contactAdd)
-            annotationButton.addTarget(self, action: #selector(MapViewController.chooseRadiusForTag(_:)), for: .touchUpInside)
-            annotationView.rightCalloutAccessoryView = annotationButton
-            let button = annotationView.rightCalloutAccessoryView as! UIButton
-            for i in 0...searchedLocations.count-1 {
-              //  println("Annotation is: \(annotation.title) Location is: \(searchedLocations[i].title) Index is: \(i)")
-                if (annotation.coordinate.latitude == searchedLocations[i].coordinate.latitude) && (annotation.coordinate.longitude == searchedLocations[i].coordinate.longitude) {
-                  //  annotationView.tag = i
-                    button.tag = i
-            //        println("***Picked Annotation is: \(annotation.title) Location is: \(searchedLocations[i].title) Index is: \(i)")
-                    break
+            if !toggleTaggedAnnotationsButtonSelected {
+                let annotationButton = UIButton(type: UIButtonType.contactAdd)
+                annotationButton.addTarget(self, action: #selector(MapViewController.chooseRadiusForTag(_:)), for: .touchUpInside)
+                annotationView.rightCalloutAccessoryView = annotationButton
+                let button = annotationView.rightCalloutAccessoryView as! UIButton
+                for (index, _) in searchedLocations.enumerated() {
+                    //  println("Annotation is: \(annotation.title) Location is: \(searchedLocations[i].title) Index is: \(i)")
+                    if (annotation.coordinate.latitude == searchedLocations[index].coordinate.latitude) && (annotation.coordinate.longitude == searchedLocations[index].coordinate.longitude) {
+                        //  annotationView.tag = i
+                        button.tag = index
+                        //        println("***Picked Annotation is: \(annotation.title) Location is: \(searchedLocations[i].title) Index is: \(i)")
+                        break
+                    }
                 }
+
             }
-          //  button.tag = index
+                      //  button.tag = index
             return annotationView
         }
     }
@@ -151,6 +158,12 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         stateForToggleButton()
         toggleTaggedAnnotationsButton.action = #selector(MapViewController.toggleTaggedAnnotations)
         toggleTaggedAnnotationsButton.target = self
+        if currentLocation.isEnabled {
+            toggleTaggedAnnotationsButton.isEnabled = true
+        } else {
+            toggleTaggedAnnotationsButton.isEnabled = false
+        }
+      //  toggleTaggedAnnotationsButton.isEnabled = false
     }
     
     func taggingLocationView() {
@@ -161,6 +174,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         toggleTaggedAnnotationsButton.title = "Tag"
         toggleTaggedAnnotationsButton.action = #selector(MapViewController.tagButtonPressed)
         toggleTaggedAnnotationsButton.target = self
+        toggleTaggedAnnotationsButton.isEnabled = true
         
     }
     
@@ -169,20 +183,35 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     }
     
     func toggleTaggedAnnotations() {
+        print("Locations: \(locations[0].name)")
         if toggleTaggedAnnotationsButtonSelected {
+            toggleTaggedAnnotationsButtonSelected = false
             removeAnnotationsForLocations(locations)
+            moveMapToDefaultView()
+            
+            
         } else {
+            toggleTaggedAnnotationsButtonSelected = true
             addAnnotations(locations)
             moveMap(forMapCase: .taggedLocations)
+            
         }
-        toggleTaggedAnnotationsButtonSelected = !toggleTaggedAnnotationsButtonSelected
         stateForToggleButton()
+    }
+    
+    func mapView(_ mapView: MKMapView, didUpdate userLocation: MKUserLocation) {
+        if !currentLocation.isEnabled {
+            currentLocation.isEnabled = true
+            moveMapToDefaultView()
+            toggleTaggedAnnotationsButton.isEnabled = true
+        }
+        
     }
 
     
     
     func tagButtonPressed() {
-        locationToTag.radius = (Double(radiusSegmentedControl.selectedSegmentIndex) + 1) * 100
+        locationToTag.radius = ((Double(radiusSegmentedControl.selectedSegmentIndex) + 1) * 100) * 0.3048
         performSegue(withIdentifier: "TagLocation", sender: nil)
     }
     
@@ -217,7 +246,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
    //     println("Plus symbol press. Location is: \(location.name) Index is: \(button.tag)")
         locationToTag = location
         radiusSegmentedControl.selectedSegmentIndex = 0
-        addRadiusOverlayForLocation(location, withRadius: (Double(radiusSegmentedControl.selectedSegmentIndex) + 1) * 100.0)
+        addRadiusOverlayForLocation(location, withRadius: (Double(radiusSegmentedControl.selectedSegmentIndex) + 1) * 100 * 0.3048)
         moveMapToLocation(locationToTag)
     }
     
@@ -236,7 +265,13 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     
     
     func moveMapToLocation(_ location: Location) {
-        let region = MKCoordinateRegionMakeWithDistance(location.coordinate, 1000, 1000)
+        let region = MKCoordinateRegionMakeWithDistance(location.coordinate, 500, 500)
+        let regionThatFits = map.regionThatFits(region)
+        map.setRegion(regionThatFits, animated: true)
+    }
+    
+    func moveMapToDefaultView() {
+        let region = MKCoordinateRegionMakeWithDistance(map.userLocation.coordinate, 30000, 30000)
         let regionThatFits = map.regionThatFits(region)
         map.setRegion(regionThatFits, animated: true)
     }

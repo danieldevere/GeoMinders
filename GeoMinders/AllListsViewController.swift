@@ -197,6 +197,14 @@ class AllListsViewController: UITableViewController {
         tableView.deselectRow(at: indexPath, animated: true)
     }
     
+    override func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
+        if indexPath.row < dataModel.lists.count {
+            return true
+        } else {
+            return false
+        }
+    }
+    
     func listDeleted(_ listIndex: Int) {
         for item in dataModel.lists[listIndex].checklist {
             for location in dataModel.locations {

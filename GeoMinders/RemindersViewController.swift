@@ -30,6 +30,44 @@ class RemindersViewController: UITableViewController {
     @IBOutlet weak var reminderNameLabel: UILabel!
     @IBOutlet weak var reminderDetailLabel: UILabel!
     @IBOutlet weak var reminderCheckbox: UIImageView!
+    @IBOutlet weak var backAndCancelButton: UIBarButtonItem!
+    
+    @IBAction func startedTyping() {
+        backAndCancelButton.title = "Cancel"
+        backAndCancelButton.action = #selector(RemindersViewController.cancelAdd)
+        backAndCancelButton.target = self
+    }
+    
+    func cancelAdd() {
+        let textField = tableView.viewWithTag(1003) as! UITextField
+        textField.text = ""
+        textField.resignFirstResponder()
+        backAndCancelButton.title = "< Back"
+        backAndCancelButton.action = #selector(RemindersViewController.back)
+    }  
+    
+    @IBAction func done() {
+        //   println("Text: \(textField.text)")
+        let textField = tableView.viewWithTag(1003) as! UITextField
+        textField.resignFirstResponder()
+        let item = ReminderItem()
+        item.reminderText = textField.text!
+        item.checked = false
+        if UserDefaults.standard.object(forKey: "ReminderIndex") != nil {
+            let reminderIndex = UserDefaults.standard.integer(forKey: "ReminderIndex")
+            item.myID = reminderIndex + 1
+            UserDefaults.standard.set(reminderIndex + 1, forKey: "ReminderIndex")
+        } else {
+            item.myID = 0
+            UserDefaults.standard.set(0, forKey: "ReminderIndex")
+        }
+        tempReminder = item
+        textField.text = ""
+        
+        performSegue(withIdentifier: "PickLocation", sender: nil)
+
+    }
+
     
     @IBAction func back() {
         dismiss(animated: true, completion: nil)
@@ -51,8 +89,8 @@ class RemindersViewController: UITableViewController {
     }
     override func viewDidLoad() {
         super.viewDidLoad()
-        let cellNib = UINib(nibName: "NewReminderCell", bundle: nil)
-        tableView.register(cellNib, forCellReuseIdentifier: "NewReminderCell")
+       /* let cellNib = UINib(nibName: "NewReminderCell", bundle: nil)
+        tableView.register(cellNib, forCellReuseIdentifier: "NewReminderCell")*/
     }
 
     override func didReceiveMemoryWarning() {
@@ -111,8 +149,7 @@ class RemindersViewController: UITableViewController {
             return cell
             
         } else {
-            let cell = tableView.dequeueReusableCell(withIdentifier: "NewReminderCell", for: indexPath) as! NewReminderCell
-            cell.delegate = self
+            let cell = tableView.dequeueReusableCell(withIdentifier: "NewReminderCell", for: indexPath)
             return cell
         }
     }
@@ -158,6 +195,14 @@ class RemindersViewController: UITableViewController {
     //    saveReminderItems()
     }
     
+    override func tableView(_ tableView: UITableView, willSelectRowAt indexPath: IndexPath) -> IndexPath? {
+        if indexPath.row == reminderList.checklist.count {
+            return nil
+        } else {
+            return indexPath
+        }
+    }
+    
   /*
         */
     func updateCheckmarkForCell(_ cell: UITableViewCell, withReminderItem reminder: ReminderItem) {
@@ -175,7 +220,7 @@ class RemindersViewController: UITableViewController {
         let identifier = "\(location.myID)"
         let region = CLCircularRegion(center: location.coordinate, radius: location.radius, identifier: identifier)
         region.notifyOnEntry = true
-        region.notifyOnExit = false
+        region.notifyOnExit = true
         return region
     }
     
@@ -278,6 +323,9 @@ extension RemindersViewController: LocationPickerViewControllerDelegate {
         let indexPath = IndexPath(row: reminderList.checklist.count - 1, section: 0)
         let indexPaths = [indexPath]
         tableView.insertRows(at: indexPaths, with: .automatic)
+        backAndCancelButton.title = "< Back"
+        backAndCancelButton.action = #selector(RemindersViewController.back)
+
 
 
         tableView.reloadData()
@@ -286,7 +334,7 @@ extension RemindersViewController: LocationPickerViewControllerDelegate {
     }
     
     func locationPickerViewControllerDidCancel(_ controller: LocationPickerViewController) {
-        dismiss(animated: true, completion: nil)
+     //   dismiss(animated: true, completion: nil)
     }
 }
 

@@ -27,6 +27,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         dataModel.loadReminderItems()
         controller.dataModel = dataModel
         // Override point for customization after application launch.
+
         let notificationSettings = UIUserNotificationSettings(types: UIUserNotificationType.alert, categories: nil)
         UIApplication.shared.registerUserNotificationSettings(notificationSettings)
         return true
@@ -58,10 +59,19 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
     
     func application(_ application: UIApplication, didReceive notification: UILocalNotification) {
-        let alertView = UIAlertController(title: "You have arrived at \(notification.alertTitle)", message: notification.alertBody, preferredStyle: UIAlertControllerStyle.alert)
-        let alertAction = UIAlertAction(title: "OK", style: UIAlertActionStyle.default, handler: nil)
+        let alertView = UIAlertController(title: "You have arrived at \(notification.alertTitle!)", message: notification.alertBody, preferredStyle: UIAlertControllerStyle.alert)
+        
+    //    window?.rootViewController?.present(alertView, animated: true, completion: nil)
+        var topWindow = UIWindow(frame: UIScreen.main.bounds)
+        topWindow.rootViewController = UIViewController()
+        let alertAction = UIAlertAction(title: "OK", style: UIAlertActionStyle.default, handler: {
+            _ in
+            topWindow.isHidden = true
+        })
+        
         alertView.addAction(alertAction)
-        window?.rootViewController?.present(alertView, animated: true, completion: nil)
+        topWindow.makeKeyAndVisible()
+        topWindow.rootViewController?.present(alertView, animated: true, completion: nil)
     }
     
     func saveData() {
@@ -99,7 +109,7 @@ extension AppDelegate: CLLocationManagerDelegate {
                 break
             }
         }
-        let date = Date(timeIntervalSinceNow: 5)
+        let date = Date(timeIntervalSinceNow: 1)
         let localNotification = UILocalNotification()
         localNotification.fireDate = date
         localNotification.timeZone = TimeZone.current
@@ -110,6 +120,7 @@ extension AppDelegate: CLLocationManagerDelegate {
         alertString = alertString + " and \(additionalReminders)"
         localNotification.alertBody = alertString + " other items."
         localNotification.alertTitle = locationEntered.name
+        
         localNotification.soundName = UILocalNotificationDefaultSoundName
         UIApplication.shared.scheduleLocalNotification(localNotification)
         print("Entered the location: \(locationEntered.name)")
@@ -125,6 +136,14 @@ extension AppDelegate: CLLocationManagerDelegate {
         controller.tableView.reloadData()
         
       //locationManager.startMonitoringForRegion(region)
+    }
+    
+    func locationManager(_ manager: CLLocationManager, didExitRegion region: CLRegion) {
+        let navigationController = window?.rootViewController as! UINavigationController
+        let controller = navigationController.topViewController as! AllListsViewController
+        controller.storeList = nil
+        controller.atStore = false
+        controller.tableView.reloadData()
     }
     
     func locationManager(_ manager: CLLocationManager, monitoringDidFailFor region: CLRegion?, withError error: Error) {
