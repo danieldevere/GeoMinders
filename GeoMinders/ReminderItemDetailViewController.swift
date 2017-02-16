@@ -50,7 +50,7 @@ class ReminderItemDetailViewController: UITableViewController {
                 }
             }
             
-            
+            textField.resignFirstResponder()
             delegate.reminderItemDetailViewController(self, didFinishEditingReminder: reminderItem!)
         }
     }
