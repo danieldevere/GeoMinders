@@ -14,29 +14,30 @@ class DataModel {
     var locations = [Location]()
     
     func reminderDocumentsDirectory() -> String {
-        let paths = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true) as! [String]
-     //   println("Directory: \(paths[0])")
+        let paths = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true) 
+        print("Directory: \(paths[0])")
         return paths[0]
     }
     
     func reminderDataFilePath() -> String {
-        return reminderDocumentsDirectory().stringByAppendingPathComponent("GeoMindersItems.plist")
+        return reminderDocumentsDirectory().appending("/GeoMindersItems.plist")
+      //  return reminderDocumentsDirectory().stringByAppendingPathComponent("GeoMindersItems.plist")
     }
     
     func saveReminderItems() {
         let data = NSMutableData()
-        let archiver = NSKeyedArchiver(forWritingWithMutableData: data)
-        archiver.encodeObject(lists, forKey: "Checklists")
+        let archiver = NSKeyedArchiver(forWritingWith: data)
+        archiver.encode(lists, forKey: "Checklists")
         archiver.finishEncoding()
-        data.writeToFile(reminderDataFilePath(), atomically: true)
+        data.write(toFile: reminderDataFilePath(), atomically: true)
     }
     
     func loadReminderItems() {
         let path = reminderDataFilePath()
-        if NSFileManager.defaultManager().fileExistsAtPath(path) {
-            if let data = NSData(contentsOfFile: path) {
-                let unarchiver = NSKeyedUnarchiver(forReadingWithData: data)
-                if let checklists = unarchiver.decodeObjectForKey("Checklists") as? [ReminderList] {
+        if FileManager.default.fileExists(atPath: path) {
+            if let data = try? Data(contentsOf: URL(fileURLWithPath: path)) {
+                let unarchiver = NSKeyedUnarchiver(forReadingWith: data)
+                if let checklists = unarchiver.decodeObject(forKey: "Checklists") as? [ReminderList] {
                     lists = checklists
                 }
                 unarchiver.finishDecoding()
@@ -46,21 +47,20 @@ class DataModel {
     
     func saveLocationItems() {
         let data = NSMutableData()
-        let archiver = NSKeyedArchiver(forWritingWithMutableData: data)
-        archiver.encodeObject(locations, forKey: "MyLocations")
+        let archiver = NSKeyedArchiver(forWritingWith: data)
+        archiver.encode(locations, forKey: "MyLocations")
         archiver.finishEncoding()
-        data.writeToFile(dataFilePath(), atomically: true)
+        data.write(toFile: dataFilePath(), atomically: true)
     }
     
     func loadLocationItems() {
         let path = dataFilePath()
-        if NSFileManager.defaultManager().fileExistsAtPath(path) {
-            if let data = NSData(contentsOfFile: path) {
-                let unarchiver = NSKeyedUnarchiver(forReadingWithData: data)
+        if FileManager.default.fileExists(atPath: path) {
+            if let data = try? Data(contentsOf: URL(fileURLWithPath: path)) {
+                let unarchiver = NSKeyedUnarchiver(forReadingWith: data)
                 locations = [Location]()
-                var location = Location()
                 
-                if let mylocations = unarchiver.decodeObjectForKey("MyLocations") as? [Location] {
+                if let mylocations = unarchiver.decodeObject(forKey: "MyLocations") as? [Location] {
                     locations = mylocations
                 }
                 unarchiver.finishDecoding()
@@ -69,13 +69,14 @@ class DataModel {
     }
     
     func documentsDirectory() -> String {
-        let paths = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true) as! [String]
-    //    println("Directory: \(paths[0])")
+        let paths = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true) 
+        print("Directory: \(paths[0])")
         return paths[0]
     }
     
     func dataFilePath() -> String {
-        return documentsDirectory().stringByAppendingPathComponent("GeoMindersLocations.plist")
+        return documentsDirectory().appending("/GeoMindersLocations.plist")
+ //       return documentsDirectory().stringByAppendingPathComponent("GeoMindersLocations.plist")
     }
     
     init() {

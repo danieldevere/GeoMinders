@@ -10,8 +10,8 @@ import UIKit
 import CoreLocation
 
 protocol LocationPickerViewControllerDelegate: class {
-    func locationPickerViewControllerDidCancel(controller: LocationPickerViewController)
-    func locationPickerViewController(controller: LocationPickerViewController, didPickLocation location: Location)
+    func locationPickerViewControllerDidCancel(_ controller: LocationPickerViewController)
+    func locationPickerViewController(_ controller: LocationPickerViewController, didPickLocation location: Location)
 }
 
 class LocationPickerViewController: UITableViewController {
@@ -41,24 +41,24 @@ class LocationPickerViewController: UITableViewController {
     
     
     @IBAction func cancel() {
-        dismissViewControllerAnimated(true, completion: nil)
+        dismiss(animated: true, completion: nil)
         delegate?.locationPickerViewControllerDidCancel(self)
         
     }
     
     func edit() {
         editButton.title = "Done"
-        tableView.editing = true
-        editButton.style = UIBarButtonItemStyle.Done
+        tableView.isEditing = true
+        editButton.style = UIBarButtonItemStyle.done
         
-        editButton.action = Selector("done")
+        editButton.action = #selector(LocationPickerViewController.done)
     }
     
     func done() {
-        tableView.editing = false
-        editButton.style = .Plain
+        tableView.isEditing = false
+        editButton.style = .plain
         editButton.title = "Edit"
-        editButton.action = Selector("edit")
+        editButton.action = #selector(LocationPickerViewController.edit)
     }
     
         
@@ -68,13 +68,13 @@ class LocationPickerViewController: UITableViewController {
         super.viewDidLoad()
         editButton.target = self
         editButton.title = "Edit"
-        editButton.action = Selector("edit")
+        editButton.action = #selector(LocationPickerViewController.edit)
         self.navigationItem.rightBarButtonItem = editButton
         if let thisLocation = getLocation() {
             location = thisLocation
         }
         if dataModel == nil {
-            println("DataModel not passed to locationPicker")
+            print("DataModel not passed to locationPicker")
         }
   /*      let location0 = Location()
         location0.name = "Kroger"
@@ -86,7 +86,7 @@ class LocationPickerViewController: UITableViewController {
         */
     }
     
-    override func viewWillAppear(animated: Bool) {
+    override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         tableView.reloadData()
     //    println("LocationPicker Locations: \(dataModel.locations)")
@@ -98,10 +98,10 @@ class LocationPickerViewController: UITableViewController {
         // Dispose of any resources that can be recreated.
     }
     
-    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-        if let indexPath = tableView.indexPathForCell(sender as! UITableViewCell) {
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if let indexPath = tableView.indexPath(for: sender as! UITableViewCell) {
             if indexPath.row == dataModel.locations.count {
-                let navigationController = segue.destinationViewController as! UINavigationController
+                let navigationController = segue.destination as! UINavigationController
                 let controller = navigationController.topViewController as! MapViewController
                 controller.locations = dataModel.locations
                 controller.delegate = self
@@ -111,7 +111,7 @@ class LocationPickerViewController: UITableViewController {
 
     // MARK: - Table view data source
 
-    override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // #warning Incomplete method implementation.
         // Return the number of rows in the section.
       //  println("Number of locations in data model: \(dataModel.locations.count)")
@@ -119,50 +119,49 @@ class LocationPickerViewController: UITableViewController {
     }
 
     
-    override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         if indexPath.row < dataModel.locations.count {
-            let cell = tableView.dequeueReusableCellWithIdentifier("LocationCell", forIndexPath: indexPath) as! UITableViewCell
+            let cell = tableView.dequeueReusableCell(withIdentifier: "LocationCell", for: indexPath) 
             cell.textLabel?.text = dataModel.locations[indexPath.row].name
-            cell.accessoryType = .None
+            cell.accessoryType = .none
             if let thisLocation = location {
                 if thisLocation.myID == dataModel.locations[indexPath.row].myID {
-                    cell.accessoryType = .Checkmark
+                    cell.accessoryType = .checkmark
                 }
             }
             return cell
         } else {
-            let cell = tableView.dequeueReusableCellWithIdentifier("AddLocationButtonCell", forIndexPath: indexPath) as! UITableViewCell
+            let cell = tableView.dequeueReusableCell(withIdentifier: "AddLocationButtonCell", for: indexPath) 
             return cell
         }
     }
     
-    override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         if indexPath.row < dataModel.locations.count && delegate != nil {
             location = dataModel.locations[indexPath.row]
             delegate?.locationPickerViewController(self, didPickLocation: location!)
-            tableView.deselectRowAtIndexPath(indexPath, animated: true)
+            tableView.deselectRow(at: indexPath, animated: true)
         } else {
-            tableView.deselectRowAtIndexPath(indexPath, animated: true)
+            tableView.deselectRow(at: indexPath, animated: true)
         }
         
     }
  
-    override func tableView(tableView: UITableView, editingStyleForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCellEditingStyle {
+    override func tableView(_ tableView: UITableView, editingStyleForRowAt indexPath: IndexPath) -> UITableViewCellEditingStyle {
         if indexPath.row < dataModel.locations.count {
-            if tableView.editing {
-                return UITableViewCellEditingStyle.Delete
+            if tableView.isEditing {
+                return UITableViewCellEditingStyle.delete
             }
         }
-            return UITableViewCellEditingStyle.None
+            return UITableViewCellEditingStyle.none
         
     }
     
-    override func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
-        let alertView = UIAlertController(title: "Are you sure?", message: "Deleting a Location also deletes all events at that location", preferredStyle: UIAlertControllerStyle.Alert)
-        let alertAction = UIAlertAction(title: "Delete", style: UIAlertActionStyle.Destructive, handler: {
+    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
+        let alertView = UIAlertController(title: "Are you sure?", message: "Deleting a Location also deletes all events at that location", preferredStyle: UIAlertControllerStyle.alert)
+        let alertAction = UIAlertAction(title: "Delete", style: UIAlertActionStyle.destructive, handler: {
             _ in
             for list in self.dataModel.lists {
-                let checklistCount = list.checklist.count - 1
                                     
                   /*  if list.checklist[i].locationID == self.dataModel.locations[indexPath.row].myID {
                         list.checklist.removeAtIndex(i)
@@ -174,16 +173,16 @@ class LocationPickerViewController: UITableViewController {
                 
             }
             self.dataModel.saveReminderItems()
-            self.dataModel.locations.removeAtIndex(indexPath.row)
+            self.dataModel.locations.remove(at: indexPath.row)
             self.dataModel.saveLocationItems()
             let indexPaths = [indexPath]
-            self.tableView.deleteRowsAtIndexPaths(indexPaths, withRowAnimation: .Automatic)
+            self.tableView.deleteRows(at: indexPaths, with: .automatic)
         })
-        let cancelAction = UIAlertAction(title: "Cancel", style: .Default, handler: nil)
+        let cancelAction = UIAlertAction(title: "Cancel", style: .default, handler: nil)
         
         alertView.addAction(cancelAction)
         alertView.addAction(alertAction)
-        presentViewController(alertView, animated: true, completion: nil)
+        present(alertView, animated: true, completion: nil)
         
     }
         
@@ -194,10 +193,11 @@ class LocationPickerViewController: UITableViewController {
 }
 
 extension LocationPickerViewController: MapViewControllerDelegate {
-    func mapViewControllerDidExit(controller: MapViewController) {
-        dismissViewControllerAnimated(true, completion: nil)
+    func mapViewControllerDidExit(_ controller: MapViewController) {
+        dismiss(animated: true, completion: nil)
         dataModel.locations = controller.locations
         dataModel.saveLocationItems()
+        print("savedLocations")
     }
 }
 

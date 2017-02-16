@@ -9,8 +9,8 @@
 import UIKit
 
 protocol TagLocationViewControllerDelegate: class {
-    func tagLocationViewControllerDidGoBack(controller: TagLocationViewController)
-    func tagLocationViewController(controller: TagLocationViewController, didSaveTag tag: Location)
+    func tagLocationViewControllerDidGoBack(_ controller: TagLocationViewController)
+    func tagLocationViewController(_ controller: TagLocationViewController, didSaveTag tag: Location)
 }
 
 class TagLocationViewController: UITableViewController {
@@ -26,28 +26,28 @@ class TagLocationViewController: UITableViewController {
     @IBOutlet weak var addressLabel: UILabel!
     
     
-    @IBAction func goBack(sender: AnyObject) {
+    @IBAction func goBack(_ sender: AnyObject) {
         delegate?.tagLocationViewControllerDidGoBack(self)
     }
     
-    @IBAction func saveTag(sender: AnyObject) {
+    @IBAction func saveTag(_ sender: AnyObject) {
         if let location = taggedLocation {
-            println("Location: \(location.name) id: \(location.myID)")
-            if !textField.text.isEmpty {
-                location.name = textField.text
+            print("Location: \(location.name) id: \(location.myID)")
+            if !(textField.text?.isEmpty)! {
+                location.name = textField.text!
             }
-            if NSUserDefaults.standardUserDefaults().objectForKey("LocationIndex") != nil {
-                let locationIndex = NSUserDefaults.standardUserDefaults().integerForKey("LocationIndex")
+            if UserDefaults.standard.object(forKey: "LocationIndex") != nil {
+                let locationIndex = UserDefaults.standard.integer(forKey: "LocationIndex")
                 location.myID = locationIndex + 1
-                NSUserDefaults.standardUserDefaults().setInteger(locationIndex + 1, forKey: "LocationIndex")
+                UserDefaults.standard.set(locationIndex + 1, forKey: "LocationIndex")
                 
             } else {
                 location.myID = 0
-                NSUserDefaults.standardUserDefaults().setInteger(0, forKey: "LocationIndex")
+                UserDefaults.standard.set(0, forKey: "LocationIndex")
             }
             delegate?.tagLocationViewController(self, didSaveTag: location)
         } else {
-            println("Error: No location passed")
+            print("Error: No location passed")
         }
     }
     
@@ -71,7 +71,7 @@ class TagLocationViewController: UITableViewController {
         // Dispose of any resources that can be recreated.
     }
     
-    override func tableView(tableView: UITableView, willSelectRowAtIndexPath indexPath: NSIndexPath) -> NSIndexPath? {
+    override func tableView(_ tableView: UITableView, willSelectRowAt indexPath: IndexPath) -> IndexPath? {
         return nil
     }
     

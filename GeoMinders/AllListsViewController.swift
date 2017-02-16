@@ -30,11 +30,11 @@ class AllListsViewController: UITableViewController {
         addingList = true
         
         locationButton.target = self
-        locationButton.action = Selector("cancelNewList")
-        addButton.enabled = false
-        let indexPath = NSIndexPath(forRow: dataModel.lists.count, inSection: 0)
+        locationButton.action = #selector(AllListsViewController.cancelNewList)
+        addButton.isEnabled = false
+        let indexPath = IndexPath(row: dataModel.lists.count, section: 0)
         let indexPaths = [indexPath]
-        tableView.insertRowsAtIndexPaths(indexPaths, withRowAnimation: .Automatic)
+        tableView.insertRows(at: indexPaths, with: .automatic)
         locationButton.title = "Cancel"
         let textField = tableView.viewWithTag(3000) as! UITextField
         textField.becomeFirstResponder()
@@ -42,7 +42,7 @@ class AllListsViewController: UITableViewController {
     
     @IBAction func done() {
         let textField = tableView.viewWithTag(3000) as! UITextField
-        let newList = ReminderList(name: textField.text)
+        let newList = ReminderList(name: textField.text!)
         dataModel.lists.append(newList)
         textField.text = ""
         dataModel.saveReminderItems()
@@ -53,16 +53,16 @@ class AllListsViewController: UITableViewController {
         addingList = false
         locationButton.title = "Locations"
         locationButton.target = self
-        locationButton.action = Selector("locationButtonAction")
-        addButton.enabled = true
+        locationButton.action = #selector(AllListsViewController.locationButtonAction)
+        addButton.isEnabled = true
         tableView.reloadData()
     }
     
     func locationButtonAction() {
-        performSegueWithIdentifier("ShowLocations", sender: nil)
+        performSegue(withIdentifier: "ShowLocations", sender: nil)
     }
     
-    func remindersForLocation(location: Location) -> [ReminderItem] {
+    func remindersForLocation(_ location: Location) -> [ReminderItem] {
         var reminders = [ReminderItem]()
         for list in dataModel.lists {
             for reminder in list.checklist {
@@ -121,26 +121,26 @@ class AllListsViewController: UITableViewController {
         // Dispose of any resources that can be recreated.
     }
     
-    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "ShowChecklist" {
-            let navigationController = segue.destinationViewController as! UINavigationController
+            let navigationController = segue.destination as! UINavigationController
             let controller = navigationController.topViewController as! RemindersViewController
             let cell = sender as! UITableViewCell
-            let indexPath = tableView.indexPathForCell(cell)
+            let indexPath = tableView.indexPath(for: cell)
             controller.reminderList = dataModel.lists[indexPath!.row]
             controller.delegate = self
             controller.dataModel = dataModel
             controller.title = dataModel.lists[indexPath!.row].name
           //  println("Sender: \(sender)")
         } else if segue.identifier == "ShowLocations" {
-            let navigationController = segue.destinationViewController as! UINavigationController
+            let navigationController = segue.destination as! UINavigationController
             let controller = navigationController.topViewController as! LocationPickerViewController
             controller.dataModel = dataModel
         } else if segue.identifier == "ShowStoreList" {
-            let navigationController = segue.destinationViewController as! UINavigationController
+            let navigationController = segue.destination as! UINavigationController
             let controller = navigationController.topViewController as! RemindersViewController
             if let list = storeList {
-                println("sent storeList to reminder screen")
+                print("sent storeList to reminder screen")
                 controller.reminderList = list
                 controller.title = list.name
             }
@@ -151,53 +151,53 @@ class AllListsViewController: UITableViewController {
     }
 
     // MARK: - Table view data source
-    override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // #warning Incomplete method implementation.
         // Return the number of rows in the section.
         return numberOfRows()
     }
 
 
-    override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         if indexPath.row < dataModel.lists.count {
-            let cell = tableView.dequeueReusableCellWithIdentifier("ListCell", forIndexPath: indexPath) as! UITableViewCell
+            let cell = tableView.dequeueReusableCell(withIdentifier: "ListCell", for: indexPath) 
             cell.textLabel?.text = dataModel.lists[indexPath.row].name
             return cell
         } else if (atStore) && (indexPath.row == dataModel.lists.count) {
-            let cell = tableView.dequeueReusableCellWithIdentifier("ItemsToDoAtLocationCell", forIndexPath: indexPath) as! UITableViewCell
+            let cell = tableView.dequeueReusableCell(withIdentifier: "ItemsToDoAtLocationCell", for: indexPath) 
             cell.textLabel?.text = "\(storeList!.name)"
             cell.detailTextLabel?.text = "\(storeList!.checklist.count) items"
             return cell
         } else if (addingList) && (indexPath.row >= dataModel.lists.count) {
-            let cell = tableView.dequeueReusableCellWithIdentifier("NewListCell", forIndexPath: indexPath) as! UITableViewCell
+            let cell = tableView.dequeueReusableCell(withIdentifier: "NewListCell", for: indexPath) 
             return cell
         } else {
-            return super.tableView(tableView, cellForRowAtIndexPath: indexPath)
+            return super.tableView(tableView, cellForRowAt: indexPath)
         }
     }
     
-    override func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
-        let alert = UIAlertController(title: "Deleting List", message: "This will delete all the items in the list", preferredStyle: UIAlertControllerStyle.Alert)
-        let deleteAction = UIAlertAction(title: "Delete", style: UIAlertActionStyle.Destructive, handler: {
+    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
+        let alert = UIAlertController(title: "Deleting List", message: "This will delete all the items in the list", preferredStyle: UIAlertControllerStyle.alert)
+        let deleteAction = UIAlertAction(title: "Delete", style: UIAlertActionStyle.destructive, handler: {
             _ in
             self.listDeleted(indexPath.row)
             
-            self.dataModel.lists.removeAtIndex(indexPath.row)
+            self.dataModel.lists.remove(at: indexPath.row)
             let indexPaths = [indexPath]
-            tableView.deleteRowsAtIndexPaths(indexPaths, withRowAnimation: .Automatic)
+            tableView.deleteRows(at: indexPaths, with: .automatic)
             self.dataModel.saveReminderItems()
         })
         alert.addAction(deleteAction)
-        let cancelAction = UIAlertAction(title: "Cancel", style: UIAlertActionStyle.Cancel, handler: nil)
+        let cancelAction = UIAlertAction(title: "Cancel", style: UIAlertActionStyle.cancel, handler: nil)
         alert.addAction(cancelAction)
-        presentViewController(alert, animated: true, completion: nil)
+        present(alert, animated: true, completion: nil)
     }
     
-    override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        tableView.deselectRowAtIndexPath(indexPath, animated: true)
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: true)
     }
     
-    func listDeleted(listIndex: Int) {
+    func listDeleted(_ listIndex: Int) {
         for item in dataModel.lists[listIndex].checklist {
             for location in dataModel.locations {
                 if location.myID == item.locationID {
@@ -218,11 +218,11 @@ class AllListsViewController: UITableViewController {
         }
     }
     
-    func stopMonitoring(location: Location) {
+    func stopMonitoring(_ location: Location) {
         for region in locationManager.monitoredRegions {
             if let region = region as? CLCircularRegion {
-                if region.identifier.toInt() == location.myID {
-                    locationManager.stopMonitoringForRegion(region)
+                if Int(region.identifier) == location.myID {
+                    locationManager.stopMonitoring(for: region)
                 }
             }
 
@@ -294,7 +294,7 @@ class AllListsViewController: UITableViewController {
 }
 
 extension AllListsViewController: RemindersViewControllerDelegate {
-    func remindersViewControllerWantsToSave(controller: RemindersViewController) {
+    func remindersViewControllerWantsToSave(_ controller: RemindersViewController) {
         dataModel.saveReminderItems()
     }
 }

@@ -19,14 +19,14 @@ class ReminderList: NSObject, NSCoding {
     }
     
     required init(coder aDecoder: NSCoder) {
-        name = aDecoder.decodeObjectForKey("Name") as! String
-        checklist = aDecoder.decodeObjectForKey("Checklist") as! [ReminderItem]
+        name = aDecoder.decodeObject(forKey: "Name") as! String
+        checklist = aDecoder.decodeObject(forKey: "Checklist") as! [ReminderItem]
         super.init()
     }
     
-    func encodeWithCoder(aCoder: NSCoder) {
-        aCoder.encodeObject(name, forKey: "Name")
-        aCoder.encodeObject(checklist, forKey: "Checklist")
+    func encode(with aCoder: NSCoder) {
+        aCoder.encode(name, forKey: "Name")
+        aCoder.encode(checklist, forKey: "Checklist")
     }
     
     override init() {

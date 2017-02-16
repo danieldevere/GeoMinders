@@ -9,8 +9,8 @@
 import UIKit
 
 protocol NewReminderCellDelegate: class {
-    func newReminderCell(controller: NewReminderCell, didPressDoneAddingReminder reminder: ReminderItem)
-    func newReminderCellDidCancelWithTap(controller: NewReminderCell)
+    func newReminderCell(_ controller: NewReminderCell, didPressDoneAddingReminder reminder: ReminderItem)
+    func newReminderCellDidCancelWithTap(_ controller: NewReminderCell)
 }
 
 class NewReminderCell: UITableViewCell {
@@ -23,15 +23,15 @@ class NewReminderCell: UITableViewCell {
      //   println("Text: \(textField.text)")
         textField.resignFirstResponder()
         let item = ReminderItem()
-        item.reminderText = textField.text
+        item.reminderText = textField.text!
         item.checked = false
-        if NSUserDefaults.standardUserDefaults().objectForKey("ReminderIndex") != nil {
-            let reminderIndex = NSUserDefaults.standardUserDefaults().integerForKey("ReminderIndex")
+        if UserDefaults.standard.object(forKey: "ReminderIndex") != nil {
+            let reminderIndex = UserDefaults.standard.integer(forKey: "ReminderIndex")
             item.myID = reminderIndex + 1
-            NSUserDefaults.standardUserDefaults().setInteger(reminderIndex + 1, forKey: "ReminderIndex")
+            UserDefaults.standard.set(reminderIndex + 1, forKey: "ReminderIndex")
         } else {
             item.myID = 0
-            NSUserDefaults.standardUserDefaults().setInteger(0, forKey: "ReminderIndex")
+            UserDefaults.standard.set(0, forKey: "ReminderIndex")
         }
         delegate?.newReminderCell(self, didPressDoneAddingReminder: item)
     }
@@ -42,7 +42,7 @@ class NewReminderCell: UITableViewCell {
         // Initialization code
     }
 
-    override func setSelected(selected: Bool, animated: Bool) {
+    override func setSelected(_ selected: Bool, animated: Bool) {
         super.setSelected(selected, animated: animated)
 
         // Configure the view for the selected state

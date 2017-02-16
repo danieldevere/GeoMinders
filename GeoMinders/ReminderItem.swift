@@ -16,22 +16,22 @@ class ReminderItem: NSObject, NSCoding {
     var locationID: Int = 0
     var locationAddress = ""
     
-    func encodeWithCoder(aCoder: NSCoder) {
-        aCoder.encodeObject(reminderText, forKey: "ReminderText")
-        aCoder.encodeObject(detailText, forKey: "DetailText")
-        aCoder.encodeBool(checked, forKey: "Checked")
-        aCoder.encodeInteger(locationID, forKey: "LocationID")
-        aCoder.encodeInteger(myID, forKey: "MyID")
-        aCoder.encodeObject(locationAddress, forKey: "LocationAddress")
+    func encode(with aCoder: NSCoder) {
+        aCoder.encode(reminderText, forKey: "ReminderText")
+        aCoder.encode(detailText, forKey: "DetailText")
+        aCoder.encode(checked, forKey: "Checked")
+        aCoder.encode(locationID, forKey: "LocationID")
+        aCoder.encode(myID, forKey: "MyID")
+        aCoder.encode(locationAddress, forKey: "LocationAddress")
     }
     
     required init(coder aDecoder: NSCoder) {
-        reminderText = aDecoder.decodeObjectForKey("ReminderText") as! String
-        detailText = aDecoder.decodeObjectForKey("DetailText") as! String
-        checked = aDecoder.decodeBoolForKey("Checked")
-        myID = aDecoder.decodeIntegerForKey("MyID")
-        locationID = aDecoder.decodeIntegerForKey("LocationID")
-        locationAddress = aDecoder.decodeObjectForKey("LocationAddress") as! String
+        reminderText = aDecoder.decodeObject(forKey: "ReminderText") as! String
+        detailText = aDecoder.decodeObject(forKey: "DetailText") as! String
+        checked = aDecoder.decodeBool(forKey: "Checked")
+        myID = aDecoder.decodeInteger(forKey: "MyID")
+        locationID = aDecoder.decodeInteger(forKey: "LocationID")
+        locationAddress = aDecoder.decodeObject(forKey: "LocationAddress") as! String
         super.init()
     }
     

@@ -9,8 +9,8 @@
 import UIKit
 
 protocol ReminderItemDetailViewControllerDelegate: class {
-    func reminderItemDetailViewController(controller: ReminderItemDetailViewController, didFinishEditingReminder reminder: ReminderItem)
-    func reminderItemDetailViewControllerDidCancel(controller: ReminderItemDetailViewController)
+    func reminderItemDetailViewController(_ controller: ReminderItemDetailViewController, didFinishEditingReminder reminder: ReminderItem)
+    func reminderItemDetailViewControllerDidCancel(_ controller: ReminderItemDetailViewController)
 }
 
 class ReminderItemDetailViewController: UITableViewController {
@@ -33,7 +33,7 @@ class ReminderItemDetailViewController: UITableViewController {
     
     @IBAction func done() {
         if let delegate = delegate {
-            reminderItem?.reminderText = textField.text
+            reminderItem?.reminderText = textField.text!
             if let newLocation = tempLocation {
                 if reminderItem?.locationID != newLocation.myID {
                     for location in dataModel.locations {
@@ -45,7 +45,7 @@ class ReminderItemDetailViewController: UITableViewController {
                     reminderItem?.locationID = newLocation.myID
                     newLocation.remindersCount = newLocation.remindersCount + 1
                     reminderItem?.detailText = newLocation.name
-                    reminderItem?.locationAddress = newLocation.subtitle
+                    reminderItem?.locationAddress = newLocation.subtitle!
 
                 }
             }
@@ -71,7 +71,7 @@ class ReminderItemDetailViewController: UITableViewController {
         
     }
     
-    override func viewWillAppear(animated: Bool) {
+    override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
     }
     
@@ -83,9 +83,9 @@ class ReminderItemDetailViewController: UITableViewController {
         // Dispose of any resources that can be recreated.
     }
     
-    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "PickLocation" {
-            let navigationController = segue.destinationViewController as! UINavigationController
+            let navigationController = segue.destination as! UINavigationController
             let controller = navigationController.topViewController as! LocationPickerViewController
             controller.delegate = self
             controller.dataModel = dataModel
@@ -99,14 +99,14 @@ class ReminderItemDetailViewController: UITableViewController {
     }
 }
 extension ReminderItemDetailViewController: LocationPickerViewControllerDelegate {
-    func locationPickerViewController(controller: LocationPickerViewController, didPickLocation location: Location) {
+    func locationPickerViewController(_ controller: LocationPickerViewController, didPickLocation location: Location) {
         tempLocation = location
         locationLabel.text = tempLocation?.name
         locationDetailLabel.text = tempLocation?.subtitle
-        dismissViewControllerAnimated(true, completion: nil)
+        dismiss(animated: true, completion: nil)
     }
     
-    func locationPickerViewControllerDidCancel(controller: LocationPickerViewController) {
+    func locationPickerViewControllerDidCancel(_ controller: LocationPickerViewController) {
      //   println("before dismiss")
   //      dismissViewControllerAnimated(true, completion: nil)
         controller.delegate = nil

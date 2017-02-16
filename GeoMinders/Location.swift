@@ -23,7 +23,7 @@ class Location: NSObject, NSCoding, MKAnnotation {
         return CLLocationCoordinate2DMake(latitude, longitude)
     }
     
-    var title: String! {
+    var title: String? {
         if name.isEmpty {
             return placemark?.name
         } else {
@@ -31,19 +31,19 @@ class Location: NSObject, NSCoding, MKAnnotation {
         }
     }
     
-    var subtitle: String! {
+    var subtitle: String? {
         return stringFromPlacemark(placemark!)
     }
     
     required init(coder aDecoder: NSCoder) {
-        name = aDecoder.decodeObjectForKey("Name") as! String
-        placemark = aDecoder.decodeObjectForKey("Placemark") as? MKPlacemark
-        longitude = aDecoder.decodeDoubleForKey("Longitude")
-        latitude = aDecoder.decodeDoubleForKey("Latitude")
-        radius = aDecoder.decodeDoubleForKey("Radius")
-        reminderIDs = aDecoder.decodeObjectForKey("ReminderIDs") as! [Int]
-        myID = aDecoder.decodeIntegerForKey("MyID")
-        remindersCount = aDecoder.decodeIntegerForKey("RemindersCount")
+        name = aDecoder.decodeObject(forKey: "Name") as! String
+        placemark = aDecoder.decodeObject(forKey: "Placemark") as? MKPlacemark
+        longitude = aDecoder.decodeDouble(forKey: "Longitude")
+        latitude = aDecoder.decodeDouble(forKey: "Latitude")
+        radius = aDecoder.decodeDouble(forKey: "Radius")
+        reminderIDs = aDecoder.decodeObject(forKey: "ReminderIDs") as! [Int]
+        myID = aDecoder.decodeInteger(forKey: "MyID")
+        remindersCount = aDecoder.decodeInteger(forKey: "RemindersCount")
         super.init()
     }
     
@@ -51,24 +51,40 @@ class Location: NSObject, NSCoding, MKAnnotation {
         super.init()
     }
     
-    func stringFromPlacemark(placemark: MKPlacemark) -> String {
-        return "\(placemark.subThoroughfare) \(placemark.thoroughfare)\n" + "\(placemark.locality), \(placemark.administrativeArea) \(placemark.postalCode)"
+    func stringFromPlacemark(_ placemark: MKPlacemark) -> String {
+        var string = ""
+        if let subThoroughFare = placemark.subThoroughfare {
+            string.append("\(subThoroughFare) ")
+        }
+        if let thoroughfare = placemark.thoroughfare {
+            string.append("\(thoroughfare)\n")
+        }
+        if let locality = placemark.locality {
+            string.append("\(locality), ")
+        }
+        if let administrativeArea = placemark.administrativeArea {
+            string.append("\(administrativeArea) ")
+        }
+        if let postalCode = placemark.postalCode {
+            string.append(postalCode)
+        }
+        return string
     }
     
-    func encodeWithCoder(aCoder: NSCoder) {
-        aCoder.encodeObject(name, forKey: "Name")
+    func encode(with aCoder: NSCoder) {
+        aCoder.encode(name, forKey: "Name")
      //   println("Name: \(name)")
-        aCoder.encodeObject(placemark, forKey: "Placemark")
+        aCoder.encode(placemark, forKey: "Placemark")
     //    println("Placemark: \(placemark)")
-        aCoder.encodeDouble(longitude, forKey: "Longitude")
+        aCoder.encode(longitude, forKey: "Longitude")
     //    println("Longitude: \(longitude)")
-        aCoder.encodeDouble(latitude, forKey: "Latitude")
+        aCoder.encode(latitude, forKey: "Latitude")
     //    println("Latitude: \(latitude)")
-        aCoder.encodeDouble(radius, forKey: "Radius")
+        aCoder.encode(radius, forKey: "Radius")
    //     println("Radius: \(radius)")
-        aCoder.encodeInteger(myID, forKey: "MyID")
-        aCoder.encodeObject(reminderIDs, forKey: "ReminderIDs")
-        aCoder.encodeInteger(remindersCount, forKey: "RemindersCount")
+        aCoder.encode(myID, forKey: "MyID")
+        aCoder.encode(reminderIDs, forKey: "ReminderIDs")
+        aCoder.encode(remindersCount, forKey: "RemindersCount")
     }
     
     convenience init(name: String, placemark: MKPlacemark?, longitude: Double, latitude: Double) {
