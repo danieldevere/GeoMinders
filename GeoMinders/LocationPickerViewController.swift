@@ -23,6 +23,8 @@ class LocationPickerViewController: UITableViewController {
     
     var location: Location?
     
+    var editingLocations: Bool?
+    
     func getLocation() -> Location? {
         if let thisID = locationID {
             for location in dataModel.locations {
@@ -66,15 +68,26 @@ class LocationPickerViewController: UITableViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        editButton.target = self
-        editButton.title = "Edit"
-        editButton.action = #selector(LocationPickerViewController.edit)
-        self.navigationItem.rightBarButtonItem = editButton
+                self.navigationItem.rightBarButtonItem = editButton
         if let thisLocation = getLocation() {
             location = thisLocation
         }
         if dataModel == nil {
             print("DataModel not passed to locationPicker")
+        }
+        
+        if let editing = editingLocations {
+            if editing {
+                editButton.target = self
+                editButton.isEnabled = true
+                editButton.title = "Edit"
+                editButton.action = #selector(LocationPickerViewController.edit)
+
+            } else {
+                editButton.title = ""
+                editButton.isEnabled = false
+
+            }
         }
   /*      let location0 = Location()
         location0.name = "Kroger"

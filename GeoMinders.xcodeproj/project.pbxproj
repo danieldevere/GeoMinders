@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		56073E7C1E5BD24E003FA06E /* SettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56073E7B1E5BD24E003FA06E /* SettingsViewController.swift */; };
+		56073E7E1E5BD5EE003FA06E /* Settings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56073E7D1E5BD5EE003FA06E /* Settings.swift */; };
 		562E411A1E4AC90D0096B0A3 /* LocationPickerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 562E41191E4AC90D0096B0A3 /* LocationPickerViewController.swift */; };
 		562E411C1E4AC9700096B0A3 /* Location.swift in Sources */ = {isa = PBXBuildFile; fileRef = 562E411B1E4AC9700096B0A3 /* Location.swift */; };
 		562E41201E4B8FFB0096B0A3 /* MapKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 562E411F1E4B8FFB0096B0A3 /* MapKit.framework */; };
@@ -40,6 +42,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		56073E7B1E5BD24E003FA06E /* SettingsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SettingsViewController.swift; sourceTree = "<group>"; };
+		56073E7D1E5BD5EE003FA06E /* Settings.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Settings.swift; sourceTree = "<group>"; };
 		562E41191E4AC90D0096B0A3 /* LocationPickerViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LocationPickerViewController.swift; sourceTree = "<group>"; };
 		562E411B1E4AC9700096B0A3 /* Location.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Location.swift; sourceTree = "<group>"; };
 		562E411F1E4B8FFB0096B0A3 /* MapKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MapKit.framework; path = System/Library/Frameworks/MapKit.framework; sourceTree = SDKROOT; };
@@ -126,6 +130,8 @@
 				56A96A311E4F9EA40022C96F /* AllListsViewController.swift */,
 				56A96A331E4FA18A0022C96F /* ReminderList.swift */,
 				5658EFCD1E52CE310076E558 /* DataModel.swift */,
+				56073E7B1E5BD24E003FA06E /* SettingsViewController.swift */,
+				56073E7D1E5BD5EE003FA06E /* Settings.swift */,
 			);
 			path = GeoMinders;
 			sourceTree = "<group>";
@@ -269,6 +275,8 @@
 				5658EFCE1E52CE310076E558 /* DataModel.swift in Sources */,
 				56A96A341E4FA18A0022C96F /* ReminderList.swift in Sources */,
 				562E411C1E4AC9700096B0A3 /* Location.swift in Sources */,
+				56073E7E1E5BD5EE003FA06E /* Settings.swift in Sources */,
+				56073E7C1E5BD24E003FA06E /* SettingsViewController.swift in Sources */,
 				56573DD21E47D2FC0053822B /* ReminderItem.swift in Sources */,
 				56CB4A1F1E49815D0078E69F /* ReminderItemDetailViewController.swift in Sources */,
 				56573DAE1E47C32B0053822B /* AppDelegate.swift in Sources */,

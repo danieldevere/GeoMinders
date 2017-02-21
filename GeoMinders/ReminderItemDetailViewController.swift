@@ -89,6 +89,7 @@ class ReminderItemDetailViewController: UITableViewController {
             let controller = navigationController.topViewController as! LocationPickerViewController
             controller.delegate = self
             controller.dataModel = dataModel
+            controller.editingLocations = false
             if let location = tempLocation {
                 controller.locationID = location.myID
             } else {

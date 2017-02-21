@@ -21,7 +21,7 @@ class AllListsViewController: UITableViewController {
     
     let locationManager = CLLocationManager()
     
-    @IBOutlet weak var locationButton: UIBarButtonItem!
+    @IBOutlet weak var settingsButton: UIBarButtonItem!
     
     @IBOutlet weak var addButton: UIBarButtonItem!
     
@@ -29,13 +29,13 @@ class AllListsViewController: UITableViewController {
     @IBAction func addList() {
         addingList = true
         
-        locationButton.target = self
-        locationButton.action = #selector(AllListsViewController.cancelNewList)
+        settingsButton.target = self
+        settingsButton.action = #selector(AllListsViewController.cancelNewList)
         addButton.isEnabled = false
         let indexPath = IndexPath(row: dataModel.lists.count, section: 0)
         let indexPaths = [indexPath]
         tableView.insertRows(at: indexPaths, with: .automatic)
-        locationButton.title = "Cancel"
+        settingsButton.title = "Cancel"
         let textField = tableView.viewWithTag(3000) as! UITextField
         textField.becomeFirstResponder()
     }
@@ -50,16 +50,19 @@ class AllListsViewController: UITableViewController {
     }
     
     func cancelNewList() {
+        let textField = tableView.viewWithTag(3000) as! UITextField
+        textField.text = ""
+        textField.resignFirstResponder()
         addingList = false
-        locationButton.title = "Locations"
-        locationButton.target = self
-        locationButton.action = #selector(AllListsViewController.locationButtonAction)
+        settingsButton.target = self
+        settingsButton.action = #selector(AllListsViewController.settingsButtonAction)
+       settingsButton.title = "Settings"
         addButton.isEnabled = true
         tableView.reloadData()
     }
     
-    func locationButtonAction() {
-        performSegue(withIdentifier: "ShowLocations", sender: nil)
+    func settingsButtonAction() {
+        performSegue(withIdentifier: "ShowSettings", sender: nil)
     }
     
     func remindersForLocation(_ location: Location) -> [ReminderItem] {
@@ -106,10 +109,11 @@ class AllListsViewController: UITableViewController {
 */
     
     
-    
     override func viewDidLoad() {
         super.viewDidLoad()
-                // Uncomment the following line to preserve selection between presentations
+        settingsButton.target = self
+        settingsButton.action = #selector(AllListsViewController.settingsButtonAction)
+        // Uncomment the following line to preserve selection between presentations
         // self.clearsSelectionOnViewWillAppear = false
 
         // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
@@ -130,11 +134,14 @@ class AllListsViewController: UITableViewController {
             controller.reminderList = dataModel.lists[indexPath!.row]
             controller.delegate = self
             controller.dataModel = dataModel
-            controller.title = dataModel.lists[indexPath!.row].name
+            controller.title = "\(dataModel.lists[indexPath!.row].name) List"
+            if addingList {
+                cancelNewList()
+            }
           //  println("Sender: \(sender)")
-        } else if segue.identifier == "ShowLocations" {
+        } else if segue.identifier == "ShowSettings" {
             let navigationController = segue.destination as! UINavigationController
-            let controller = navigationController.topViewController as! LocationPickerViewController
+            let controller = navigationController.topViewController as! SettingsViewController
             controller.dataModel = dataModel
         } else if segue.identifier == "ShowStoreList" {
             let navigationController = segue.destination as! UINavigationController
@@ -195,6 +202,13 @@ class AllListsViewController: UITableViewController {
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
+        if addingList {
+            if atStore && indexPath.row > dataModel.lists.count + 1 {
+                cancelNewList()
+            } else if !atStore && indexPath.row > dataModel.lists.count {
+                cancelNewList()
+            }
+        }
     }
     
     override func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
@@ -204,7 +218,15 @@ class AllListsViewController: UITableViewController {
             return false
         }
     }
-    
+    /*
+    override func tableView(_ tableView: UITableView, willSelectRowAt indexPath: IndexPath) -> IndexPath? {
+        if addingList && indexPath.row < dataModel.lists.count {
+            return nil
+        } else {
+            return indexPath
+        }
+    }
+    */
     func listDeleted(_ listIndex: Int) {
         for item in dataModel.lists[listIndex].checklist {
             for location in dataModel.locations {

@@ -28,7 +28,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         controller.dataModel = dataModel
         // Override point for customization after application launch.
 
-        let notificationSettings = UIUserNotificationSettings(types: UIUserNotificationType.alert, categories: nil)
+        let notificationSettings = UIUserNotificationSettings(types: [UIUserNotificationType.alert, UIUserNotificationType.sound], categories: nil)
         UIApplication.shared.registerUserNotificationSettings(notificationSettings)
         return true
     }
@@ -124,7 +124,16 @@ extension AppDelegate: CLLocationManagerDelegate {
         localNotification.soundName = UILocalNotificationDefaultSoundName
         UIApplication.shared.scheduleLocalNotification(localNotification)
         print("Entered the location: \(locationEntered.name)")
-        
+        if dataModel.settings.remindAgain {
+            let secondDate = Date(timeIntervalSinceNow: 600)
+            let secondNotification = UILocalNotification()
+            secondNotification.fireDate = secondDate
+            secondNotification.timeZone = TimeZone.current
+            secondNotification.alertBody = alertString + " other items."
+            secondNotification.alertTitle = locationEntered.name
+            secondNotification.soundName = UILocalNotificationDefaultSoundName
+            UIApplication.shared.scheduleLocalNotification(secondNotification)
+        }
         let navigationController = window?.rootViewController as! UINavigationController
         let controller = navigationController.topViewController as! AllListsViewController
         controller.atStore = true

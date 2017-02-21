@@ -15,6 +15,8 @@ class ReminderItem: NSObject, NSCoding {
     var myID: Int = 0
     var locationID: Int = 0
     var locationAddress = ""
+    var creationDate: Date?
+    var completionDate: Date?
     
     func encode(with aCoder: NSCoder) {
         aCoder.encode(reminderText, forKey: "ReminderText")
@@ -23,6 +25,8 @@ class ReminderItem: NSObject, NSCoding {
         aCoder.encode(locationID, forKey: "LocationID")
         aCoder.encode(myID, forKey: "MyID")
         aCoder.encode(locationAddress, forKey: "LocationAddress")
+        aCoder.encode(creationDate, forKey: "CreationDate")
+        aCoder.encode(completionDate, forKey: "CompletionDate")
     }
     
     required init(coder aDecoder: NSCoder) {
@@ -32,6 +36,8 @@ class ReminderItem: NSObject, NSCoding {
         myID = aDecoder.decodeInteger(forKey: "MyID")
         locationID = aDecoder.decodeInteger(forKey: "LocationID")
         locationAddress = aDecoder.decodeObject(forKey: "LocationAddress") as! String
+        creationDate = aDecoder.decodeObject(forKey: "CreationDate") as? Date
+        completionDate = aDecoder.decodeObject(forKey: "CompletionDate") as? Date
         super.init()
     }
     

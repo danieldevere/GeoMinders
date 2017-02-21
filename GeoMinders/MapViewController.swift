@@ -167,11 +167,12 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     }
     
     func taggingLocationView() {
+        self.title = "Choose Size"
         bottomBar.isHidden = false
-        searchBar.isHidden = false
+        searchBar.isHidden = true
         cancelButton.action = #selector(MapViewController.tagCancelButtonPressed)
         cancelButton.target = self
-        toggleTaggedAnnotationsButton.title = "Tag"
+        toggleTaggedAnnotationsButton.title = "Save"
         toggleTaggedAnnotationsButton.action = #selector(MapViewController.tagButtonPressed)
         toggleTaggedAnnotationsButton.target = self
         toggleTaggedAnnotationsButton.isEnabled = true
@@ -183,7 +184,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     }
     
     func toggleTaggedAnnotations() {
-        print("Locations: \(locations[0].name)")
+    //    print("Locations: \(locations[0].name)")
         if toggleTaggedAnnotationsButtonSelected {
             toggleTaggedAnnotationsButtonSelected = false
             removeAnnotationsForLocations(locations)
@@ -230,9 +231,9 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     
     func stateForToggleButton() {
         if toggleTaggedAnnotationsButtonSelected {
-            toggleTaggedAnnotationsButton.title = "Hide Tags"
+            toggleTaggedAnnotationsButton.title = "Hide Saved"
         } else {
-            toggleTaggedAnnotationsButton.title = "Show Tags"
+            toggleTaggedAnnotationsButton.title = "Show Saved"
         }
         
     }
@@ -349,6 +350,7 @@ extension MapViewController: UISearchBarDelegate {
                 self.addAnnotations(self.searchedLocations)
                 self.moveMap(forMapCase: .untaggedLocations)
                 searchBar.resignFirstResponder()
+                self.title = "Tap a Pin"
             }
         })
     }

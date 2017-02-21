@@ -13,6 +13,57 @@ class DataModel {
     
     var locations = [Location]()
     
+    var settings = Settings(remindAgain: true, playAlertSounds: true, deleteAfter30Days: true)
+    
+    func settingsDocumentsDirectory() -> String {
+        let paths = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)
+        return paths[0]
+    }
+    
+    func settingsDataFilePath() -> String {
+        return settingsDocumentsDirectory().appending("/GeoMindersSettings.plist")
+    }
+    
+    func saveSettings() {
+        let data = NSMutableData()
+        let archiver = NSKeyedArchiver(forWritingWith: data)
+        archiver.encode(settings, forKey: "Settings")
+        archiver.finishEncoding()
+        data.write(toFile: settingsDataFilePath(), atomically: true)
+    }
+    
+    func loadSettings() {
+        let path = settingsDataFilePath()
+        if FileManager.default.fileExists(atPath: path) {
+            if let data = try? Data(contentsOf: URL(fileURLWithPath: path)) {
+                let unarchiver = NSKeyedUnarchiver(forReadingWith: data)
+                if let loadedSettings = unarchiver.decodeObject(forKey: "Settings") as? Settings {
+                    settings = loadedSettings
+                    unarchiver.finishDecoding()
+                }
+            }
+        }
+    }
+    
+    func deleteOldCompleted() {
+        for list in lists {
+            let checkedList = list.checklist.filter({
+                $0.checked == true
+            })
+            var uncheckedList = list.checklist.filter({
+                $0.checked == false
+            })
+            let keepers = checkedList.filter({
+                Date(timeIntervalSinceNow: 0).timeIntervalSince($0.completionDate!) < (30 * 24 * 60 * 60)
+            })
+            for keeper in keepers {
+                uncheckedList.append(keeper)
+            }
+            list.checklist = uncheckedList
+        }
+    }
+    
+    
     func reminderDocumentsDirectory() -> String {
         let paths = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true) 
         print("Directory: \(paths[0])")
@@ -25,6 +76,7 @@ class DataModel {
     }
     
     func saveReminderItems() {
+    //    sortItemsByCompletedThenDate()
         let data = NSMutableData()
         let archiver = NSKeyedArchiver(forWritingWith: data)
         archiver.encode(lists, forKey: "Checklists")
@@ -39,8 +91,13 @@ class DataModel {
                 let unarchiver = NSKeyedUnarchiver(forReadingWith: data)
                 if let checklists = unarchiver.decodeObject(forKey: "Checklists") as? [ReminderList] {
                     lists = checklists
+                    unarchiver.finishDecoding()
+                    if settings.deleteAfter30Days {
+                        deleteOldCompleted()
+                    }
+                    sortItemsByCompletedThenDate()
                 }
-                unarchiver.finishDecoding()
+                
             }
         }
     }
@@ -62,8 +119,9 @@ class DataModel {
                 
                 if let mylocations = unarchiver.decodeObject(forKey: "MyLocations") as? [Location] {
                     locations = mylocations
+                    unarchiver.finishDecoding()
                 }
-                unarchiver.finishDecoding()
+                
             }
         }
     }
@@ -79,9 +137,37 @@ class DataModel {
  //       return documentsDirectory().stringByAppendingPathComponent("GeoMindersLocations.plist")
     }
     
+    func sortItemsByCompletedThenDate() {
+        for list in lists {
+            var completed = list.checklist.filter({
+                $0.checked == true
+            })
+            var notCompleted = list.checklist.filter({
+                $0.checked == false
+            })
+            completed.sort(by: {
+                item1, item2 in return
+                item1.creationDate?.compare(item2.creationDate!) == .orderedAscending
+            })
+            notCompleted.sort(by: {
+                item1, item2 in return
+                item1.creationDate?.compare(item2.creationDate!) == .orderedAscending
+            })
+            var sortedList = [ReminderItem]()
+            for item in notCompleted {
+                sortedList.append(item)
+            }
+            for item in completed {
+                sortedList.append(item)
+            }
+            list.checklist = sortedList
+        }
+    }
+    
     init() {
         loadLocationItems()
         loadReminderItems()
+        loadSettings()
     }
 
 
