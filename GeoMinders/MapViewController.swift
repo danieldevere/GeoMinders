@@ -18,11 +18,12 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     
     let locationManager = CLLocationManager()
     
+    var editingLocation = false
 
     
     var locations = [Location]()
     
-    var searchedLocations = [Location]()
+    var searchedLocations: [Location]?
     
     var toggleTaggedAnnotationsButtonSelected = false
     
@@ -71,6 +72,15 @@ class MapViewController: UIViewController, MKMapViewDelegate {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        if locations.count >= 20 {
+            let alertController = UIAlertController(title: "Too Many Locations", message: "Apple only allows us to track up to 20 locations.  You will need to delete a location before adding a new one.", preferredStyle: .alert)
+            let alertAction = UIAlertAction(title: "OK", style: .default, handler: {
+                _ in
+                self.dismiss(animated: true, completion: nil)
+            })
+            alertController.addAction(alertAction)
+            present(alertController, animated: true, completion: nil)
+        }
         currentLocation.isEnabled = false
         toggleTaggedAnnotationsButton.isEnabled = false
         let authStatus = CLLocationManager.authorizationStatus()
@@ -79,6 +89,21 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         }
         map.delegate = self
         regularView()
+        let gestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(MapViewController.dismissKeyboard))
+        gestureRecognizer.cancelsTouchesInView = false
+        gestureRecognizer.delegate = self
+        view.addGestureRecognizer(gestureRecognizer)
+        if editingLocation{
+            currentLocation.isHidden = true
+            self.navigationItem.rightBarButtonItem = UIBarButtonItem(title: "", style: .plain, target: nil, action: nil)
+            cancelButton.title = "< Back"
+            cancelButton.action = #selector(MapViewController.back)
+            self.title = locations[0].name
+            addRadiusOverlayForLocation(locations[0], withRadius: locations[0].radius)
+            toggleTaggedAnnotations()
+            self.title = "This Location"
+
+        }
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -111,9 +136,9 @@ class MapViewController: UIViewController, MKMapViewDelegate {
                 let button = annotationView.rightCalloutAccessoryView as! UIButton
                 
                 
-                for (arrayIndex, _) in searchedLocations.enumerated() {
+                for (arrayIndex, _) in (searchedLocations?.enumerated())! {
                     //  println("Annotation is: \(annotation.title) Location is: \(searchedLocations[i].title) Index is: \(i)")
-                    if (annotation.coordinate.latitude == searchedLocations[arrayIndex].coordinate.latitude) && (annotation.coordinate.longitude == searchedLocations[arrayIndex].coordinate.longitude) {
+                    if (annotation.coordinate.latitude == searchedLocations?[arrayIndex].coordinate.latitude) && (annotation.coordinate.longitude == searchedLocations?[arrayIndex].coordinate.longitude) {
                         //  annotationView.tag = i
                         button.tag = arrayIndex
                         //     println("***Picked Annotation is: \(annotation.title) Location is: \(searchedLocations[i].title) Index is: \(i)")
@@ -133,9 +158,9 @@ class MapViewController: UIViewController, MKMapViewDelegate {
                 annotationButton.addTarget(self, action: #selector(MapViewController.chooseRadiusForTag(_:)), for: .touchUpInside)
                 annotationView.rightCalloutAccessoryView = annotationButton
                 let button = annotationView.rightCalloutAccessoryView as! UIButton
-                for (index, _) in searchedLocations.enumerated() {
+                for (index, _) in (searchedLocations?.enumerated())! {
                     //  println("Annotation is: \(annotation.title) Location is: \(searchedLocations[i].title) Index is: \(i)")
-                    if (annotation.coordinate.latitude == searchedLocations[index].coordinate.latitude) && (annotation.coordinate.longitude == searchedLocations[index].coordinate.longitude) {
+                    if (annotation.coordinate.latitude == searchedLocations?[index].coordinate.latitude) && (annotation.coordinate.longitude == searchedLocations?[index].coordinate.longitude) {
                         //  annotationView.tag = i
                         button.tag = index
                         //        println("***Picked Annotation is: \(annotation.title) Location is: \(searchedLocations[i].title) Index is: \(i)")
@@ -152,7 +177,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     func regularView() {
         bottomBar.isHidden = true
         searchBar.isHidden = false
-        cancelButton.title = "Back"
+        cancelButton.title = "< Back"
         cancelButton.action = #selector(MapViewController.cancel)
         cancelButton.target = self
         stateForToggleButton()
@@ -188,11 +213,19 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         if toggleTaggedAnnotationsButtonSelected {
             toggleTaggedAnnotationsButtonSelected = false
             removeAnnotationsForLocations(locations)
+            if let theseLocations = searchedLocations {
+                addAnnotations(theseLocations)
+            }
+            searchBar.isHidden = false
             moveMapToDefaultView()
             
             
         } else {
             toggleTaggedAnnotationsButtonSelected = true
+            if let theseLocations = searchedLocations {
+                removeAnnotationsForLocations(theseLocations)
+            }
+            searchBar.isHidden = true
             addAnnotations(locations)
             moveMap(forMapCase: .taggedLocations)
             
@@ -202,11 +235,21 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     
     func mapView(_ mapView: MKMapView, didUpdate userLocation: MKUserLocation) {
         if !currentLocation.isEnabled {
-            currentLocation.isEnabled = true
-            moveMapToDefaultView()
-            toggleTaggedAnnotationsButton.isEnabled = true
+            if editingLocation {
+                currentLocation.isEnabled = true
+                
+            } else {
+                currentLocation.isEnabled = true
+                moveMapToDefaultView()
+                toggleTaggedAnnotationsButton.isEnabled = true
+            }
+            
         }
         
+    }
+    
+    func back() {
+        dismiss(animated: true, completion: nil)
     }
 
     
@@ -218,6 +261,9 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     
     func tagCancelButtonPressed() {
         regularView()
+        addAnnotationsExcept(locationToTag)
+        let annotationView = map.view(for: locationToTag)
+        annotationView?.rightCalloutAccessoryView?.isHidden = false
         locationToTag = Location()
         moveMap(forMapCase: .untaggedLocations)
         map.remove(overlay!)
@@ -243,12 +289,31 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     func chooseRadiusForTag(_ sender: UIButton) {
         taggingLocationView()
         let button = sender
-        let location = searchedLocations[button.tag]
+        let location = searchedLocations?[button.tag]
+        button.isHidden = true
+        removeAnnotationsExcept(location!)
    //     println("Plus symbol press. Location is: \(location.name) Index is: \(button.tag)")
-        locationToTag = location
+        locationToTag = location!
         radiusSegmentedControl.selectedSegmentIndex = 0
-        addRadiusOverlayForLocation(location, withRadius: (Double(radiusSegmentedControl.selectedSegmentIndex) + 1) * 100 * 0.3048)
+        addRadiusOverlayForLocation(location!, withRadius: (Double(radiusSegmentedControl.selectedSegmentIndex) + 1) * 100 * 0.3048)
         moveMapToLocation(locationToTag)
+        
+    }
+    
+    func addAnnotationsExcept(_ location: Location) {
+        for thisLocation in searchedLocations! {
+            if (location.coordinate.latitude != thisLocation.coordinate.latitude) || (location.coordinate.longitude != thisLocation.coordinate.longitude) {
+                map.addAnnotation(thisLocation)
+            }
+        }
+    }
+    
+    func removeAnnotationsExcept(_ location: Location) {
+        for thisLocation in searchedLocations! {
+            if (location.coordinate.latitude != thisLocation.coordinate.latitude) || (location.coordinate.longitude != thisLocation.coordinate.longitude) {
+                map.removeAnnotation(thisLocation)
+            }
+        }
     }
     
     func addAnnotations(_ theseLocations: [Location]) {
@@ -284,7 +349,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         case .currentLocation:
             myCount = 0
         case .untaggedLocations:
-            myCount = searchedLocations.count
+            myCount = (searchedLocations?.count)!
             mapLocations = searchedLocations
         case .taggedLocations:
             myCount = locations.count
@@ -295,12 +360,12 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         case 0:
             region = MKCoordinateRegionMakeWithDistance(map.userLocation.coordinate, 1000, 1000)
         case 1:
-            let location = mapLocations[mapLocations.count - 1]
-            region = MKCoordinateRegionMakeWithDistance(location.coordinate, 1000, 1000)
+            let location = mapLocations?[(mapLocations?.count)! - 1]
+            region = MKCoordinateRegionMakeWithDistance((location?.coordinate)!, 500, 500)
         default:
             var topLeftCoord = CLLocationCoordinate2D(latitude: -90, longitude: 180)
             var bottomRightCoord = CLLocationCoordinate2D(latitude: 90, longitude: -180)
-            for location in mapLocations {
+            for location in mapLocations! {
                 topLeftCoord.latitude = max(topLeftCoord.latitude, location.coordinate.latitude)
                 topLeftCoord.longitude = min(topLeftCoord.longitude, location.coordinate.longitude)
                 bottomRightCoord.latitude = min(bottomRightCoord.latitude, location.coordinate.latitude)
@@ -330,6 +395,10 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         overlay = MKCircle(center: location.coordinate, radius: radius)
         map.add(overlay!)
     }
+    
+    func dismissKeyboard() {
+        searchBar.resignFirstResponder()
+    }
 
 }
 
@@ -343,16 +412,27 @@ extension MapViewController: UISearchBarDelegate {
             if let error = error {
                 print("Error: \(error)")
             } else {
+                self.searchedLocations = [Location]()
                 for mapItem in (response?.mapItems)! as [MKMapItem] {
                     let location = Location(name: mapItem.placemark.name!, placemark: mapItem.placemark, longitude: mapItem.placemark.coordinate.longitude, latitude: mapItem.placemark.coordinate.latitude)
-                    self.searchedLocations.append(location)
+                    self.searchedLocations?.append(location)
                 }
-                self.addAnnotations(self.searchedLocations)
+                if let theseLocations = self.searchedLocations {
+                    self.addAnnotations(theseLocations)
+                }
                 self.moveMap(forMapCase: .untaggedLocations)
                 searchBar.resignFirstResponder()
                 self.title = "Tap a Pin"
             }
         })
+    }
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        if searchText.isEmpty {
+            if let theseLocations = searchedLocations {
+                removeAnnotationsForLocations(theseLocations)
+                searchedLocations = [Location]()
+            }
+        }
     }
 }
 
@@ -366,5 +446,11 @@ extension MapViewController: TagLocationViewControllerDelegate {
 
         dismiss(animated: true, completion: nil)
         delegate?.mapViewControllerDidExit(self)
+    }
+}
+
+extension MapViewController: UIGestureRecognizerDelegate {
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
+        return true
     }
 }

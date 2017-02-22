@@ -27,8 +27,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         dataModel.loadReminderItems()
         controller.dataModel = dataModel
         // Override point for customization after application launch.
+        var types: UIUserNotificationType = []
+        if dataModel.settings.playAlertSounds {
+            types = [.alert, .sound]
+        } else {
+            types = [.alert]
+        }
 
-        let notificationSettings = UIUserNotificationSettings(types: [UIUserNotificationType.alert, UIUserNotificationType.sound], categories: nil)
+        let notificationSettings = UIUserNotificationSettings(types: types, categories: nil)
         UIApplication.shared.registerUserNotificationSettings(notificationSettings)
         return true
     }

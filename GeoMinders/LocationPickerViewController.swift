@@ -41,6 +41,7 @@ class LocationPickerViewController: UITableViewController {
     
     @IBOutlet weak var editButton: UIBarButtonItem!
     
+    @IBOutlet weak var cancelButton: UIBarButtonItem!
     
     @IBAction func cancel() {
         dismiss(animated: true, completion: nil)
@@ -50,6 +51,10 @@ class LocationPickerViewController: UITableViewController {
     
     func edit() {
         editButton.title = "Done"
+        cancelButton.title = "Done"
+        cancelButton.target = self
+        cancelButton.action = #selector(LocationPickerViewController.done)
+        cancelButton.style = .done
         tableView.isEditing = true
         editButton.style = UIBarButtonItemStyle.done
         
@@ -59,8 +64,18 @@ class LocationPickerViewController: UITableViewController {
     func done() {
         tableView.isEditing = false
         editButton.style = .plain
-        editButton.title = "Edit"
+        editButton.title = "Delete"
         editButton.action = #selector(LocationPickerViewController.edit)
+        cancelButton.title = "Cancel"
+        if let editing = editingLocations {
+            if editing {
+                cancelButton.title = "< Back"
+            }
+        }
+        
+        cancelButton.action = #selector(LocationPickerViewController.cancel)
+        cancelButton.style = .plain
+        cancelButton.target = self
     }
     
         
@@ -80,8 +95,9 @@ class LocationPickerViewController: UITableViewController {
             if editing {
                 editButton.target = self
                 editButton.isEnabled = true
-                editButton.title = "Edit"
+                editButton.title = "Delete"
                 editButton.action = #selector(LocationPickerViewController.edit)
+                cancelButton.title = "< Back"
 
             } else {
                 editButton.title = ""
@@ -112,7 +128,14 @@ class LocationPickerViewController: UITableViewController {
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if let indexPath = tableView.indexPath(for: sender as! UITableViewCell) {
+        if segue.identifier == "EditLocation" {
+            let indexPath = sender as! IndexPath
+            let editLocation = dataModel.locations[indexPath.row]
+            let navigationController = segue.destination as! UINavigationController
+            let controller = navigationController.topViewController as! LocationDetailController
+            controller.locationID = editLocation.myID
+            controller.dataModel = dataModel
+        } else if let indexPath = tableView.indexPath(for: sender as! UITableViewCell) {
             if indexPath.row == dataModel.locations.count {
                 let navigationController = segue.destination as! UINavigationController
                 let controller = navigationController.topViewController as! MapViewController
@@ -142,6 +165,11 @@ class LocationPickerViewController: UITableViewController {
                     cell.accessoryType = .checkmark
                 }
             }
+            if let editing = editingLocations {
+                if editing {
+                    cell.accessoryType = .disclosureIndicator
+                }
+            }
             return cell
         } else {
             let cell = tableView.dequeueReusableCell(withIdentifier: "AddLocationButtonCell", for: indexPath) 
@@ -150,6 +178,13 @@ class LocationPickerViewController: UITableViewController {
     }
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        if let editing = editingLocations {
+            if editing {
+                if indexPath.row < dataModel.locations.count {
+                    performSegue(withIdentifier: "EditLocation", sender: indexPath)
+                }
+            }
+        }
         if indexPath.row < dataModel.locations.count && delegate != nil {
             location = dataModel.locations[indexPath.row]
             delegate?.locationPickerViewController(self, didPickLocation: location!)

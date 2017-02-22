@@ -1,71 +1,71 @@
 //
-//  SettingsViewController.swift
+//  LocationDetailController.swift
 //  GeoMinders
 //
-//  Created by DANIEL DE VERE on 2/20/17.
+//  Created by DANIEL DE VERE on 2/21/17.
 //  Copyright © 2017 DANIEL DE VERE. All rights reserved.
 //
 
 import UIKit
 
-class SettingsViewController: UITableViewController {
+
+class LocationDetailController: UITableViewController {
+    
+    var locationID: Int?
     
     var dataModel: DataModel!
     
-    @IBOutlet weak var alertSoundsToggle: UISwitch!
+    @IBOutlet weak var textField: UITextField!
     
-    @IBOutlet weak var additionalReminderToggle: UISwitch!
+    @IBOutlet weak var nameLabel: UILabel!
     
-    @IBOutlet weak var deleteItemsToggle: UISwitch!
+    @IBOutlet weak var addressLabel: UILabel!
     
-    @IBAction func alertSoundsToggleSwitched() {
-        if alertSoundsToggle.isOn {
-            dataModel.settings.playAlertSounds = true
-        } else {
-            dataModel.settings.playAlertSounds = false
-        }
-        var types: UIUserNotificationType = []
-        if dataModel.settings.playAlertSounds {
-            types = [.alert, .sound]
-        } else {
-            types = [.alert]
+    @IBOutlet weak var doneButton: UIBarButtonItem!
+    
+    @IBAction func done() {
+        if !(textField.text?.isEmpty)! {
+            let location = getLocation()
+            location.name = textField.text!
+            dataModel.saveLocationItems()
+            dismiss(animated: true, completion: nil)
         }
         
-        let notificationSettings = UIUserNotificationSettings(types: types, categories: nil)
-        UIApplication.shared.registerUserNotificationSettings(notificationSettings)
-
-        dataModel.saveSettings()
     }
     
-    @IBAction func additionalReminderToggleSwitched() {
-        if additionalReminderToggle.isOn {
-            dataModel.settings.remindAgain = true
-        } else {
-            dataModel.settings.remindAgain = false
-        }
-        dataModel.saveSettings()
-    }
-    
-    @IBAction func deleteItemToggleSwitched() {
-        if deleteItemsToggle.isOn {
-            dataModel.settings.deleteAfter30Days = true
-        } else {
-            dataModel.settings.deleteAfter30Days = false
-        }
-        dataModel.saveSettings()
-    }
-    
-    @IBAction func back() {
+    @IBAction func cancel() {
         dismiss(animated: true, completion: nil)
+    }
+    
+    @IBAction func textFieldEdit() {
+        if (textField.text?.isEmpty)! {
+            doneButton.isEnabled = false
+        } else {
+            doneButton.isEnabled = true
+        }
+    }
+    
+    
+    func getLocation() -> Location {
+        if let id = locationID {
+            for location in dataModel.locations {
+                if location.myID == id {
+                    return location
+                }
+                
+            }
+        }
+        print("LocationDetailController can't find location")
+        return Location()
     }
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        alertSoundsToggle.isOn = dataModel.settings.playAlertSounds
-        additionalReminderToggle.isOn = dataModel.settings.remindAgain
-        deleteItemsToggle.isOn = dataModel.settings.deleteAfter30Days
-
+        let location = getLocation()
+        textField.text = location.name
+        nameLabel.text = location.placemark?.name
+       // addressLabel.text = "\(location.placemark?.subThoroughfare) \(location.placemark?.thoroughfare) \(location.placemark?.locality), \(location.placemark?.administrativeArea) \(location.placemark?.postalCode)"
+        addressLabel.text = location.subtitle
         // Uncomment the following line to preserve selection between presentations
         // self.clearsSelectionOnViewWillAppear = false
 
@@ -77,19 +77,17 @@ class SettingsViewController: UITableViewController {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
-
-    // MARK: - Table view data source
-
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if segue.identifier == "ShowLocations" {
+        if segue.identifier == "ShowLocation" {
             let navigationController = segue.destination as! UINavigationController
-            let controller = navigationController.topViewController as! LocationPickerViewController
-            controller.dataModel = dataModel
-            controller.editingLocations = true
+            let controller = navigationController.topViewController as! MapViewController
+            controller.editingLocation = true
+            controller.locations = [getLocation()]
         }
     }
 
+    // MARK: - Table view data source
     /*
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "reuseIdentifier", for: indexPath)
@@ -146,3 +144,5 @@ class SettingsViewController: UITableViewController {
     */
 
 }
+
+

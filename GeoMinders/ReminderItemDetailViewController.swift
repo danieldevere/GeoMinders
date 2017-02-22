@@ -68,6 +68,10 @@ class ReminderItemDetailViewController: UITableViewController {
             locationLabel.text = item.detailText
             locationDetailLabel.text = item.locationAddress
         }
+        let gestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(ReminderItemDetailViewController.dismissKeyboard))
+        gestureRecognizer.cancelsTouchesInView = false
+        gestureRecognizer.delegate = self
+        view.addGestureRecognizer(gestureRecognizer)
         
     }
     
@@ -98,6 +102,10 @@ class ReminderItemDetailViewController: UITableViewController {
             
         }
     }
+    
+    func dismissKeyboard() {
+        textField.resignFirstResponder()
+    }
 }
 extension ReminderItemDetailViewController: LocationPickerViewControllerDelegate {
     func locationPickerViewController(_ controller: LocationPickerViewController, didPickLocation location: Location) {
@@ -112,5 +120,10 @@ extension ReminderItemDetailViewController: LocationPickerViewControllerDelegate
   //      dismissViewControllerAnimated(true, completion: nil)
         controller.delegate = nil
     //    println("after dismiss")
+    }
+}
+extension ReminderItemDetailViewController: UIGestureRecognizerDelegate {
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
+        return true
     }
 }

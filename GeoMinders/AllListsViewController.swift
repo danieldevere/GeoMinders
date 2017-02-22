@@ -170,15 +170,15 @@ class AllListsViewController: UITableViewController {
             let cell = tableView.dequeueReusableCell(withIdentifier: "ListCell", for: indexPath) 
             cell.textLabel?.text = dataModel.lists[indexPath.row].name
             return cell
-        } else if (atStore) && (indexPath.row == dataModel.lists.count) {
-            let cell = tableView.dequeueReusableCell(withIdentifier: "ItemsToDoAtLocationCell", for: indexPath) 
+        } else if (addingList) && (indexPath.row == dataModel.lists.count) {
+            let cell = tableView.dequeueReusableCell(withIdentifier: "NewListCell", for: indexPath) 
+            return cell
+        } else if (atStore) && (indexPath.row == numberOfRows() - 1) {
+            let cell = tableView.dequeueReusableCell(withIdentifier: "ItemsToDoAtLocationCell", for: indexPath)
             cell.textLabel?.text = "\(storeList!.name)"
             cell.detailTextLabel?.text = "\(storeList!.checklist.count) items"
             return cell
-        } else if (addingList) && (indexPath.row >= dataModel.lists.count) {
-            let cell = tableView.dequeueReusableCell(withIdentifier: "NewListCell", for: indexPath) 
-            return cell
-        } else {
+        }else {
             return super.tableView(tableView, cellForRowAt: indexPath)
         }
     }
