@@ -89,6 +89,13 @@ class SettingsViewController: UITableViewController {
             controller.editingLocations = true
         }
     }
+    
+    override func tableView(_ tableView: UITableView, willSelectRowAt indexPath: IndexPath) -> IndexPath? {
+        if indexPath.section == 0 || indexPath.section == 3 {
+            return indexPath
+        }
+        return nil
+    }
 
     /*
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {

@@ -77,7 +77,7 @@ class RemindersViewController: UITableViewController {
             UserDefaults.standard.set(0, forKey: "ReminderIndex")
         }
         tempReminder = item
-        textField.text = ""
+
         
         performSegue(withIdentifier: "PickLocation", sender: nil)
 
@@ -346,20 +346,6 @@ class RemindersViewController: UITableViewController {
 
 
 
-extension RemindersViewController: NewReminderCellDelegate {
-    func newReminderCell(_ controller: NewReminderCell, didPressDoneAddingReminder reminder: ReminderItem) {
-     //   println("pressedDone")
-        tempReminder = reminder
-                controller.textField.text = ""
-        
-        performSegue(withIdentifier: "PickLocation", sender: nil)
-    }
-    
-    func newReminderCellDidCancelWithTap(_ controller: NewReminderCell) {
-        
-    }
-}
-
 extension RemindersViewController: ReminderItemDetailViewControllerDelegate {
     func reminderItemDetailViewController(_ controller: ReminderItemDetailViewController, didFinishEditingReminder reminder: ReminderItem) {
         dismiss(animated: true, completion: nil)
@@ -368,10 +354,20 @@ extension RemindersViewController: ReminderItemDetailViewControllerDelegate {
         delegate?.remindersViewControllerWantsToSave(self)
         tableView.reloadData()
   //      saveReminderItems()
+        let textField = tableView.viewWithTag(1003) as! UITextField
+        if !(textField.text?.isEmpty)! {
+            cancelAdd()
+        }
+
     }
     
     func reminderItemDetailViewControllerDidCancel(_ controller: ReminderItemDetailViewController) {
         dismiss(animated: true, completion: nil)
+        let textField = tableView.viewWithTag(1003) as! UITextField
+        if !(textField.text?.isEmpty)! {
+            cancelAdd()
+        }
+        
     }
 }
 
@@ -387,24 +383,17 @@ extension RemindersViewController: LocationPickerViewControllerDelegate {
         updateLocationMonitoring()
         reminderList.checklist.append(tempReminder)
         dataModel.sortItemsByCompletedThenDate()
-        dismiss(animated: true, completion: nil)
-        let indexPath = IndexPath(row: reminderList.checklist.count - 1, section: 0)
-        let indexPaths = [indexPath]
-     //   tableView.insertRows(at: indexPaths, with: .automatic)
-        tableView.reloadData()
-        backAndCancelButton.title = "< Back"
-        backAndCancelButton.action = #selector(RemindersViewController.back)
-
-
-
+        cancelAdd()
         tableView.reloadData()
         delegate?.remindersViewControllerWantsToSave(self)
- //       saveReminderItems()
     }
     
     func locationPickerViewControllerDidCancel(_ controller: LocationPickerViewController) {
      //   dismiss(animated: true, completion: nil)
-        
+        let textField = tableView.viewWithTag(1003) as! UITextField
+        if !(textField.text?.isEmpty)! {
+            textField.becomeFirstResponder()
+        }
     }
 }
 

@@ -73,7 +73,7 @@
                                             <rect key="frame" x="60" y="8" width="228" height="47"/>
                                             <nil key="textColor"/>
                                             <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                                            <textInputTraits key="textInputTraits" returnKeyType="done" enablesReturnKeyAutomatically="YES"/>
+                                            <textInputTraits key="textInputTraits" autocapitalizationType="sentences" returnKeyType="done" enablesReturnKeyAutomatically="YES"/>
                                             <connections>
                                                 <action selector="done" destination="oXk-Jr-K1S" eventType="editingDidEndOnExit" id="cXb-ph-W3f"/>
                                                 <action selector="startedTyping" destination="oXk-Jr-K1S" eventType="editingDidBegin" id="RKY-aw-7W7"/>
@@ -256,6 +256,10 @@
                                     <constraint firstAttribute="bottom" secondItem="18f-Rz-mnZ" secondAttribute="bottom" constant="8" id="sKs-hW-qsA"/>
                                 </constraints>
                             </view>
+                            <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" style="gray" translatesAutoresizingMaskIntoConstraints="NO" id="Hn3-dM-ikt">
+                                <rect key="frame" x="284" y="76" width="20" height="20"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                            </activityIndicatorView>
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
@@ -289,6 +293,7 @@
                         <outlet property="map" destination="186-Tn-BHw" id="dhl-ih-q4T"/>
                         <outlet property="radiusSegmentedControl" destination="18f-Rz-mnZ" id="GBe-Vu-hR5"/>
                         <outlet property="searchBar" destination="BjP-38-Pwu" id="iIj-w2-ujG"/>
+                        <outlet property="searchSpinner" destination="Hn3-dM-ikt" id="tqA-UD-gJH"/>
                         <outlet property="toggleTaggedAnnotationsButton" destination="a0o-7E-OyL" id="WEx-eB-4eA"/>
                         <segue destination="9M3-wt-raA" kind="presentation" identifier="TagLocation" id="08b-4M-fEY"/>
                     </connections>
@@ -318,7 +323,7 @@
                                                 <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="vAv-oQ-tyO">
                                                     <rect key="frame" x="15" y="0.0" width="297" height="43"/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                                                    <textInputTraits key="textInputTraits"/>
+                                                    <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
                                                 </textField>
                                             </subviews>
                                             <constraints>
@@ -405,7 +410,7 @@
                                                 <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" minimumFontSize="17" clearButtonMode="always" translatesAutoresizingMaskIntoConstraints="NO" id="QwQ-Hh-8YW">
                                                     <rect key="frame" x="15" y="0.0" width="297" height="43"/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                                                    <textInputTraits key="textInputTraits"/>
+                                                    <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
                                                 </textField>
                                             </subviews>
                                             <constraints>
@@ -535,7 +540,7 @@
                                         <textField opaque="NO" clipsSubviews="YES" tag="3000" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="wBs-sn-4Wk">
                                             <rect key="frame" x="15" y="0.0" width="297" height="63.5"/>
                                             <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                                            <textInputTraits key="textInputTraits" returnKeyType="done" enablesReturnKeyAutomatically="YES"/>
+                                            <textInputTraits key="textInputTraits" autocapitalizationType="sentences" returnKeyType="done" enablesReturnKeyAutomatically="YES"/>
                                             <connections>
                                                 <action selector="done" destination="h72-t6-1jS" eventType="editingDidEndOnExit" id="n9Y-Gt-NpF"/>
                                             </connections>
@@ -790,7 +795,7 @@
                                         <rect key="frame" x="0.0" y="35" width="320" height="44"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="oIk-y6-V7B" id="pGQ-Qj-WJd">
-                                            <rect key="frame" x="0.0" y="0.0" width="320" height="43"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" textAlignment="natural" minimumFontSize="17" clearButtonMode="always" translatesAutoresizingMaskIntoConstraints="NO" id="6Un-Gy-OIg">
@@ -798,7 +803,7 @@
                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                                     <nil key="textColor"/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                                                    <textInputTraits key="textInputTraits" returnKeyType="done" enablesReturnKeyAutomatically="YES"/>
+                                                    <textInputTraits key="textInputTraits" autocapitalizationType="sentences" returnKeyType="done" enablesReturnKeyAutomatically="YES"/>
                                                     <connections>
                                                         <action selector="textFieldEdit" destination="93H-8f-xnA" eventType="editingDidBegin" id="DMy-BQ-SUP"/>
                                                         <action selector="textFieldEdit" destination="93H-8f-xnA" eventType="editingChanged" id="HHU-td-M0B"/>
@@ -817,7 +822,7 @@
                                         <rect key="frame" x="0.0" y="115" width="320" height="64"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="Mep-b9-31o" id="u0W-U2-JVP">
-                                            <rect key="frame" x="0.0" y="0.0" width="287" height="63"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="287" height="64"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Address" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="FNx-xd-r8T">
