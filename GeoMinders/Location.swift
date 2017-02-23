@@ -32,7 +32,11 @@ class Location: NSObject, NSCoding, MKAnnotation {
     }
     
     var subtitle: String? {
-        return stringFromPlacemark(placemark!)
+        if let thisPlacemark = placemark {
+            return stringFromPlacemark(thisPlacemark)
+        } else {
+            return "(No Address Found)"
+        }
     }
     
     required init(coder aDecoder: NSCoder) {

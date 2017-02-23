@@ -190,7 +190,7 @@
             </objects>
             <point key="canvasLocation" x="2303" y="-356"/>
         </scene>
-        <!--Search-->
+        <!--Search or Press-->
         <scene sceneID="1YH-2A-Jk4">
             <objects>
                 <viewController id="Yy2-cj-TSF" customClass="MapViewController" customModule="GeoMinders" customModuleProvider="target" sceneMemberID="viewController">
@@ -281,7 +281,7 @@
                         </constraints>
                     </view>
                     <toolbarItems/>
-                    <navigationItem key="navigationItem" title="Search" id="frt-YZ-6yu">
+                    <navigationItem key="navigationItem" title="Search or Press" id="frt-YZ-6yu">
                         <barButtonItem key="leftBarButtonItem" title="Cancel" id="WKa-pu-ajh"/>
                         <barButtonItem key="rightBarButtonItem" title="Item" id="a0o-7E-OyL"/>
                     </navigationItem>

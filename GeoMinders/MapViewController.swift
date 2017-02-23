@@ -19,6 +19,8 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     let locationManager = CLLocationManager()
     
     var editingLocation = false
+    
+    
 
     
     var locations = [Location]()
@@ -85,7 +87,6 @@ class MapViewController: UIViewController, MKMapViewDelegate {
             present(alertController, animated: true, completion: nil)
         }
         currentLocation.isEnabled = false
-        toggleTaggedAnnotationsButton.isEnabled = false
         let authStatus = CLLocationManager.authorizationStatus()
         if authStatus == .notDetermined {
             locationManager.requestAlwaysAuthorization()
@@ -105,6 +106,54 @@ class MapViewController: UIViewController, MKMapViewDelegate {
             addRadiusOverlayForLocation(locations[0], withRadius: locations[0].radius)
             toggleTaggedAnnotations()
             self.title = "This Location"
+
+        }
+        let pinGestureRecognizer = UILongPressGestureRecognizer(target: self, action: #selector(MapViewController.addAnnotationOnTap))
+        pinGestureRecognizer.cancelsTouchesInView = false
+        pinGestureRecognizer.delegate = self
+        view.addGestureRecognizer(pinGestureRecognizer)
+        map.isRotateEnabled = false
+        toggleTaggedAnnotationsButton.isEnabled = true
+    }
+    
+    func addAnnotationOnTap(gesture: UIGestureRecognizer) {
+        if toggleTaggedAnnotationsButtonSelected {
+            let alertController = UIAlertController(title: "Cannot add pin", message: "You cannot tap to add a pin while showing your saved locations.  Press Hide Saved to add a pin", preferredStyle: .alert)
+            let action = UIAlertAction(title: "OK", style: .default, handler: nil)
+            alertController.addAction(action)
+            present(alertController, animated: true, completion: nil)
+        } else {
+            if gesture.state == UIGestureRecognizerState.began {
+                let touchPoint = gesture.location(in: map)
+                let locationCoordinate = map.convert(touchPoint, toCoordinateFrom: map)
+                var locationName = ""
+                var locationPlacemark: MKPlacemark?
+                var location = Location(name: locationName, placemark: nil, longitude: locationCoordinate.longitude, latitude: locationCoordinate.latitude)
+                let geocodeLocation = CLLocation(latitude: locationCoordinate.latitude, longitude: locationCoordinate.longitude)
+                CLGeocoder().reverseGeocodeLocation(geocodeLocation, completionHandler: {
+                    placemarks, error in
+                    if error != nil {
+                        print("Reverse Geocode failed. Error: \(error)")
+                    } else {
+                        if let placemark = placemarks {
+                            if placemark.count > 0 {
+                                let pm = placemark[0]
+                                if let pmName = pm.name {
+                                    locationName = pmName
+                                }
+                                locationPlacemark = pm as? MKPlacemark
+                                location = Location(name: locationName, placemark: locationPlacemark, longitude: locationCoordinate.longitude, latitude: locationCoordinate.latitude)
+                            }
+                        }
+                        if (self.currentLocation.isEnabled && self.map.annotations.count > 1) || (!self.currentLocation.isEnabled && self.map.annotations.count > 0) {
+                            self.map.removeAnnotations(self.map.annotations)
+                        }
+                        self.searchedLocations = [location]
+                        self.addAnnotations(self.searchedLocations!)
+                        self.map.selectAnnotation(self.searchedLocations![0], animated: true)
+                    }
+                })
+            }
 
         }
     }
@@ -208,7 +257,10 @@ class MapViewController: UIViewController, MKMapViewDelegate {
                 addAnnotations(theseLocations)
             }
             searchBar.isHidden = false
-            moveMapToDefaultView()
+            if currentLocation.isEnabled {
+                moveMapToDefaultView()
+            }
+            
             
             
         } else {
@@ -228,11 +280,12 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         if !currentLocation.isEnabled {
             if editingLocation {
                 currentLocation.isEnabled = true
+                toggleTaggedAnnotationsButton.isEnabled = false
+                print("Editing Location")
                 
             } else {
                 currentLocation.isEnabled = true
                 moveMapToDefaultView()
-                toggleTaggedAnnotationsButton.isEnabled = true
             }
             
         }
@@ -254,6 +307,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         annotationView?.rightCalloutAccessoryView?.isHidden = false
         locationToTag = Location()
         moveMap(forMapCase: .untaggedLocations)
+        title = "Tap a Pin"
         map.remove(overlay!)
     }
     
@@ -380,6 +434,8 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     func dismissKeyboard() {
         searchBar.resignFirstResponder()
     }
+    
+    
 
 }
 
@@ -390,6 +446,7 @@ extension MapViewController: UISearchBarDelegate {
         searchSpinner.startAnimating()
         searchBar.resignFirstResponder()
         let query = MKLocalSearchRequest()
+        query.region = map.region
         query.naturalLanguageQuery = searchBar.text
         let search = MKLocalSearch(request: query)
         search.start(completionHandler: {
@@ -423,6 +480,7 @@ extension MapViewController: UISearchBarDelegate {
             if let theseLocations = searchedLocations {
                 removeAnnotationsForLocations(theseLocations)
                 searchedLocations = [Location]()
+                title = "Search or Press"
             }
         }
     }
@@ -431,6 +489,7 @@ extension MapViewController: UISearchBarDelegate {
 extension MapViewController: TagLocationViewControllerDelegate {
     func tagLocationViewControllerDidGoBack(_ controller: TagLocationViewController) {
         dismiss(animated: true, completion: nil)
+        tagCancelButtonPressed()
     }
     
     func tagLocationViewController(_ controller: TagLocationViewController, didSaveTag tag: Location) {
