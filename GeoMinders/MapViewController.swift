@@ -20,7 +20,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     
     var editingLocation = false
     
-    
+    var taggingLocation = false
 
     
     var locations = [Location]()
@@ -177,7 +177,8 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         if annotation.isKind(of: MKUserLocation.self) {
             return nil
         } else if let annotationView = mapView.dequeueReusableAnnotationView(withIdentifier: "Pin") as? MKPinAnnotationView {
-            if !toggleTaggedAnnotationsButtonSelected {
+            print("viewforannotation elseif")
+            if !toggleTaggedAnnotationsButtonSelected && !editingLocation {
                 let annotationButton = UIButton(type: UIButtonType.contactAdd)
                 annotationButton.addTarget(self, action: #selector(MapViewController.chooseRadiusForTag(_:)), for: .touchUpInside)
                 annotationView.rightCalloutAccessoryView = annotationButton
@@ -185,7 +186,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
                 
                 
                 for (arrayIndex, _) in (searchedLocations?.enumerated())! {
-                    if (annotation.coordinate.latitude == searchedLocations?[arrayIndex].coordinate.latitude) && (annotation.coordinate.longitude == searchedLocations?[arrayIndex].coordinate.longitude) {
+                    if (annotation.coordinate.latitude == searchedLocations?[arrayIndex].latitude) && (annotation.coordinate.longitude == searchedLocations?[arrayIndex].longitude) {
                         button.tag = arrayIndex
                         break
                     }
@@ -194,29 +195,36 @@ class MapViewController: UIViewController, MKMapViewDelegate {
             }
             return annotationView
         } else {
+            print("Viewforannotation else")
             let annotationView = MKPinAnnotationView(annotation: annotation, reuseIdentifier: "Pin")
             annotationView.canShowCallout = true
             annotationView.isEnabled = true
             annotationView.animatesDrop = true
-            if !toggleTaggedAnnotationsButtonSelected {
+            print("three lines down")
+            if !toggleTaggedAnnotationsButtonSelected && !editingLocation {
+                print("this shouldn't run")
                 let annotationButton = UIButton(type: UIButtonType.contactAdd)
                 annotationButton.addTarget(self, action: #selector(MapViewController.chooseRadiusForTag(_:)), for: .touchUpInside)
                 annotationView.rightCalloutAccessoryView = annotationButton
                 let button = annotationView.rightCalloutAccessoryView as! UIButton
+                print("just before for loop")
                 for (index, _) in (searchedLocations?.enumerated())! {
-                    if (annotation.coordinate.latitude == searchedLocations?[index].coordinate.latitude) && (annotation.coordinate.longitude == searchedLocations?[index].coordinate.longitude) {
+                    print("for loop")
+                    if (annotation.coordinate.latitude == searchedLocations?[index].latitude) && (annotation.coordinate.longitude == searchedLocations?[index].longitude) {
                         button.tag = index
                         break
                     }
                 }
 
             }
+            print("before return")
                       //  button.tag = index
             return annotationView
         }
     }
     
     func regularView() {
+        taggingLocation = false
         bottomBar.isHidden = true
         searchBar.isHidden = false
         cancelButton.title = "< Back"
@@ -225,6 +233,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         stateForToggleButton()
         toggleTaggedAnnotationsButton.action = #selector(MapViewController.toggleTaggedAnnotations)
         toggleTaggedAnnotationsButton.target = self
+        toggleTaggedAnnotationsButton.style = .plain
         if currentLocation.isEnabled {
             toggleTaggedAnnotationsButton.isEnabled = true
         } else {
@@ -233,12 +242,15 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     }
     
     func taggingLocationView() {
+        taggingLocation = true
         self.title = "Choose Size"
         bottomBar.isHidden = false
         searchBar.isHidden = true
         cancelButton.action = #selector(MapViewController.tagCancelButtonPressed)
         cancelButton.target = self
+        cancelButton.title = "< Search"
         toggleTaggedAnnotationsButton.title = "Save"
+        toggleTaggedAnnotationsButton.style = .done
         toggleTaggedAnnotationsButton.action = #selector(MapViewController.tagButtonPressed)
         toggleTaggedAnnotationsButton.target = self
         toggleTaggedAnnotationsButton.isEnabled = true
@@ -280,7 +292,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         if !currentLocation.isEnabled {
             if editingLocation {
                 currentLocation.isEnabled = true
-                toggleTaggedAnnotationsButton.isEnabled = false
+            //    toggleTaggedAnnotationsButton.isEnabled = false
                 print("Editing Location")
                 
             } else {
@@ -502,6 +514,10 @@ extension MapViewController: TagLocationViewControllerDelegate {
 
 extension MapViewController: UIGestureRecognizerDelegate {
     func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
-        return true
+        if taggingLocation || editingLocation {
+            return false
+        } else {
+            return true
+        }
     }
 }

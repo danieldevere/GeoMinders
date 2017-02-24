@@ -63,7 +63,7 @@ class LocationDetailController: UITableViewController {
         super.viewDidLoad()
         let location = getLocation()
         textField.text = location.name
-        nameLabel.text = location.placemark?.name
+        nameLabel.text = location.subtitle
        // addressLabel.text = "\(location.placemark?.subThoroughfare) \(location.placemark?.thoroughfare) \(location.placemark?.locality), \(location.placemark?.administrativeArea) \(location.placemark?.postalCode)"
         addressLabel.text = location.subtitle
         // Uncomment the following line to preserve selection between presentations
