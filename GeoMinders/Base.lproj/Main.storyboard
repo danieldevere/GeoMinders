@@ -610,7 +610,11 @@
                         </connections>
                     </tableView>
                     <navigationItem key="navigationItem" title="My Lists" id="0Tf-mV-Zsz">
-                        <barButtonItem key="leftBarButtonItem" title="Settings" id="vsp-WP-zW3"/>
+                        <barButtonItem key="leftBarButtonItem" title="Settings" id="vsp-WP-zW3">
+                            <connections>
+                                <segue destination="G4P-06-F78" kind="show" identifier="ShowSettings" id="gsi-fM-gvG"/>
+                            </connections>
+                        </barButtonItem>
                         <barButtonItem key="rightBarButtonItem" systemItem="add" id="bYT-ty-XdC">
                             <connections>
                                 <action selector="addList" destination="h72-t6-1jS" id="FVg-AG-xZc"/>
@@ -620,7 +624,6 @@
                     <connections>
                         <outlet property="addButton" destination="bYT-ty-XdC" id="rq5-V4-Zjz"/>
                         <outlet property="settingsButton" destination="vsp-WP-zW3" id="MvJ-i9-TO6"/>
-                        <segue destination="tpE-Cb-YmP" kind="presentation" identifier="ShowSettings" id="uIr-FI-hd1"/>
                     </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="muK-qa-3Jn" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -645,7 +648,7 @@
             </objects>
             <point key="canvasLocation" x="-442.5" y="-355.98591549295776"/>
         </scene>
-        <!--Settings-->
+        <!--Settings View Controller-->
         <scene sceneID="lmv-sZ-oz4">
             <objects>
                 <tableViewController id="G4P-06-F78" customClass="SettingsViewController" customModule="GeoMinders" customModuleProvider="target" sceneMemberID="viewController">
@@ -785,13 +788,6 @@
                             <outlet property="delegate" destination="G4P-06-F78" id="ESO-j7-QOh"/>
                         </connections>
                     </tableView>
-                    <navigationItem key="navigationItem" title="Settings" id="HPv-Y4-280">
-                        <barButtonItem key="leftBarButtonItem" title="&lt; My Lists" id="bSP-jX-W1c">
-                            <connections>
-                                <action selector="back" destination="G4P-06-F78" id="yJz-ON-TFK"/>
-                            </connections>
-                        </barButtonItem>
-                    </navigationItem>
                     <connections>
                         <outlet property="additionalReminderToggle" destination="2Vl-vP-wWh" id="67W-iu-3HK"/>
                         <outlet property="alertSoundsToggle" destination="3EE-Bd-oCq" id="EBM-T0-Raz"/>
@@ -1017,24 +1013,6 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="6fR-6t-joi" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="4836" y="-262"/>
-        </scene>
-        <!--Navigation Controller-->
-        <scene sceneID="Mmk-d4-4rA">
-            <objects>
-                <navigationController automaticallyAdjustsScrollViewInsets="NO" id="tpE-Cb-YmP" sceneMemberID="viewController">
-                    <toolbarItems/>
-                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="Ob6-WW-R4H">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
-                        <autoresizingMask key="autoresizingMask"/>
-                    </navigationBar>
-                    <nil name="viewControllers"/>
-                    <connections>
-                        <segue destination="G4P-06-F78" kind="relationship" relationship="rootViewController" id="h4z-X0-5yL"/>
-                    </connections>
-                </navigationController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="fMk-BY-5XQ" userLabel="First Responder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="1410" y="-1058.4507042253522"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="qQb-0G-seg">

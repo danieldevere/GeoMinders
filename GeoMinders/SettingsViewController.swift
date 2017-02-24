@@ -46,7 +46,7 @@ class SettingsViewController: UITableViewController {
     }
     
     @IBAction func back() {
-        dismiss(animated: true, completion: nil)
+     //   dismiss(animated: true, completion: nil)
     }
 
     override func viewDidLoad() {

@@ -140,8 +140,8 @@ class AllListsViewController: UITableViewController {
             }
           //  println("Sender: \(sender)")
         } else if segue.identifier == "ShowSettings" {
-            let navigationController = segue.destination as! UINavigationController
-            let controller = navigationController.topViewController as! SettingsViewController
+            let controller = segue.destination as! SettingsViewController
+        //    let controller = navigationController.topViewController as! SettingsViewController
             controller.dataModel = dataModel
         } else if segue.identifier == "ShowStoreList" {
             let navigationController = segue.destination as! UINavigationController
