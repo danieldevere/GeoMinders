@@ -92,7 +92,8 @@ class LocationPickerViewController: UITableViewController {
             editButton.isEnabled = true
             editButton.title = "Delete"
             editButton.action = #selector(LocationPickerViewController.edit)
-            cancelButton.title = "< Back"
+            cancelButton.title = "< Settings"
+            title = "My Locations"
         } else {
             editButton.title = ""
             editButton.isEnabled = false

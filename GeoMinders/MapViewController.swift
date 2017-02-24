@@ -67,10 +67,8 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     }
     
     @IBAction func segmentChanged() {
-        let placemark = MKPlacemark(coordinate: locationToTag.coordinate, addressDictionary: nil)
-        let location = Location(name: "", placemark: placemark, longitude: locationToTag.coordinate.longitude, latitude: locationToTag.coordinate.latitude)
         map.removeOverlays(map.overlays)
-        addRadiusOverlayForLocation(location, withRadius: (Double(radiusSegmentedControl.selectedSegmentIndex) + 1) * 100.0 * 0.3048)
+        addRadiusOverlayForLocation(locationToTag, withRadius: (Double(radiusSegmentedControl.selectedSegmentIndex) + 1) * 100.0 * 0.3048)
     }
     
 
@@ -106,6 +104,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
             addRadiusOverlayForLocation(locations[0], withRadius: locations[0].radius)
             toggleTaggedAnnotations()
             self.title = "This Location"
+            
 
         }
         let pinGestureRecognizer = UILongPressGestureRecognizer(target: self, action: #selector(MapViewController.addAnnotationOnTap))
@@ -113,7 +112,34 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         pinGestureRecognizer.delegate = self
         view.addGestureRecognizer(pinGestureRecognizer)
         map.isRotateEnabled = false
-        toggleTaggedAnnotationsButton.isEnabled = true
+        if !editingLocation {
+            toggleTaggedAnnotationsButton.isEnabled = true
+        }
+        
+    }
+    
+    func stringFromCLPlacemark(placemark: CLPlacemark) -> String {
+        var string = ""
+        if let subthoroughfare = placemark.subThoroughfare {
+            string.append("\(subthoroughfare) ")
+        }
+        if let thoroughfare = placemark.thoroughfare {
+            string.append("\(thoroughfare)\n")
+        }
+        if let locality = placemark.locality {
+            string.append("\(locality), ")
+        }
+        if let administrativeArea = placemark.administrativeArea {
+            string.append("\(administrativeArea) ")
+        }
+        if let postalCode = placemark.postalCode {
+            string.append("\(postalCode)")
+        }
+        if string.isEmpty {
+            return "(No address found)"
+        } else {
+            return string
+        }
     }
     
     func addAnnotationOnTap(gesture: UIGestureRecognizer) {
@@ -127,8 +153,8 @@ class MapViewController: UIViewController, MKMapViewDelegate {
                 let touchPoint = gesture.location(in: map)
                 let locationCoordinate = map.convert(touchPoint, toCoordinateFrom: map)
                 var locationName = ""
-                var locationPlacemark: MKPlacemark?
-                var location = Location(name: locationName, placemark: nil, longitude: locationCoordinate.longitude, latitude: locationCoordinate.latitude)
+                var locationPlacemark = CLPlacemark()
+                var location = Location()
                 let geocodeLocation = CLLocation(latitude: locationCoordinate.latitude, longitude: locationCoordinate.longitude)
                 CLGeocoder().reverseGeocodeLocation(geocodeLocation, completionHandler: {
                     placemarks, error in
@@ -141,8 +167,8 @@ class MapViewController: UIViewController, MKMapViewDelegate {
                                 if let pmName = pm.name {
                                     locationName = pmName
                                 }
-                                locationPlacemark = pm as? MKPlacemark
-                                location = Location(name: locationName, placemark: locationPlacemark, longitude: locationCoordinate.longitude, latitude: locationCoordinate.latitude)
+                                locationPlacemark = pm
+                                location = Location(name: locationName, address: self.stringFromCLPlacemark(placemark: locationPlacemark), addressName: locationName, longitude: locationCoordinate.longitude, latitude: locationCoordinate.latitude)
                             }
                         }
                         if (self.currentLocation.isEnabled && self.map.annotations.count > 1) || (!self.currentLocation.isEnabled && self.map.annotations.count > 0) {
@@ -324,12 +350,13 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     }
     
     func stateForToggleButton() {
-        if toggleTaggedAnnotationsButtonSelected {
-            toggleTaggedAnnotationsButton.title = "Hide Saved"
-        } else {
-            toggleTaggedAnnotationsButton.title = "Show Saved"
+        if !editingLocation {
+            if toggleTaggedAnnotationsButtonSelected {
+                toggleTaggedAnnotationsButton.title = "Hide Saved"
+            } else {
+                toggleTaggedAnnotationsButton.title = "Show Saved"
+            }
         }
-        
     }
 
 
@@ -447,6 +474,26 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         searchBar.resignFirstResponder()
     }
     
+    func stringFromPlacemark(_ placemark: MKPlacemark) -> String {
+        var string = ""
+        if let subThoroughFare = placemark.subThoroughfare {
+            string.append("\(subThoroughFare) ")
+        }
+        if let thoroughfare = placemark.thoroughfare {
+            string.append("\(thoroughfare)\n")
+        }
+        if let locality = placemark.locality {
+            string.append("\(locality), ")
+        }
+        if let administrativeArea = placemark.administrativeArea {
+            string.append("\(administrativeArea) ")
+        }
+        if let postalCode = placemark.postalCode {
+            string.append(postalCode)
+        }
+        return string
+    }
+
     
 
 }
@@ -471,7 +518,7 @@ extension MapViewController: UISearchBarDelegate {
                 }
                 self.searchedLocations = [Location]()
                 for mapItem in (response?.mapItems)! as [MKMapItem] {
-                    let location = Location(name: mapItem.placemark.name!, placemark: mapItem.placemark, longitude: mapItem.placemark.coordinate.longitude, latitude: mapItem.placemark.coordinate.latitude)
+                    let location = Location(name: mapItem.placemark.name!, address: self.stringFromPlacemark(mapItem.placemark), addressName: mapItem.placemark.name!, longitude: mapItem.placemark.coordinate.longitude, latitude: mapItem.placemark.coordinate.latitude)
                     self.searchedLocations?.append(location)
                 }
                 if let theseLocations = self.searchedLocations {

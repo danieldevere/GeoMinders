@@ -57,7 +57,7 @@ class RemindersViewController: UITableViewController {
         let textField = tableView.viewWithTag(1003) as! UITextField
         textField.text = ""
         textField.resignFirstResponder()
-        backAndCancelButton.title = "< Back"
+        backAndCancelButton.title = "< My Lists"
         backAndCancelButton.action = #selector(RemindersViewController.back)
     }  
     
