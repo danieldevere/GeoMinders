@@ -25,6 +25,8 @@ class TagLocationViewController: UITableViewController {
     
     @IBOutlet weak var addressLabel: UILabel!
     
+    @IBOutlet weak var addressName: UILabel!
+    
     
     @IBAction func goBack(_ sender: AnyObject) {
         delegate?.tagLocationViewControllerDidGoBack(self)
@@ -57,7 +59,8 @@ class TagLocationViewController: UITableViewController {
         
         textField.text = taggedLocation?.name
         textField.becomeFirstResponder()
-        addressLabel.text = taggedLocation?.subtitle
+        addressLabel.text = taggedLocation?.address
+        addressName.text = taggedLocation?.addressName
 
         // Uncomment the following line to preserve selection between presentations
         // self.clearsSelectionOnViewWillAppear = false

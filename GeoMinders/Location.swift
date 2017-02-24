@@ -14,7 +14,8 @@ class Location: NSObject, NSCoding, MKAnnotation {
     var myID: Int = 0
     var reminderIDs = [Int]()
     var name = ""
-    var placemark: MKPlacemark?
+    var addressName = ""
+    var address = ""
     var latitude: Double = 0.0
     var longitude: Double = 0.0
     var radius: Double = 0.0
@@ -25,23 +26,20 @@ class Location: NSObject, NSCoding, MKAnnotation {
     
     var title: String? {
         if name.isEmpty {
-            return placemark?.name
+            return addressName
         } else {
             return name
         }
     }
     
     var subtitle: String? {
-        if let thisPlacemark = placemark {
-            return stringFromPlacemark(thisPlacemark)
-        } else {
-            return "(No Address Found)"
-        }
+        return address
     }
     
     required init(coder aDecoder: NSCoder) {
         name = aDecoder.decodeObject(forKey: "Name") as! String
-        placemark = aDecoder.decodeObject(forKey: "Placemark") as? MKPlacemark
+        address = aDecoder.decodeObject(forKey: "Address") as! String
+        addressName = aDecoder.decodeObject(forKey: "AddressName") as! String
         longitude = aDecoder.decodeDouble(forKey: "Longitude")
         latitude = aDecoder.decodeDouble(forKey: "Latitude")
         radius = aDecoder.decodeDouble(forKey: "Radius")
@@ -55,31 +53,13 @@ class Location: NSObject, NSCoding, MKAnnotation {
         super.init()
     }
     
-    func stringFromPlacemark(_ placemark: MKPlacemark) -> String {
-        var string = ""
-        if let subThoroughFare = placemark.subThoroughfare {
-            string.append("\(subThoroughFare) ")
-        }
-        if let thoroughfare = placemark.thoroughfare {
-            string.append("\(thoroughfare)\n")
-        }
-        if let locality = placemark.locality {
-            string.append("\(locality), ")
-        }
-        if let administrativeArea = placemark.administrativeArea {
-            string.append("\(administrativeArea) ")
-        }
-        if let postalCode = placemark.postalCode {
-            string.append(postalCode)
-        }
-        return string
-    }
-    
+        
     func encode(with aCoder: NSCoder) {
         aCoder.encode(name, forKey: "Name")
      //   println("Name: \(name)")
-        aCoder.encode(placemark, forKey: "Placemark")
+        aCoder.encode(address, forKey: "Address")
     //    println("Placemark: \(placemark)")
+        aCoder.encode(addressName, forKey: "AddressName")
         aCoder.encode(longitude, forKey: "Longitude")
     //    println("Longitude: \(longitude)")
         aCoder.encode(latitude, forKey: "Latitude")
@@ -91,10 +71,11 @@ class Location: NSObject, NSCoding, MKAnnotation {
         aCoder.encode(remindersCount, forKey: "RemindersCount")
     }
     
-    convenience init(name: String, placemark: MKPlacemark?, longitude: Double, latitude: Double) {
+    convenience init(name: String, address: String, addressName: String, longitude: Double, latitude: Double) {
         self.init()
         self.name = name
-        self.placemark = placemark
+        self.address = address
+        self.addressName = addressName
         self.longitude = longitude
         self.latitude = latitude
         

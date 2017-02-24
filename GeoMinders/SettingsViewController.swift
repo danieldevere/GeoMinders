@@ -24,16 +24,6 @@ class SettingsViewController: UITableViewController {
         } else {
             dataModel.settings.playAlertSounds = false
         }
-        var types: UIUserNotificationType = []
-        if dataModel.settings.playAlertSounds {
-            types = [.alert, .sound]
-        } else {
-            types = [.alert]
-        }
-        
-        let notificationSettings = UIUserNotificationSettings(types: types, categories: nil)
-        UIApplication.shared.registerUserNotificationSettings(notificationSettings)
-
         dataModel.saveSettings()
     }
     
@@ -56,7 +46,7 @@ class SettingsViewController: UITableViewController {
     }
     
     @IBAction func back() {
-        dismiss(animated: true, completion: nil)
+     //   dismiss(animated: true, completion: nil)
     }
 
     override func viewDidLoad() {

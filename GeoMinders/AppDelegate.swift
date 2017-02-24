@@ -65,19 +65,26 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
     
     func application(_ application: UIApplication, didReceive notification: UILocalNotification) {
-        let alertView = UIAlertController(title: "You have arrived at \(notification.alertTitle!)", message: notification.alertBody, preferredStyle: UIAlertControllerStyle.alert)
-        
-    //    window?.rootViewController?.present(alertView, animated: true, completion: nil)
-        var topWindow = UIWindow(frame: UIScreen.main.bounds)
+        let topWindow = UIWindow(frame: UIScreen.main.bounds)
         topWindow.rootViewController = UIViewController()
-        let alertAction = UIAlertAction(title: "OK", style: UIAlertActionStyle.default, handler: {
-            _ in
-            topWindow.isHidden = true
-        })
-        
-        alertView.addAction(alertAction)
         topWindow.makeKeyAndVisible()
-        topWindow.rootViewController?.present(alertView, animated: true, completion: nil)
+        if #available(iOS 8.2, *) {
+            let alertView = UIAlertController(title: "You have arrived at \(notification.alertTitle!)", message: notification.alertBody, preferredStyle: UIAlertControllerStyle.alert)
+            
+            let alertAction = UIAlertAction(title: "OK", style: UIAlertActionStyle.default, handler: {
+                _ in
+                topWindow.isHidden = true
+            })
+            
+            alertView.addAction(alertAction)
+            
+            topWindow.rootViewController?.present(alertView, animated: true, completion: nil)
+
+        } else {
+            // Fallback on earlier versions
+            let alertView = UIAlertView(title: "You have arrived at a saved location", message: notification.alertBody, delegate: nil, cancelButtonTitle: "OK")
+            alertView.show()
+        }
     }
     
     func saveData() {
@@ -125,9 +132,14 @@ extension AppDelegate: CLLocationManagerDelegate {
         alertString = alertString + ", you need to get \(remindersForNotification[0].reminderText)"
         alertString = alertString + " and \(additionalReminders)"
         localNotification.alertBody = alertString + " other items."
-        localNotification.alertTitle = locationEntered.name
-        
-        localNotification.soundName = UILocalNotificationDefaultSoundName
+        if #available(iOS 8.2, *) {
+            localNotification.alertTitle = locationEntered.name
+        } else {
+            // Fallback on earlier versions
+        }
+        if dataModel.settings.playAlertSounds {
+            localNotification.soundName = UILocalNotificationDefaultSoundName
+        }
         UIApplication.shared.scheduleLocalNotification(localNotification)
         print("Entered the location: \(locationEntered.name)")
         if dataModel.settings.remindAgain {
@@ -136,8 +148,17 @@ extension AppDelegate: CLLocationManagerDelegate {
             secondNotification.fireDate = secondDate
             secondNotification.timeZone = TimeZone.current
             secondNotification.alertBody = alertString + " other items."
-            secondNotification.alertTitle = locationEntered.name
-            secondNotification.soundName = UILocalNotificationDefaultSoundName
+            if #available(iOS 8.2, *) {
+                secondNotification.alertTitle = locationEntered.name
+                
+
+            } else {
+                // Fallback on earlier versions
+            }
+            if dataModel.settings.playAlertSounds {
+                secondNotification.soundName = UILocalNotificationDefaultSoundName
+            }
+            
             UIApplication.shared.scheduleLocalNotification(secondNotification)
         }
         let navigationController = window?.rootViewController as! UINavigationController
