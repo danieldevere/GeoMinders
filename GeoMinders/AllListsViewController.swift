@@ -2,8 +2,8 @@
 //  AllListsViewController.swift
 //  GeoMinders
 //
-//  Created by DANIEL DE VERE on 2/11/17.
-//  Copyright (c) 2017 DANIEL DE VERE. All rights reserved.
+//  Created by DANIEL DEVERE on 2/11/17.
+//  Copyright (c) 2017 DANIEL DEVERE. All rights reserved.
 //
 
 import UIKit
@@ -11,24 +11,22 @@ import CoreLocation
 
 class AllListsViewController: UITableViewController {
     
+    // MARK: - Variables
+    
     var dataModel: DataModel!
-    
     var addingList = false
-    
     var atStore = false
-    
     var storeList: ReminderList?
-    
     let locationManager = CLLocationManager()
     
     @IBOutlet weak var settingsButton: UIBarButtonItem!
-    
     @IBOutlet weak var addButton: UIBarButtonItem!
+
+    // MARK: - Action Functions
     
-    
+    // User presses the plus button
     @IBAction func addList() {
         addingList = true
-        
         settingsButton.target = self
         settingsButton.action = #selector(AllListsViewController.cancelNewList)
         addButton.isEnabled = false
@@ -39,7 +37,7 @@ class AllListsViewController: UITableViewController {
         let textField = tableView.viewWithTag(3000) as! UITextField
         textField.becomeFirstResponder()
     }
-    
+    // User presses done on keyboard to add new list
     @IBAction func done() {
         let textField = tableView.viewWithTag(3000) as! UITextField
         let newList = ReminderList(name: textField.text!)
@@ -48,7 +46,7 @@ class AllListsViewController: UITableViewController {
         dataModel.saveReminderItems()
         cancelNewList()
     }
-    
+    // User presses cancel while adding new list
     func cancelNewList() {
         let textField = tableView.viewWithTag(3000) as! UITextField
         textField.text = ""
@@ -56,68 +54,24 @@ class AllListsViewController: UITableViewController {
         addingList = false
         settingsButton.target = self
         settingsButton.action = #selector(AllListsViewController.settingsButtonAction)
-       settingsButton.title = "Settings"
+        settingsButton.title = "Settings"
         addButton.isEnabled = true
         tableView.reloadData()
     }
-    
+    // User presses settings button
     func settingsButtonAction() {
         performSegue(withIdentifier: "ShowSettings", sender: nil)
     }
     
-    func remindersForLocation(_ location: Location) -> [ReminderItem] {
-        var reminders = [ReminderItem]()
-        for list in dataModel.lists {
-            for reminder in list.checklist {
-                if reminder.locationID == location.myID {
-                    if !reminder.checked {
-                        reminders.append(reminder)
-                    }
-                    
-                }
-            }
-        }
-        return reminders
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        navigationController?.isToolbarHidden = true
     }
-   /*
-    override func viewDidAppear(animated: Bool) {
-        super.viewDidAppear(animated)
-        for thisRegion in locationManager.monitoredRegions {
-            let region = thisRegion as! CLCircularRegion
-            if let currentLocation = locationManager.location {
-                if (currentLocation.coordinate.latitude == region.center.latitude) && (currentLocation.coordinate.longitude == region.center.longitude) {
-                    for location in dataModel.locations {
-                        if location.myID == region.identifier.toInt() {
-                            storeList?.checklist = remindersForLocation(location)
-                            storeList?.name = location.name
-                            atStore = true
-                            tableView.reloadData()
-                            break
-                        }
-                    }
-                    println("found current location in monitored regions")
-                    break
-                }
-                
-            } else {
-                println("No current location")
-            }
-        }
-        
-
-    }
-*/
-    
     
     override func viewDidLoad() {
         super.viewDidLoad()
         settingsButton.target = self
         settingsButton.action = #selector(AllListsViewController.settingsButtonAction)
-        // Uncomment the following line to preserve selection between presentations
-        // self.clearsSelectionOnViewWillAppear = false
-
-        // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
-        // self.navigationItem.rightBarButtonItem = self.editButtonItem()
     }
 
     override func didReceiveMemoryWarning() {
@@ -126,53 +80,52 @@ class AllListsViewController: UITableViewController {
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        // Segue when user taps on reminder list
         if segue.identifier == "ShowChecklist" {
-            let navigationController = segue.destination as! UINavigationController
-            let controller = navigationController.topViewController as! RemindersViewController
+            let controller = segue.destination as! RemindersViewController
             let cell = sender as! UITableViewCell
             let indexPath = tableView.indexPath(for: cell)
             controller.reminderList = dataModel.lists[indexPath!.row]
-            controller.delegate = self
             controller.dataModel = dataModel
             controller.title = "\(dataModel.lists[indexPath!.row].name) List"
             if addingList {
                 cancelNewList()
             }
-          //  println("Sender: \(sender)")
+        // Segue when user taps on settings button
         } else if segue.identifier == "ShowSettings" {
-            let controller = segue.destination as! SettingsViewController
-        //    let controller = navigationController.topViewController as! SettingsViewController
-            controller.dataModel = dataModel
-        } else if segue.identifier == "ShowStoreList" {
             let navigationController = segue.destination as! UINavigationController
-            let controller = navigationController.topViewController as! RemindersViewController
+            let controller = navigationController.topViewController as! SettingsViewController
+            controller.dataModel = dataModel
+        // Segue when user is at store and taps the store list
+        } else if segue.identifier == "ShowStoreList" {
+            let controller = segue.destination as! RemindersViewController
             if let list = storeList {
                 print("sent storeList to reminder screen")
                 controller.reminderList = list
                 controller.title = list.name
             }
-            controller.delegate = self
             controller.dataModel = dataModel
             controller.atStore = true
         }
     }
 
     // MARK: - Table view data source
+    
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        // #warning Incomplete method implementation.
-        // Return the number of rows in the section.
         return numberOfRows()
     }
 
-
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        // List cells
         if indexPath.row < dataModel.lists.count {
             let cell = tableView.dequeueReusableCell(withIdentifier: "ListCell", for: indexPath) 
             cell.textLabel?.text = dataModel.lists[indexPath.row].name
             return cell
+        // New list cell below list cells if not at store and below store list if at store
         } else if (addingList) && (indexPath.row == dataModel.lists.count) {
             let cell = tableView.dequeueReusableCell(withIdentifier: "NewListCell", for: indexPath) 
             return cell
+        // Add store list below list cells
         } else if (atStore) && (indexPath.row == numberOfRows() - 1) {
             let cell = tableView.dequeueReusableCell(withIdentifier: "ItemsToDoAtLocationCell", for: indexPath)
             cell.textLabel?.text = "\(storeList!.name)"
@@ -184,11 +137,11 @@ class AllListsViewController: UITableViewController {
     }
     
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
+        // Alert user before list deletion
         let alert = UIAlertController(title: "Deleting List", message: "This will delete all the items in the list", preferredStyle: UIAlertControllerStyle.alert)
         let deleteAction = UIAlertAction(title: "Delete", style: UIAlertActionStyle.destructive, handler: {
             _ in
             self.listDeleted(indexPath.row)
-            
             self.dataModel.lists.remove(at: indexPath.row)
             let indexPaths = [indexPath]
             tableView.deleteRows(at: indexPaths, with: .automatic)
@@ -199,7 +152,7 @@ class AllListsViewController: UITableViewController {
         alert.addAction(cancelAction)
         present(alert, animated: true, completion: nil)
     }
-    
+    // Cancels new list if there is one.  storyboard has segue to reminder list
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         if addingList {
@@ -210,7 +163,7 @@ class AllListsViewController: UITableViewController {
             }
         }
     }
-    
+    // Don't allow editing of new cell or store list
     override func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
         if indexPath.row < dataModel.lists.count {
             return true
@@ -218,15 +171,10 @@ class AllListsViewController: UITableViewController {
             return false
         }
     }
-    /*
-    override func tableView(_ tableView: UITableView, willSelectRowAt indexPath: IndexPath) -> IndexPath? {
-        if addingList && indexPath.row < dataModel.lists.count {
-            return nil
-        } else {
-            return indexPath
-        }
-    }
-    */
+    
+    // MARK: - Location monitoring functions
+    
+    // Update all the locations when a list is deleted
     func listDeleted(_ listIndex: Int) {
         for item in dataModel.lists[listIndex].checklist {
             for location in dataModel.locations {
@@ -237,9 +185,8 @@ class AllListsViewController: UITableViewController {
         }
         dataModel.saveLocationItems()
         updateLocationMonitoring()
-    //    println("Number of locations monitored after list deletion: \(locationManager.monitoredRegions.count)")
     }
-    
+    // Check all the locations to see if they should still be monitored
     func updateLocationMonitoring() {
         for location in dataModel.locations {
             if location.remindersCount <= 0 {
@@ -255,76 +202,34 @@ class AllListsViewController: UITableViewController {
                     locationManager.stopMonitoring(for: region)
                 }
             }
-
         }
     }
-
     
+    // MARK: - Functions
     
-    
-        
+    // Search reminders to create at store list
+    func remindersForLocation(_ location: Location) -> [ReminderItem] {
+        var reminders = [ReminderItem]()
+        for list in dataModel.lists {
+            for reminder in list.checklist {
+                if reminder.locationID == location.myID {
+                    if !reminder.checked {
+                        reminders.append(reminder)
+                    }
+                }
+            }
+        }
+        return reminders
+    }
+    // Calculate the number of rows in the tableview
     func numberOfRows() -> Int {
         var number = dataModel.lists.count
         if addingList {
             number += 1
         }
-        
         if atStore {
             number += 1
         }
         return number
-    }
-
-
-    /*
-    // Override to support conditional editing of the table view.
-    override func tableView(tableView: UITableView, canEditRowAtIndexPath indexPath: NSIndexPath) -> Bool {
-        // Return NO if you do not want the specified item to be editable.
-        return true
-    }
-    */
-
-    /*
-    // Override to support editing the table view.
-    override func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
-        if editingStyle == .Delete {
-            // Delete the row from the data source
-            tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Fade)
-        } else if editingStyle == .Insert {
-            // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
-        }    
-    }
-    */
-
-    /*
-    // Override to support rearranging the table view.
-    override func tableView(tableView: UITableView, moveRowAtIndexPath fromIndexPath: NSIndexPath, toIndexPath: NSIndexPath) {
-
-    }
-    */
-
-    /*
-    // Override to support conditional rearranging of the table view.
-    override func tableView(tableView: UITableView, canMoveRowAtIndexPath indexPath: NSIndexPath) -> Bool {
-        // Return NO if you do not want the item to be re-orderable.
-        return true
-    }
-    */
-
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-        // Get the new view controller using [segue destinationViewController].
-        // Pass the selected object to the new view controller.
-    }
-    */
-
-}
-
-extension AllListsViewController: RemindersViewControllerDelegate {
-    func remindersViewControllerWantsToSave(_ controller: RemindersViewController) {
-        dataModel.saveReminderItems()
     }
 }

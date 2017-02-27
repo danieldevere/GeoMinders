@@ -2,67 +2,32 @@
 //  RemindersViewController.swift
 //  GeoMinders
 //
-//  Created by DANIEL DE VERE on 2/5/17.
-//  Copyright (c) 2017 DANIEL DE VERE. All rights reserved.
+//  Created by DANIEL DEVERE on 2/5/17.
+//  Copyright (c) 2017 DANIEL DEVERE. All rights reserved.
 //
 
 import UIKit
 import CoreLocation
 
-protocol RemindersViewControllerDelegate: class {
-    func remindersViewControllerWantsToSave(_ controller: RemindersViewController)
-}
-
 class RemindersViewController: UITableViewController {
+    // MARK: - Variables
     
     var hideCompleted = true
-
-    var reminderList: ReminderList
-    
+    var reminderList = ReminderList()
     var tempReminder = ReminderItem()
-    
-    var delegate: RemindersViewControllerDelegate?
-    
     var dataModel: DataModel!
-    
     var atStore: Bool = false
-    
     let locationManager = CLLocationManager()
     
     @IBOutlet weak var reminderNameLabel: UILabel!
     @IBOutlet weak var reminderDetailLabel: UILabel!
     @IBOutlet weak var reminderCheckbox: UIImageView!
-    @IBOutlet weak var backAndCancelButton: UIBarButtonItem!
-    
     @IBOutlet weak var showCompletedButton: UIBarButtonItem!
     
-    @IBAction func toggleShowCompleted() {
-        hideCompleted = !hideCompleted
-        if hideCompleted {
-            showCompletedButton.title = "Show Completed"
-        } else {
-            showCompletedButton.title = "Hide Completed"
-        }
-        dataModel.sortItemsByCompletedThenDate()
-        tableView.reloadData()
-    }
+    // MARK: - Actions
     
-    @IBAction func startedTyping() {
-        backAndCancelButton.title = "Cancel"
-        backAndCancelButton.action = #selector(RemindersViewController.cancelAdd)
-        backAndCancelButton.target = self
-    }
-    
-    func cancelAdd() {
-        let textField = tableView.viewWithTag(1003) as! UITextField
-        textField.text = ""
-        textField.resignFirstResponder()
-        backAndCancelButton.title = "< My Lists"
-        backAndCancelButton.action = #selector(RemindersViewController.back)
-    }  
-    
+    // User is done typing and presses done on keyboard
     @IBAction func done() {
-        //   println("Text: \(textField.text)")
         let textField = tableView.viewWithTag(1003) as! UITextField
         textField.resignFirstResponder()
         let item = ReminderItem()
@@ -77,37 +42,39 @@ class RemindersViewController: UITableViewController {
             UserDefaults.standard.set(0, forKey: "ReminderIndex")
         }
         tempReminder = item
-
-        
         performSegue(withIdentifier: "PickLocation", sender: nil)
-
     }
-
-    
-    @IBAction func back() {
-        dismiss(animated: true, completion: nil)
+    // User presses the show completed/hide completed button
+    @IBAction func toggleShowCompleted() {
+        hideCompleted = !hideCompleted
+        if hideCompleted {
+            showCompletedButton.title = "Show Completed"
+        } else {
+            showCompletedButton.title = "Hide Completed"
+        }
         dataModel.sortItemsByCompletedThenDate()
+        tableView.reloadData()
     }
-
+    // Changes the left bar button item to the cancel button
+    @IBAction func startedTyping() {
+        navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .cancel, target: self, action: #selector(RemindersViewController.cancelAdd))
+    }
+    // User presses the detail button on a reminder
     @IBAction func detailButton(_ sender: AnyObject) {
         performSegue(withIdentifier: "ShowDetail", sender: sender)
     }
-  
-    required init(coder aDecoder: NSCoder) {
-        reminderList = ReminderList()
-        super.init(coder: aDecoder)!
- //       loadReminderItems()
-        
+    // User starts typing reminder but presses cancel button
+    func cancelAdd() {
+        let textField = tableView.viewWithTag(1003) as! UITextField
+        textField.text = ""
+        textField.resignFirstResponder()
+        navigationItem.leftBarButtonItem = nil
     }
-
+    
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-    }
-    override func viewDidLoad() {
-        super.viewDidLoad()
-   //     updateCheckmarksForCells()
-       /* let cellNib = UINib(nibName: "NewReminderCell", bundle: nil)
-        tableView.register(cellNib, forCellReuseIdentifier: "NewReminderCell")*/
+        dataModel.sortItemsByCompletedThenDate()
+        navigationController?.isToolbarHidden = false
     }
 
     override func didReceiveMemoryWarning() {
@@ -116,6 +83,7 @@ class RemindersViewController: UITableViewController {
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        // User presses the detail button on a reminder
         if segue.identifier == "ShowDetail" {
             let navigationController = segue.destination as! UINavigationController
             let controller = navigationController.topViewController as! ReminderItemDetailViewController
@@ -124,32 +92,29 @@ class RemindersViewController: UITableViewController {
                 controller.dataModel = dataModel
                 controller.delegate = self
             }
+        // User presses done after typing reminder
         } else if segue.identifier == "PickLocation" {
             let navigationController = segue.destination as! UINavigationController
             let controller = navigationController.topViewController as! LocationPickerViewController
             controller.delegate = self
             controller.dataModel = dataModel
             controller.editingLocations = false
-        //    println("Pick Location Segue")
         }
-        
     }
-    
 
     // MARK: - Table view data source
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-    //    println("Number of row: \(reminderList.checklist.count)")
         return calculateNumberOfRows()
     }
-
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        // Adds the new reminder row when the user isn't at the store and they aren't showing the completed items
         if !atStore && hideCompleted && (indexPath.row == tableView.numberOfRows(inSection: 0) - 1 || reminderList.checklist[indexPath.row].checked) {
             let cell = tableView.dequeueReusableCell(withIdentifier: "NewReminderCell", for: indexPath)
             return cell
         }
-        
+        // Adds the reminder rows whether its a store list or a regular list
         if indexPath.row < reminderList.checklist.count {
             let item = reminderList.checklist[indexPath.row]
             let cell = tableView.dequeueReusableCell(withIdentifier: "ReminderItemCell", for: indexPath) 
@@ -164,7 +129,7 @@ class RemindersViewController: UITableViewController {
                 cell.accessoryType = UITableViewCellAccessoryType.detailButton
             }
             return cell
-            
+        // Adds the new reminder row when the user is showing completed
         } else {
             let cell = tableView.dequeueReusableCell(withIdentifier: "NewReminderCell", for: indexPath)
             return cell
@@ -172,6 +137,7 @@ class RemindersViewController: UITableViewController {
     }
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        // toggle the cell's checkmark and set the completion date
         if indexPath.row < reminderList.checklist.count {
             let cell = tableView.cellForRow(at: indexPath)
             let checkmark = cell?.viewWithTag(1000) as! UIImageView
@@ -187,42 +153,35 @@ class RemindersViewController: UITableViewController {
                 checkmark.image = UIImage()
             }
             tableView.deselectRow(at: indexPath, animated: true)
-       //     updateCheckmarksForCells()
-            delegate?.remindersViewControllerWantsToSave(self)
+            dataModel.saveReminderItems()
             dataModel.saveLocationItems()
-    //        saveReminderItems()
-
         }
     }
     
     override func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
+        // Prevents deletion of new reminder row
         if indexPath.row == reminderList.checklist.count {
             return false
-        }else {
+        } else {
+            // Allows deletion unless at the store
             if atStore {
                 return false
             } else {
                 return true
             }
-
         }
     }
-    
+    // Delete reminder. Updates the location's reminder count
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
-
-        
         removeReminderFromLocation(reminderList.checklist[indexPath.row])
         dataModel.saveLocationItems()
         updateLocationMonitoring()
-    //    println("Locations: \(locations[0].reminderIDs.count)")
         reminderList.checklist.remove(at: indexPath.row)
         let indexPaths = [indexPath]
-
         tableView.deleteRows(at: indexPaths, with: .automatic)
-        delegate?.remindersViewControllerWantsToSave(self)
-    //    saveReminderItems()
+        dataModel.saveReminderItems()
     }
-    
+    // Turns off selection of new reminder cell
     override func tableView(_ tableView: UITableView, willSelectRowAt indexPath: IndexPath) -> IndexPath? {
         if indexPath.row == reminderList.checklist.count {
             return nil
@@ -231,6 +190,9 @@ class RemindersViewController: UITableViewController {
         }
     }
     
+    // MARK: - Functions
+    
+    // Convenience function to calculate number of rows
     func calculateNumberOfRows() -> Int {
         var rows = 0
         if !atStore {
@@ -249,66 +211,13 @@ class RemindersViewController: UITableViewController {
         }
         return rows
     }
-    
-  /*
-        */
+    // Convenience function for the cell for row at indexpath
     func updateCheckmarkForCell(cell: UITableViewCell, withReminder reminder: ReminderItem) {
         let checkmark = cell.viewWithTag(1000) as! UIImageView
         if reminder.checked {
             checkmark.image = #imageLiteral(resourceName: "checkmark-512")
         } else {
             checkmark.image = UIImage()
-        }
-    }
-    
-    func updateCheckmarksForCells() {
-        var i = 0
-        var numberOfRows = 0
-        if atStore {
-            numberOfRows = tableView.numberOfRows(inSection: 0)
-        } else {
-            numberOfRows = tableView.numberOfRows(inSection: 0) - 1
-        }
-        while i < numberOfRows {
-            let indexPath = IndexPath(row: i, section: 0)
-            let cell = tableView.cellForRow(at: indexPath)
-            let checkmark = cell?.viewWithTag(1000) as! UIImageView
-            if reminderList.checklist[indexPath.row].checked {
-                checkmark.image = UIImage(named: "checkmark-512")
-            } else {
-                checkmark.image = UIImage()
-            }
-            i += 1
-        }
-    }
-    
-    func region(_ location: Location) -> CLCircularRegion {
-        let identifier = "\(location.myID)"
-        let region = CLCircularRegion(center: location.coordinate, radius: location.radius, identifier: identifier)
-        region.notifyOnEntry = true
-        region.notifyOnExit = true
-        return region
-    }
-    
-    func startMonitoring(_ location: Location) {
-      /*  if locationManager.monitoring {
-            print("geofencing not supported")
-            return
-        }*/
-        // 2
-        let region = self.region(location)
-        locationManager.startMonitoring(for: region)
-     //   println("Start monitoring location: \(location.name)")
-
-    }
-    
-    func stopMonitoring(_ location: Location) {
-        for region in locationManager.monitoredRegions {
-            if let region = region as? CLCircularRegion {
-                if Int(region.identifier) == location.myID {
-                    locationManager.stopMonitoring(for: region)
-                }
-            }
         }
     }
     
@@ -328,37 +237,57 @@ class RemindersViewController: UITableViewController {
         }
     }
     
+    // MARK: - Location monitoring functions
+    
+    func region(_ location: Location) -> CLCircularRegion {
+        let identifier = "\(location.myID)"
+        let region = CLCircularRegion(center: location.coordinate, radius: location.radius, identifier: identifier)
+        region.notifyOnEntry = true
+        region.notifyOnExit = true
+        return region
+    }
+    
+    func startMonitoring(_ location: Location) {
+        let region = self.region(location)
+        locationManager.startMonitoring(for: region)
+    }
+    
+    func stopMonitoring(_ location: Location) {
+        for region in locationManager.monitoredRegions {
+            if let region = region as? CLCircularRegion {
+                if Int(region.identifier) == location.myID {
+                    locationManager.stopMonitoring(for: region)
+                }
+            }
+        }
+    }
+    
     func updateLocationMonitoring() {
         for location in dataModel.locations {
             if location.remindersCount <= 0 {
                 stopMonitoring(location)
-           //     println("stopped monitoring \(location.name)")
             } else {
                 stopMonitoring(location)
                 startMonitoring(location)
             }
         }
-     //   println("Locations being monitored \(locationManager.monitoredRegions.count)")
     }
-
-    
 }
 
-
+// MARK: - Reminder Detail Delegate
 
 extension RemindersViewController: ReminderItemDetailViewControllerDelegate {
+    
     func reminderItemDetailViewController(_ controller: ReminderItemDetailViewController, didFinishEditingReminder reminder: ReminderItem) {
         dismiss(animated: true, completion: nil)
         updateLocationMonitoring()
         print("After Edit Reminder: \(reminder.reminderText) LocationID: \(reminder.locationID)")
-        delegate?.remindersViewControllerWantsToSave(self)
+        dataModel.saveReminderItems()
         tableView.reloadData()
-  //      saveReminderItems()
         let textField = tableView.viewWithTag(1003) as! UITextField
         if !(textField.text?.isEmpty)! {
             cancelAdd()
         }
-
     }
     
     func reminderItemDetailViewControllerDidCancel(_ controller: ReminderItemDetailViewController) {
@@ -367,29 +296,31 @@ extension RemindersViewController: ReminderItemDetailViewControllerDelegate {
         if !(textField.text?.isEmpty)! {
             cancelAdd()
         }
-        
     }
 }
 
+// MARK: - Location Picker delegate
+
 extension RemindersViewController: LocationPickerViewControllerDelegate {
     func locationPickerViewController(_ controller: LocationPickerViewController, didPickLocation location: Location) {
+        // Add location info to reminder
         tempReminder.detailText = location.name
-        tempReminder.locationAddress = location.subtitle!
+        tempReminder.locationAddress = location.address
         tempReminder.locationID = location.myID
         tempReminder.creationDate = Date(timeIntervalSinceNow: 0)
         addReminderToLocationCount(tempReminder)
-        print("After PickLocation Reminder: \(tempReminder.reminderText) LocationID: \(tempReminder.locationID)")
-        dataModel.saveLocationItems()
-        updateLocationMonitoring()
         reminderList.checklist.append(tempReminder)
         dataModel.sortItemsByCompletedThenDate()
+        dataModel.saveReminderItems()
+        // Update location data
+        dataModel.saveLocationItems()
+        updateLocationMonitoring()
+        // Update view
         cancelAdd()
         tableView.reloadData()
-        delegate?.remindersViewControllerWantsToSave(self)
     }
     
     func locationPickerViewControllerDidCancel(_ controller: LocationPickerViewController) {
-     //   dismiss(animated: true, completion: nil)
         let textField = tableView.viewWithTag(1003) as! UITextField
         if !(textField.text?.isEmpty)! {
             textField.becomeFirstResponder()

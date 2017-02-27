@@ -17,7 +17,6 @@
 		56573DB31E47C32B0053822B /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 56573DB11E47C32B0053822B /* Main.storyboard */; };
 		56573DB51E47C32B0053822B /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 56573DB41E47C32B0053822B /* Images.xcassets */; };
 		56573DB81E47C32B0053822B /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 56573DB61E47C32B0053822B /* LaunchScreen.xib */; };
-		56573DC41E47C32B0053822B /* GeoMindersTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56573DC31E47C32B0053822B /* GeoMindersTests.swift */; };
 		56573DD01E47C49B0053822B /* RemindersViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56573DCF1E47C49B0053822B /* RemindersViewController.swift */; };
 		56573DD21E47D2FC0053822B /* ReminderItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56573DD11E47D2FC0053822B /* ReminderItem.swift */; };
 		5658EFCE1E52CE310076E558 /* DataModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5658EFCD1E52CE310076E558 /* DataModel.swift */; };
@@ -27,16 +26,6 @@
 		56A96A341E4FA18A0022C96F /* ReminderList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56A96A331E4FA18A0022C96F /* ReminderList.swift */; };
 		56CB4A1F1E49815D0078E69F /* ReminderItemDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56CB4A1E1E49815D0078E69F /* ReminderItemDetailViewController.swift */; };
 /* End PBXBuildFile section */
-
-/* Begin PBXContainerItemProxy section */
-		56573DBE1E47C32B0053822B /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 56573DA01E47C32B0053822B /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 56573DA71E47C32B0053822B;
-			remoteInfo = GeoMinders;
-		};
-/* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		56073E7B1E5BD24E003FA06E /* SettingsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SettingsViewController.swift; sourceTree = "<group>"; };
@@ -51,7 +40,6 @@
 		56573DB21E47C32B0053822B /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		56573DB41E47C32B0053822B /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		56573DB71E47C32B0053822B /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/LaunchScreen.xib; sourceTree = "<group>"; };
-		56573DBD1E47C32B0053822B /* GeoMindersTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GeoMindersTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		56573DC21E47C32B0053822B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		56573DC31E47C32B0053822B /* GeoMindersTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeoMindersTests.swift; sourceTree = "<group>"; };
 		56573DCF1E47C49B0053822B /* RemindersViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RemindersViewController.swift; sourceTree = "<group>"; };
@@ -73,16 +61,36 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		56573DBA1E47C32B0053822B /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		56309AA21E63DAA2008CEAC1 /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				56573DD11E47D2FC0053822B /* ReminderItem.swift */,
+				562E411B1E4AC9700096B0A3 /* Location.swift */,
+				56073E7D1E5BD5EE003FA06E /* Settings.swift */,
+				5658EFCD1E52CE310076E558 /* DataModel.swift */,
+				56A96A331E4FA18A0022C96F /* ReminderList.swift */,
+			);
+			name = Model;
+			sourceTree = "<group>";
+		};
+		56309AA31E63DC0A008CEAC1 /* Controller */ = {
+			isa = PBXGroup;
+			children = (
+				56573DCF1E47C49B0053822B /* RemindersViewController.swift */,
+				56CB4A1E1E49815D0078E69F /* ReminderItemDetailViewController.swift */,
+				562E41191E4AC90D0096B0A3 /* LocationPickerViewController.swift */,
+				562E41211E4B90980096B0A3 /* MapViewController.swift */,
+				56A96A2F1E4ECF0B0022C96F /* TagLocationViewController.swift */,
+				56A96A311E4F9EA40022C96F /* AllListsViewController.swift */,
+				56073E7B1E5BD24E003FA06E /* SettingsViewController.swift */,
+				5671604F1E5D4B95000E47D0 /* LocationDetailController.swift */,
+			);
+			name = Controller;
+			sourceTree = "<group>";
+		};
 		56573D9F1E47C32B0053822B = {
 			isa = PBXGroup;
 			children = (
@@ -97,7 +105,6 @@
 			isa = PBXGroup;
 			children = (
 				56573DA81E47C32B0053822B /* GeoMinders.app */,
-				56573DBD1E47C32B0053822B /* GeoMindersTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -105,24 +112,13 @@
 		56573DAA1E47C32B0053822B /* GeoMinders */ = {
 			isa = PBXGroup;
 			children = (
+				56309AA31E63DC0A008CEAC1 /* Controller */,
+				56309AA21E63DAA2008CEAC1 /* Model */,
 				56573DAD1E47C32B0053822B /* AppDelegate.swift */,
 				56573DB11E47C32B0053822B /* Main.storyboard */,
 				56573DB41E47C32B0053822B /* Images.xcassets */,
 				56573DB61E47C32B0053822B /* LaunchScreen.xib */,
 				56573DAB1E47C32B0053822B /* Supporting Files */,
-				56573DCF1E47C49B0053822B /* RemindersViewController.swift */,
-				56573DD11E47D2FC0053822B /* ReminderItem.swift */,
-				56CB4A1E1E49815D0078E69F /* ReminderItemDetailViewController.swift */,
-				562E41191E4AC90D0096B0A3 /* LocationPickerViewController.swift */,
-				562E411B1E4AC9700096B0A3 /* Location.swift */,
-				562E41211E4B90980096B0A3 /* MapViewController.swift */,
-				56A96A2F1E4ECF0B0022C96F /* TagLocationViewController.swift */,
-				56A96A311E4F9EA40022C96F /* AllListsViewController.swift */,
-				56A96A331E4FA18A0022C96F /* ReminderList.swift */,
-				5658EFCD1E52CE310076E558 /* DataModel.swift */,
-				56073E7B1E5BD24E003FA06E /* SettingsViewController.swift */,
-				56073E7D1E5BD5EE003FA06E /* Settings.swift */,
-				5671604F1E5D4B95000E47D0 /* LocationDetailController.swift */,
 			);
 			path = GeoMinders;
 			sourceTree = "<group>";
@@ -172,24 +168,6 @@
 			productReference = 56573DA81E47C32B0053822B /* GeoMinders.app */;
 			productType = "com.apple.product-type.application";
 		};
-		56573DBC1E47C32B0053822B /* GeoMindersTests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 56573DCA1E47C32B0053822B /* Build configuration list for PBXNativeTarget "GeoMindersTests" */;
-			buildPhases = (
-				56573DB91E47C32B0053822B /* Sources */,
-				56573DBA1E47C32B0053822B /* Frameworks */,
-				56573DBB1E47C32B0053822B /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				56573DBF1E47C32B0053822B /* PBXTargetDependency */,
-			);
-			name = GeoMindersTests;
-			productName = GeoMindersTests;
-			productReference = 56573DBD1E47C32B0053822B /* GeoMindersTests.xctest */;
-			productType = "com.apple.product-type.bundle.unit-test";
-		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -203,11 +181,6 @@
 						CreatedOnToolsVersion = 6.4;
 						DevelopmentTeam = WFV6LKJDBU;
 						LastSwiftMigration = 0820;
-					};
-					56573DBC1E47C32B0053822B = {
-						CreatedOnToolsVersion = 6.4;
-						LastSwiftMigration = 0820;
-						TestTargetID = 56573DA71E47C32B0053822B;
 					};
 				};
 			};
@@ -225,7 +198,6 @@
 			projectRoot = "";
 			targets = (
 				56573DA71E47C32B0053822B /* GeoMinders */,
-				56573DBC1E47C32B0053822B /* GeoMindersTests */,
 			);
 		};
 /* End PBXProject section */
@@ -238,13 +210,6 @@
 				56573DB31E47C32B0053822B /* Main.storyboard in Resources */,
 				56573DB81E47C32B0053822B /* LaunchScreen.xib in Resources */,
 				56573DB51E47C32B0053822B /* Images.xcassets in Resources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		56573DBB1E47C32B0053822B /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -272,23 +237,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		56573DB91E47C32B0053822B /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				56573DC41E47C32B0053822B /* GeoMindersTests.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXSourcesBuildPhase section */
-
-/* Begin PBXTargetDependency section */
-		56573DBF1E47C32B0053822B /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 56573DA71E47C32B0053822B /* GeoMinders */;
-			targetProxy = 56573DBE1E47C32B0053822B /* PBXContainerItemProxy */;
-		};
-/* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
 		56573DB11E47C32B0053822B /* Main.storyboard */ = {
@@ -431,44 +380,6 @@
 			};
 			name = Release;
 		};
-		56573DCB1E47C32B0053822B /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(SDKROOT)/Developer/Library/Frameworks",
-					"$(inherited)",
-				);
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					"DEBUG=1",
-					"$(inherited)",
-				);
-				INFOPLIST_FILE = GeoMindersTests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = "com.dandevere.$(PRODUCT_NAME:rfc1034identifier)";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 3.0;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/GeoMinders.app/GeoMinders";
-			};
-			name = Debug;
-		};
-		56573DCC1E47C32B0053822B /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(SDKROOT)/Developer/Library/Frameworks",
-					"$(inherited)",
-				);
-				INFOPLIST_FILE = GeoMindersTests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = "com.dandevere.$(PRODUCT_NAME:rfc1034identifier)";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 3.0;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/GeoMinders.app/GeoMinders";
-			};
-			name = Release;
-		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -486,15 +397,6 @@
 			buildConfigurations = (
 				56573DC81E47C32B0053822B /* Debug */,
 				56573DC91E47C32B0053822B /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		56573DCA1E47C32B0053822B /* Build configuration list for PBXNativeTarget "GeoMindersTests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				56573DCB1E47C32B0053822B /* Debug */,
-				56573DCC1E47C32B0053822B /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

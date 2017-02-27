@@ -2,15 +2,14 @@
 //  ReminderList.swift
 //  GeoMinders
 //
-//  Created by DANIEL DE VERE on 2/11/17.
-//  Copyright (c) 2017 DANIEL DE VERE. All rights reserved.
+//  Created by DANIEL DEVERE on 2/11/17.
+//  Copyright (c) 2017 DANIEL DEVERE. All rights reserved.
 //
 
 import Foundation
 
 class ReminderList: NSObject, NSCoding {
     var name = ""
-    
     var checklist = [ReminderItem]()
     
     init(name: String) {

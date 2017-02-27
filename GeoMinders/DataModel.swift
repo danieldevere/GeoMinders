@@ -2,16 +2,21 @@
 //  DataModel.swift
 //  GeoMinders
 //
-//  Created by DANIEL DE VERE on 2/14/17.
-//  Copyright (c) 2017 DANIEL DE VERE. All rights reserved.
+//  Created by DANIEL DEVERE on 2/14/17.
+//  Copyright (c) 2017 DANIEL DEVERE. All rights reserved.
 //
 
 import Foundation
 
 class DataModel {
-    var lists = [ReminderList]()
     
-    var locations = [Location]()
+    init() {
+        loadLocationItems()
+        loadReminderItems()
+        loadSettings()
+    }
+    
+    // MARK: - Settings Data
     
     var settings = Settings(remindAgain: true, playAlertSounds: true, deleteAfter30Days: true)
     
@@ -44,39 +49,22 @@ class DataModel {
             }
         }
     }
+
+    // MARK: - Reminders Data
     
-    func deleteOldCompleted() {
-        for list in lists {
-            let checkedList = list.checklist.filter({
-                $0.checked == true
-            })
-            var uncheckedList = list.checklist.filter({
-                $0.checked == false
-            })
-            let keepers = checkedList.filter({
-                Date(timeIntervalSinceNow: 0).timeIntervalSince($0.completionDate!) < (30 * 24 * 60 * 60)
-            })
-            for keeper in keepers {
-                uncheckedList.append(keeper)
-            }
-            list.checklist = uncheckedList
-        }
-    }
-    
+    var lists = [ReminderList]()
     
     func reminderDocumentsDirectory() -> String {
-        let paths = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true) 
+        let paths = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)
         print("Directory: \(paths[0])")
         return paths[0]
     }
     
     func reminderDataFilePath() -> String {
         return reminderDocumentsDirectory().appending("/GeoMindersItems.plist")
-      //  return reminderDocumentsDirectory().stringByAppendingPathComponent("GeoMindersItems.plist")
     }
     
     func saveReminderItems() {
-    //    sortItemsByCompletedThenDate()
         let data = NSMutableData()
         let archiver = NSKeyedArchiver(forWritingWith: data)
         archiver.encode(lists, forKey: "Checklists")
@@ -97,44 +85,26 @@ class DataModel {
                     }
                     sortItemsByCompletedThenDate()
                 }
-                
             }
         }
     }
     
-    func saveLocationItems() {
-        let data = NSMutableData()
-        let archiver = NSKeyedArchiver(forWritingWith: data)
-        archiver.encode(locations, forKey: "MyLocations")
-        archiver.finishEncoding()
-        data.write(toFile: dataFilePath(), atomically: true)
-    }
-    
-    func loadLocationItems() {
-        let path = dataFilePath()
-        if FileManager.default.fileExists(atPath: path) {
-            if let data = try? Data(contentsOf: URL(fileURLWithPath: path)) {
-                let unarchiver = NSKeyedUnarchiver(forReadingWith: data)
-                locations = [Location]()
-                
-                if let mylocations = unarchiver.decodeObject(forKey: "MyLocations") as? [Location] {
-                    locations = mylocations
-                    unarchiver.finishDecoding()
-                }
-                
+    func deleteOldCompleted() {
+        for list in lists {
+            let checkedList = list.checklist.filter({
+                $0.checked == true
+            })
+            var uncheckedList = list.checklist.filter({
+                $0.checked == false
+            })
+            let keepers = checkedList.filter({
+                Date(timeIntervalSinceNow: 0).timeIntervalSince($0.completionDate!) < (30 * 24 * 60 * 60)
+            })
+            for keeper in keepers {
+                uncheckedList.append(keeper)
             }
+            list.checklist = uncheckedList
         }
-    }
-    
-    func documentsDirectory() -> String {
-        let paths = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true) 
-        print("Directory: \(paths[0])")
-        return paths[0]
-    }
-    
-    func dataFilePath() -> String {
-        return documentsDirectory().appending("/GeoMindersLocations.plist")
- //       return documentsDirectory().stringByAppendingPathComponent("GeoMindersLocations.plist")
     }
     
     func sortItemsByCompletedThenDate() {
@@ -164,11 +134,40 @@ class DataModel {
         }
     }
     
-    init() {
-        loadLocationItems()
-        loadReminderItems()
-        loadSettings()
+    // MARK: - Location Data
+    
+    var locations = [Location]()
+    
+    func saveLocationItems() {
+        let data = NSMutableData()
+        let archiver = NSKeyedArchiver(forWritingWith: data)
+        archiver.encode(locations, forKey: "MyLocations")
+        archiver.finishEncoding()
+        data.write(toFile: dataFilePath(), atomically: true)
     }
-
-
+    
+    func loadLocationItems() {
+        let path = dataFilePath()
+        if FileManager.default.fileExists(atPath: path) {
+            if let data = try? Data(contentsOf: URL(fileURLWithPath: path)) {
+                let unarchiver = NSKeyedUnarchiver(forReadingWith: data)
+                locations = [Location]()
+                
+                if let mylocations = unarchiver.decodeObject(forKey: "MyLocations") as? [Location] {
+                    locations = mylocations
+                    unarchiver.finishDecoding()
+                }
+            }
+        }
+    }
+    
+    func documentsDirectory() -> String {
+        let paths = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true) 
+        print("Directory: \(paths[0])")
+        return paths[0]
+    }
+    
+    func dataFilePath() -> String {
+        return documentsDirectory().appending("/GeoMindersLocations.plist")
+    }
 }

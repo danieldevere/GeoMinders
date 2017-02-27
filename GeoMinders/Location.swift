@@ -2,8 +2,8 @@
 //  Location.swift
 //  GeoMinders
 //
-//  Created by DANIEL DE VERE on 2/7/17.
-//  Copyright (c) 2017 DANIEL DE VERE. All rights reserved.
+//  Created by DANIEL DEVERE on 2/7/17.
+//  Copyright (c) 2017 DANIEL DEVERE. All rights reserved.
 //
 
 import Foundation
@@ -23,7 +23,7 @@ class Location: NSObject, NSCoding, MKAnnotation {
     var coordinate: CLLocationCoordinate2D {
         return CLLocationCoordinate2DMake(latitude, longitude)
     }
-    
+    // MKAnnotation Variables
     var title: String? {
         if name.isEmpty {
             return addressName
@@ -53,19 +53,13 @@ class Location: NSObject, NSCoding, MKAnnotation {
         super.init()
     }
     
-        
     func encode(with aCoder: NSCoder) {
         aCoder.encode(name, forKey: "Name")
-     //   println("Name: \(name)")
         aCoder.encode(address, forKey: "Address")
-    //    println("Placemark: \(placemark)")
         aCoder.encode(addressName, forKey: "AddressName")
         aCoder.encode(longitude, forKey: "Longitude")
-    //    println("Longitude: \(longitude)")
         aCoder.encode(latitude, forKey: "Latitude")
-    //    println("Latitude: \(latitude)")
         aCoder.encode(radius, forKey: "Radius")
-   //     println("Radius: \(radius)")
         aCoder.encode(myID, forKey: "MyID")
         aCoder.encode(reminderIDs, forKey: "ReminderIDs")
         aCoder.encode(remindersCount, forKey: "RemindersCount")
@@ -78,8 +72,5 @@ class Location: NSObject, NSCoding, MKAnnotation {
         self.addressName = addressName
         self.longitude = longitude
         self.latitude = latitude
-        
     }
-
-    
 }
