@@ -120,11 +120,11 @@ class DataModel {
             })
             completed.sort(by: {
                 item1, item2 in return
-                item1.creationDate?.compare(item2.creationDate!) == .orderedAscending
+                item1.creationDate?.compare(item2.creationDate!) == .orderedDescending
             })
             notCompleted.sort(by: {
                 item1, item2 in return
-                item1.creationDate?.compare(item2.creationDate!) == .orderedAscending
+                item1.creationDate?.compare(item2.creationDate!) == .orderedDescending
             })
             var sortedList = [ReminderItem]()
             for item in notCompleted {

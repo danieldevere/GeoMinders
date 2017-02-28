@@ -110,13 +110,11 @@ class RemindersViewController: UITableViewController {
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         // Adds the new reminder row when the user isn't at the store and they aren't showing the completed items
-        if !atStore && hideCompleted && (indexPath.row == tableView.numberOfRows(inSection: 0) - 1 || reminderList.checklist[indexPath.row].checked) {
+        if indexPath.row == 0 {
             let cell = tableView.dequeueReusableCell(withIdentifier: "NewReminderCell", for: indexPath)
             return cell
-        }
-        // Adds the reminder rows whether its a store list or a regular list
-        if indexPath.row < reminderList.checklist.count {
-            let item = reminderList.checklist[indexPath.row]
+        } else if indexPath.row - 1 >= 0 && indexPath.row - 1 < reminderList.checklist.count {
+            let item = reminderList.checklist[indexPath.row - 1]
             let cell = tableView.dequeueReusableCell(withIdentifier: "ReminderItemCell", for: indexPath) 
             let reminderText = cell.viewWithTag(1001) as! UILabel
             let reminderDetailText = cell.viewWithTag(1002) as! UILabel
@@ -129,26 +127,23 @@ class RemindersViewController: UITableViewController {
                 cell.accessoryType = UITableViewCellAccessoryType.detailButton
             }
             return cell
-        // Adds the new reminder row when the user is showing completed
-        } else {
-            let cell = tableView.dequeueReusableCell(withIdentifier: "NewReminderCell", for: indexPath)
-            return cell
         }
+        return super.tableView(tableView, cellForRowAt: indexPath)
     }
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         // toggle the cell's checkmark and set the completion date
-        if indexPath.row < reminderList.checklist.count {
+        if indexPath.row >= 1 {
             let cell = tableView.cellForRow(at: indexPath)
             let checkmark = cell?.viewWithTag(1000) as! UIImageView
-            reminderList.checklist[indexPath.row].checked = !reminderList.checklist[indexPath.row].checked
-            if reminderList.checklist[indexPath.row].checked {
+            reminderList.checklist[indexPath.row - 1].checked = !reminderList.checklist[indexPath.row - 1].checked
+            if reminderList.checklist[indexPath.row - 1].checked {
                 checkmark.image = #imageLiteral(resourceName: "checkmark-512")
-                removeReminderFromLocation(reminderList.checklist[indexPath.row])
-                reminderList.checklist[indexPath.row].completionDate = Date(timeIntervalSinceNow: 0)
+                removeReminderFromLocation(reminderList.checklist[indexPath.row - 1])
+                reminderList.checklist[indexPath.row - 1].completionDate = Date(timeIntervalSinceNow: 0)
                 updateLocationMonitoring()
             } else {
-                addReminderToLocationCount(reminderList.checklist[indexPath.row])
+                addReminderToLocationCount(reminderList.checklist[indexPath.row - 1])
                 updateLocationMonitoring()
                 checkmark.image = UIImage()
             }
@@ -160,7 +155,7 @@ class RemindersViewController: UITableViewController {
     
     override func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
         // Prevents deletion of new reminder row
-        if indexPath.row == reminderList.checklist.count {
+        if indexPath.row == 0 {
             return false
         } else {
             // Allows deletion unless at the store
@@ -173,17 +168,17 @@ class RemindersViewController: UITableViewController {
     }
     // Delete reminder. Updates the location's reminder count
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
-        removeReminderFromLocation(reminderList.checklist[indexPath.row])
+        removeReminderFromLocation(reminderList.checklist[indexPath.row - 1])
         dataModel.saveLocationItems()
         updateLocationMonitoring()
-        reminderList.checklist.remove(at: indexPath.row)
+        reminderList.checklist.remove(at: indexPath.row - 1)
         let indexPaths = [indexPath]
         tableView.deleteRows(at: indexPaths, with: .automatic)
         dataModel.saveReminderItems()
     }
     // Turns off selection of new reminder cell
     override func tableView(_ tableView: UITableView, willSelectRowAt indexPath: IndexPath) -> IndexPath? {
-        if indexPath.row == reminderList.checklist.count {
+        if indexPath.row == 0 {
             return nil
         } else {
             return indexPath

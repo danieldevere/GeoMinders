@@ -39,11 +39,13 @@ class LocationPickerViewController: UITableViewController {
         navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(LocationPickerViewController.done))
         navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(LocationPickerViewController.done))
         tableView.isEditing = true
+        tableView.reloadData()
     }
     // Exits the deletion mode
     func done() {
         tableView.isEditing = false
         editingLocationsView()
+        tableView.reloadData()
     }
     
     // MARK: - Overrides
@@ -106,7 +108,12 @@ class LocationPickerViewController: UITableViewController {
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // Add a row for the new location cell
-        return dataModel.locations.count + 1
+        if tableView.isEditing {
+            return dataModel.locations.count
+        } else {
+            return dataModel.locations.count + 1
+        }
+        
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -183,11 +190,34 @@ class LocationPickerViewController: UITableViewController {
         present(alertView, animated: true, completion: nil)
     }
     
+    override func tableView(_ tableView: UITableView, canMoveRowAt indexPath: IndexPath) -> Bool {
+        if indexPath.row == dataModel.locations.count {
+            return false
+        } else {
+            return true
+        }
+    }
+    
+    override func tableView(_ tableView: UITableView, shouldIndentWhileEditingRowAt indexPath: IndexPath) -> Bool {
+        if indexPath.row == dataModel.locations.count {
+            return false
+        } else {
+            return true
+        }
+    }
+    
+    override func tableView(_ tableView: UITableView, moveRowAt sourceIndexPath: IndexPath, to destinationIndexPath: IndexPath) {
+        let location = dataModel.locations[sourceIndexPath.row]
+        dataModel.locations.remove(at: sourceIndexPath.row)
+        dataModel.locations.insert(location, at: destinationIndexPath.row)
+        dataModel.saveLocationItems()
+    }
+    
     // MARK: - Functions
     
     // Sets up the buttons for editingLocations mode
     func editingLocationsView() {
-        navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Delete", style: .plain, target: self, action: #selector(LocationPickerViewController.edit))
+        navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Edit", style: .plain, target: self, action: #selector(LocationPickerViewController.edit))
         if dataModel.locations.count == 0 {
             navigationItem.rightBarButtonItem?.isEnabled = false
         } else {
