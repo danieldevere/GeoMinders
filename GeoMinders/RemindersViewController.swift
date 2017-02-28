@@ -133,17 +133,23 @@ class RemindersViewController: UITableViewController {
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         // toggle the cell's checkmark and set the completion date
+        var reminder = ReminderItem()
+        if atStore {
+            reminder = reminderList.checklist[indexPath.row]
+        } else {
+            reminder = reminderList.checklist[indexPath.row - 1]
+        }
         if indexPath.row >= 1 {
             let cell = tableView.cellForRow(at: indexPath)
             let checkmark = cell?.viewWithTag(1000) as! UIImageView
-            reminderList.checklist[indexPath.row - 1].checked = !reminderList.checklist[indexPath.row - 1].checked
-            if reminderList.checklist[indexPath.row - 1].checked {
+            reminder.checked = !reminder.checked
+            if reminder.checked {
                 checkmark.image = #imageLiteral(resourceName: "checkmark-512")
-                removeReminderFromLocation(reminderList.checklist[indexPath.row - 1])
-                reminderList.checklist[indexPath.row - 1].completionDate = Date(timeIntervalSinceNow: 0)
+                removeReminderFromLocation(reminder)
+                reminder.completionDate = Date(timeIntervalSinceNow: 0)
                 updateLocationMonitoring()
             } else {
-                addReminderToLocationCount(reminderList.checklist[indexPath.row - 1])
+                addReminderToLocationCount(reminder)
                 updateLocationMonitoring()
                 checkmark.image = UIImage()
             }
@@ -179,7 +185,11 @@ class RemindersViewController: UITableViewController {
     // Turns off selection of new reminder cell
     override func tableView(_ tableView: UITableView, willSelectRowAt indexPath: IndexPath) -> IndexPath? {
         if indexPath.row == 0 {
-            return nil
+            if atStore {
+                return indexPath
+            } else {
+                return nil
+            }
         } else {
             return indexPath
         }
