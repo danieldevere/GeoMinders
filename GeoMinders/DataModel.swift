@@ -14,6 +14,8 @@ class DataModel {
         loadLocationItems()
         loadReminderItems()
         loadSettings()
+        registerDefaults()
+        handleFirstTime()
     }
     
     // MARK: - Settings Data
@@ -22,6 +24,7 @@ class DataModel {
     
     func settingsDocumentsDirectory() -> String {
         let paths = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)
+        print("Settings Directory: \(paths[0])")
         return paths[0]
     }
     
@@ -56,7 +59,7 @@ class DataModel {
     
     func reminderDocumentsDirectory() -> String {
         let paths = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)
-        print("Directory: \(paths[0])")
+        print("Reminder Directory: \(paths[0])")
         return paths[0]
     }
     
@@ -163,11 +166,40 @@ class DataModel {
     
     func documentsDirectory() -> String {
         let paths = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true) 
-        print("Directory: \(paths[0])")
+        print("Locations Directory: \(paths[0])")
         return paths[0]
     }
     
     func dataFilePath() -> String {
         return documentsDirectory().appending("/GeoMindersLocations.plist")
+    }
+    
+    // MARK: - Defaults
+    
+    var indexOfSelectedChecklist: Int {
+        get {
+            return UserDefaults.standard.integer(forKey: "ChecklistIndex")
+        }
+        set {
+            UserDefaults.standard.set(newValue, forKey: "ChecklistIndex")
+            UserDefaults.standard.synchronize()
+        }
+    }
+    
+    func registerDefaults() {
+        let dictionary = [ "ChecklistIndex": -1, "FirstTime": true, "LocationIndex": 0 ] as [String : Any]
+        UserDefaults.standard.register(defaults: dictionary)
+    }
+    
+    // MARK: - First Time Function
+    
+    func handleFirstTime() {
+        let firstTime = UserDefaults.standard.bool(forKey: "FirstTime")
+        if firstTime {
+            let checklist = ReminderList(name: "Reminders")
+            lists.append(checklist)
+            indexOfSelectedChecklist = 0
+            UserDefaults.standard.set(false, forKey: "FirstTime")
+        }
     }
 }

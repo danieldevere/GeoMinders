@@ -63,6 +63,7 @@ class MapViewController: UIViewController {
         map.isRotateEnabled = false
         if editingLocation {
             editingLocationView()
+            title = "\(locations[0].name)"
         } else {
             regularView()
         }
@@ -128,7 +129,11 @@ class MapViewController: UIViewController {
         annotationView?.rightCalloutAccessoryView?.isHidden = false
         locationToTag = Location()
         moveMap(forMapCase: .untaggedLocations)
-        title = "Tap a Pin"
+        if map.selectedAnnotations.count == 0 {
+            title = "Tap a Pin"
+        } else {
+            title = "Tap Plus"
+        }
         map.remove(overlay!)
     }
     // User presses the + button on callout
@@ -155,9 +160,18 @@ class MapViewController: UIViewController {
             if let theseLocations = searchedLocations {
                 addAnnotations(theseLocations)
             }
-            if searchedLocations!.count > 0 {
-                moveMap(forMapCase: .untaggedLocations)
+            if let locations = searchedLocations {
+                if locations.count > 0 {
+                    moveMap(forMapCase: .untaggedLocations)
+                    title = "Tap a Pin"
+                } else {
+                    title = "Search or Press"
+                    if currentLocation.isEnabled {
+                        moveMapToDefaultView()
+                    }
+                }
             } else {
+                title = "Search or Press"
                 if currentLocation.isEnabled {
                     moveMapToDefaultView()
                 }
@@ -168,6 +182,7 @@ class MapViewController: UIViewController {
             if let theseLocations = searchedLocations {
                 removeAnnotationsForLocations(theseLocations)
             }
+            title = "Saved Locations"
             searchBar.isHidden = true
             addAnnotations(locations)
             moveMap(forMapCase: .taggedLocations)
@@ -183,8 +198,8 @@ class MapViewController: UIViewController {
         searchBar.isHidden = true
         navigationItem.rightBarButtonItem = nil
         navigationItem.leftBarButtonItem = nil
-        title = "\(locations[0].name)"
         showSavedLocations()
+        title = "\(locations[0].name)"
         addRadiusOverlayForLocation(locations[0], withRadius: locations[0].radius)
         map.selectAnnotation(locations[0], animated: true)
     }
@@ -303,6 +318,7 @@ class MapViewController: UIViewController {
     
     func addRadiusOverlayForLocation(_ location: Location, withRadius radius: CLLocationDistance) {
         overlay = MKCircle(center: location.coordinate, radius: radius)
+        print("\(map.overlays.count)")
         map.add(overlay!)
     }
 
@@ -350,7 +366,7 @@ class MapViewController: UIViewController {
                 bottomRightCoord.longitude = max(bottomRightCoord.longitude, location.coordinate.longitude)
             }
             let center = CLLocationCoordinate2D(latitude: topLeftCoord.latitude - (topLeftCoord.latitude  - bottomRightCoord.latitude) / 2, longitude: topLeftCoord.longitude - (topLeftCoord.longitude - bottomRightCoord.longitude) / 2)
-            let extraSpace = 1.1
+            let extraSpace = 1.3
             let span = MKCoordinateSpan(latitudeDelta: abs(topLeftCoord.latitude - bottomRightCoord.latitude) * extraSpace, longitudeDelta: abs(topLeftCoord.longitude - bottomRightCoord.longitude) * extraSpace)
             region = MKCoordinateRegion(center: center, span: span)
         }
@@ -507,7 +523,6 @@ extension MapViewController: MKMapViewDelegate {
         // Don't override user location blue pin
         if annotation.isKind(of: MKUserLocation.self) {
             return nil
-
         }
         // Dequeue annotation view or create new one
         var annotationView: MKPinAnnotationView
@@ -555,5 +570,21 @@ extension MapViewController: MKMapViewDelegate {
             return circleRenderer
         }
         return MKOverlayRenderer()
+    }
+    
+    func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
+        if !view.annotation!.isKind(of: MKUserLocation.self) {
+            if !taggingLocation && !editingLocation {
+                title = "Tap Plus"
+            }
+        }
+    }
+    
+    func mapView(_ mapView: MKMapView, didDeselect view: MKAnnotationView) {
+        if !view.annotation!.isKind(of: MKUserLocation.self) {
+            if !taggingLocation && !editingLocation {
+                title = "Tap a Pin"
+            }
+        }
     }
 }

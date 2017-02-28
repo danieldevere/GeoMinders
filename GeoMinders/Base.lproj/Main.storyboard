@@ -520,25 +520,29 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <prototypes>
-                            <tableViewCell contentMode="scaleToFill" selectionStyle="default" accessoryType="disclosureIndicator" indentationWidth="10" reuseIdentifier="ListCell" textLabel="1bM-i7-c3w" style="IBUITableViewCellStyleDefault" id="mVc-Bt-INv">
+                            <tableViewCell contentMode="scaleToFill" selectionStyle="default" accessoryType="disclosureIndicator" indentationWidth="10" reuseIdentifier="ListCell" textLabel="1bM-i7-c3w" detailTextLabel="NTN-UG-Q66" style="IBUITableViewCellStyleSubtitle" id="mVc-Bt-INv">
                                 <rect key="frame" x="0.0" y="22" width="320" height="64"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="mVc-Bt-INv" id="liJ-82-co7">
-                                    <rect key="frame" x="0.0" y="0.0" width="287" height="64"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="287" height="63"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
-                                        <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" text="Title" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="1bM-i7-c3w">
-                                            <rect key="frame" x="15" y="0.0" width="270" height="63.5"/>
+                                        <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" text="Title" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="1bM-i7-c3w">
+                                            <rect key="frame" x="15" y="14" width="34" height="21"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                            <fontDescription key="fontDescription" type="system" pointSize="16"/>
+                                            <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                             <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                            <nil key="highlightedColor"/>
+                                        </label>
+                                        <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" text="Subtitle" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="NTN-UG-Q66">
+                                            <rect key="frame" x="15" y="35" width="44" height="15"/>
+                                            <autoresizingMask key="autoresizingMask"/>
+                                            <fontDescription key="fontDescription" type="system" pointSize="12"/>
+                                            <nil key="textColor"/>
                                             <nil key="highlightedColor"/>
                                         </label>
                                     </subviews>
                                 </tableViewCellContentView>
-                                <connections>
-                                    <segue destination="oXk-Jr-K1S" kind="show" identifier="ShowChecklist" id="AgF-bf-PMr"/>
-                                </connections>
                             </tableViewCell>
                             <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="NewListCell" id="mR2-Gu-SDe">
                                 <rect key="frame" x="0.0" y="86" width="320" height="64"/>
@@ -587,9 +591,6 @@
                                         </label>
                                     </subviews>
                                 </tableViewCellContentView>
-                                <connections>
-                                    <segue destination="oXk-Jr-K1S" kind="show" identifier="ShowStoreList" id="hJ6-ow-Loi"/>
-                                </connections>
                             </tableViewCell>
                         </prototypes>
                         <connections>
@@ -612,6 +613,8 @@
                     <connections>
                         <outlet property="addButton" destination="bYT-ty-XdC" id="rq5-V4-Zjz"/>
                         <outlet property="settingsButton" destination="vsp-WP-zW3" id="MvJ-i9-TO6"/>
+                        <segue destination="oXk-Jr-K1S" kind="show" identifier="ShowChecklist" id="ZHM-zg-q7Z"/>
+                        <segue destination="oXk-Jr-K1S" kind="show" identifier="ShowStoreList" id="csm-Vv-n4I"/>
                     </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="muK-qa-3Jn" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -1032,9 +1035,9 @@
         <image name="currentLocation" width="128" height="128"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="xSK-yf-1T9"/>
-        <segue reference="hJ6-ow-Loi"/>
-        <segue reference="Nuu-WS-V7V"/>
         <segue reference="Wj6-N9-sDc"/>
+        <segue reference="Nuu-WS-V7V"/>
+        <segue reference="csm-Vv-n4I"/>
+        <segue reference="xSK-yf-1T9"/>
     </inferredMetricsTieBreakers>
 </document>

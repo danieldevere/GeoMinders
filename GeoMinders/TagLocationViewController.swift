@@ -41,10 +41,11 @@ class TagLocationViewController: UITableViewController {
             // Set the location id
             if UserDefaults.standard.object(forKey: "LocationIndex") != nil {
                 let locationIndex = UserDefaults.standard.integer(forKey: "LocationIndex")
-                location.myID = locationIndex + 1
+                location.myID = locationIndex
                 UserDefaults.standard.set(locationIndex + 1, forKey: "LocationIndex")
             // First location added
             } else {
+                print("did this run")
                 location.myID = 0
                 UserDefaults.standard.set(0, forKey: "LocationIndex")
             }

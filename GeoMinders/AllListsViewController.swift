@@ -63,9 +63,23 @@ class AllListsViewController: UITableViewController {
         performSegue(withIdentifier: "ShowSettings", sender: nil)
     }
     
+    // MARK: - Overrides
+    
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         navigationController?.isToolbarHidden = true
+        tableView.reloadData()
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        // Switches to the screen the user was last on
+        navigationController?.delegate = self
+        let index = dataModel.indexOfSelectedChecklist
+        if index >= 0 && index < dataModel.lists.count {
+            let checklist = dataModel.lists[index]
+            performSegue(withIdentifier: "ShowChecklist", sender: checklist)
+        }
     }
     
     override func viewDidLoad() {
@@ -83,11 +97,10 @@ class AllListsViewController: UITableViewController {
         // Segue when user taps on reminder list
         if segue.identifier == "ShowChecklist" {
             let controller = segue.destination as! RemindersViewController
-            let cell = sender as! UITableViewCell
-            let indexPath = tableView.indexPath(for: cell)
-            controller.reminderList = dataModel.lists[indexPath!.row]
+            let checklist = sender as! ReminderList
+            controller.reminderList = checklist
             controller.dataModel = dataModel
-            controller.title = "\(dataModel.lists[indexPath!.row].name) List"
+            controller.title = "\(checklist.name) List"
             if addingList {
                 cancelNewList()
             }
@@ -120,6 +133,14 @@ class AllListsViewController: UITableViewController {
         if indexPath.row < dataModel.lists.count {
             let cell = tableView.dequeueReusableCell(withIdentifier: "ListCell", for: indexPath) 
             cell.textLabel?.text = dataModel.lists[indexPath.row].name
+            let count = dataModel.lists[indexPath.row].countUncheckedItems()
+            if dataModel.lists[indexPath.row].checklist.count == 0 {
+                cell.detailTextLabel?.text = "(No Items)"
+            } else if count == 0 {
+                cell.detailTextLabel?.text = "All Done!"
+            } else {
+                cell.detailTextLabel?.text = "\(dataModel.lists[indexPath.row].countUncheckedItems()) Items"
+            }
             return cell
         // New list cell below list cells if not at store and below store list if at store
         } else if (addingList) && (indexPath.row == dataModel.lists.count) {
@@ -129,7 +150,7 @@ class AllListsViewController: UITableViewController {
         } else if (atStore) && (indexPath.row == numberOfRows() - 1) {
             let cell = tableView.dequeueReusableCell(withIdentifier: "ItemsToDoAtLocationCell", for: indexPath)
             cell.textLabel?.text = "\(storeList!.name)"
-            cell.detailTextLabel?.text = "\(storeList!.checklist.count) items"
+            cell.detailTextLabel?.text = "\(storeList?.countUncheckedItems()) Items"
             return cell
         }else {
             return super.tableView(tableView, cellForRowAt: indexPath)
@@ -155,11 +176,13 @@ class AllListsViewController: UITableViewController {
     // Cancels new list if there is one.  storyboard has segue to reminder list
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
-        if addingList {
-            if atStore && indexPath.row > dataModel.lists.count + 1 {
-                cancelNewList()
-            } else if !atStore && indexPath.row > dataModel.lists.count {
-                cancelNewList()
+        // Segue to checklist
+        if indexPath.row < dataModel.lists.count {
+            dataModel.indexOfSelectedChecklist = indexPath.row
+            performSegue(withIdentifier: "ShowChecklist", sender: dataModel.lists[indexPath.row])
+        } else if atStore {
+            if indexPath.row == dataModel.lists.count {
+                performSegue(withIdentifier: "ShowStoreList", sender: nil)
             }
         }
     }
@@ -231,5 +254,15 @@ class AllListsViewController: UITableViewController {
             number += 1
         }
         return number
+    }
+}
+
+// MARK: - Navigation controller delegate
+
+extension AllListsViewController: UINavigationControllerDelegate {
+    func navigationController(_ navigationController: UINavigationController, willShow viewController: UIViewController, animated: Bool) {
+        if viewController === self {
+            dataModel.indexOfSelectedChecklist = -1
+        }
     }
 }

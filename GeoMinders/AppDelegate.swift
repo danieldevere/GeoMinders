@@ -23,9 +23,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Initialize data model on app start
         let navigationController = window!.rootViewController as! UINavigationController
         let controller = navigationController.topViewController as! AllListsViewController
-        dataModel.loadLocationItems()
+    //    dataModel.loadLocationItems()
         locationManager.delegate = self
-        dataModel.loadReminderItems()
+     //   dataModel.loadReminderItems()
         controller.dataModel = dataModel
         
         // Set up notification settings
