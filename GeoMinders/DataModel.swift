@@ -186,8 +186,18 @@ class DataModel {
         }
     }
     
+    var atStore: Int {
+        get {
+            return UserDefaults.standard.integer(forKey: "AtStore")
+        }
+        set {
+            UserDefaults.standard.set(newValue, forKey: "AtStore")
+            UserDefaults.standard.synchronize()
+        }
+    }
+    
     func registerDefaults() {
-        let dictionary = [ "ChecklistIndex": -1, "FirstTime": true, "LocationIndex": 0 ] as [String : Any]
+        let dictionary = [ "ChecklistIndex": -1, "FirstTime": true, "LocationIndex": 0, "AtStore": -1 ] as [String : Any]
         UserDefaults.standard.register(defaults: dictionary)
     }
     

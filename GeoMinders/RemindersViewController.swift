@@ -16,7 +16,7 @@ class RemindersViewController: UITableViewController {
     var reminderList = ReminderList()
     var tempReminder = ReminderItem()
     var dataModel: DataModel!
-    var atStore: Bool = false
+    var atStore = false
     let locationManager = CLLocationManager()
     
     @IBOutlet weak var reminderNameLabel: UILabel!
@@ -110,25 +110,32 @@ class RemindersViewController: UITableViewController {
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         // Adds the new reminder row when the user isn't at the store and they aren't showing the completed items
-        if indexPath.row == 0 {
-            let cell = tableView.dequeueReusableCell(withIdentifier: "NewReminderCell", for: indexPath)
-            return cell
-        } else if indexPath.row - 1 >= 0 && indexPath.row - 1 < reminderList.checklist.count {
-            let item = reminderList.checklist[indexPath.row - 1]
-            let cell = tableView.dequeueReusableCell(withIdentifier: "ReminderItemCell", for: indexPath) 
+        if atStore {
+            let item = reminderList.checklist[indexPath.row]
+            let cell = tableView.dequeueReusableCell(withIdentifier: "ReminderItemCell", for: indexPath)
             let reminderText = cell.viewWithTag(1001) as! UILabel
             let reminderDetailText = cell.viewWithTag(1002) as! UILabel
             reminderText.text = item.reminderText
             reminderDetailText.text = item.detailText
             updateCheckmarkForCell(cell: cell, withReminder: item)
-            if atStore {
-                cell.accessoryType = .none
-            } else {
-                cell.accessoryType = UITableViewCellAccessoryType.detailButton
-            }
+            cell.accessoryType = .none
             return cell
+        } else {
+            if indexPath.row == 0 {
+                let cell = tableView.dequeueReusableCell(withIdentifier: "NewReminderCell", for: indexPath)
+                return cell
+            } else {
+                let item = reminderList.checklist[indexPath.row - 1]
+                let cell = tableView.dequeueReusableCell(withIdentifier: "ReminderItemCell", for: indexPath)
+                let reminderText = cell.viewWithTag(1001) as! UILabel
+                let reminderDetailText = cell.viewWithTag(1002) as! UILabel
+                reminderText.text = item.reminderText
+                reminderDetailText.text = item.detailText
+                updateCheckmarkForCell(cell: cell, withReminder: item)
+                cell.accessoryType = UITableViewCellAccessoryType.detailButton
+                return cell
+            }
         }
-        return super.tableView(tableView, cellForRowAt: indexPath)
     }
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
@@ -139,7 +146,7 @@ class RemindersViewController: UITableViewController {
         } else {
             reminder = reminderList.checklist[indexPath.row - 1]
         }
-        if indexPath.row >= 1 {
+
             let cell = tableView.cellForRow(at: indexPath)
             let checkmark = cell?.viewWithTag(1000) as! UIImageView
             reminder.checked = !reminder.checked
@@ -156,7 +163,7 @@ class RemindersViewController: UITableViewController {
             tableView.deselectRow(at: indexPath, animated: true)
             dataModel.saveReminderItems()
             dataModel.saveLocationItems()
-        }
+        
     }
     
     override func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
@@ -177,6 +184,15 @@ class RemindersViewController: UITableViewController {
         removeReminderFromLocation(reminderList.checklist[indexPath.row - 1])
         dataModel.saveLocationItems()
         updateLocationMonitoring()
+        if dataModel.atStore != -1 {
+            var i = 0
+            for item in dataModel.lists[0].checklist {
+                if item.myID == reminderList.checklist[indexPath.row - 1].myID {
+                    dataModel.lists[0].checklist.remove(at: i)
+                }
+                i += 1
+            }
+        }
         reminderList.checklist.remove(at: indexPath.row - 1)
         let indexPaths = [indexPath]
         tableView.deleteRows(at: indexPaths, with: .automatic)
@@ -315,6 +331,9 @@ extension RemindersViewController: LocationPickerViewControllerDelegate {
         tempReminder.creationDate = Date(timeIntervalSinceNow: 0)
         addReminderToLocationCount(tempReminder)
         reminderList.checklist.append(tempReminder)
+        if dataModel.atStore == tempReminder.locationID {
+            dataModel.lists[0].checklist.append(tempReminder)
+        }
         dataModel.sortItemsByCompletedThenDate()
         dataModel.saveReminderItems()
         // Update location data

@@ -15,8 +15,6 @@ class AllListsViewController: UITableViewController {
     
     var dataModel: DataModel!
     var addingList = false
-    var atStore = false
-    var storeList: ReminderList?
     let locationManager = CLLocationManager()
     
     @IBOutlet weak var settingsButton: UIBarButtonItem!
@@ -68,6 +66,12 @@ class AllListsViewController: UITableViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         navigationController?.isToolbarHidden = true
+        if dataModel.atStore != -1 {
+            if dataModel.lists[0].countUncheckedItems() == 0 {
+                dataModel.lists.remove(at: 0)
+                dataModel.atStore = -1
+            }
+        }
         tableView.reloadData()
     }
     
@@ -104,6 +108,7 @@ class AllListsViewController: UITableViewController {
             if addingList {
                 cancelNewList()
             }
+            
         // Segue when user taps on settings button
         } else if segue.identifier == "ShowSettings" {
             let navigationController = segue.destination as! UINavigationController
@@ -112,13 +117,12 @@ class AllListsViewController: UITableViewController {
         // Segue when user is at store and taps the store list
         } else if segue.identifier == "ShowStoreList" {
             let controller = segue.destination as! RemindersViewController
-            if let list = storeList {
-                print("sent storeList to reminder screen")
-                controller.reminderList = list
-                controller.title = list.name
-            }
-            controller.dataModel = dataModel
+            let checklist = sender as! ReminderList
+            print("sent storeList to reminder screen")
+            controller.reminderList = checklist
+            controller.title = checklist.name
             controller.atStore = true
+            controller.dataModel = dataModel
         }
     }
 
@@ -147,12 +151,12 @@ class AllListsViewController: UITableViewController {
             let cell = tableView.dequeueReusableCell(withIdentifier: "NewListCell", for: indexPath) 
             return cell
         // Add store list below list cells
-        } else if (atStore) && (indexPath.row == numberOfRows() - 1) {
+        }/* else if (dataModel.atStore) && (indexPath.row == numberOfRows() - 1) {
             let cell = tableView.dequeueReusableCell(withIdentifier: "ItemsToDoAtLocationCell", for: indexPath)
             cell.textLabel?.text = "\(storeList!.name)"
             cell.detailTextLabel?.text = "\(storeList?.countUncheckedItems()) Items"
             return cell
-        }else {
+        }*/ else {
             return super.tableView(tableView, cellForRowAt: indexPath)
         }
     }
@@ -162,10 +166,20 @@ class AllListsViewController: UITableViewController {
         let alert = UIAlertController(title: "Deleting List", message: "This will delete all the items in the list", preferredStyle: UIAlertControllerStyle.alert)
         let deleteAction = UIAlertAction(title: "Delete", style: UIAlertActionStyle.destructive, handler: {
             _ in
+            let wasAtStore = self.dataModel.atStore
             self.listDeleted(indexPath.row)
-            self.dataModel.lists.remove(at: indexPath.row)
-            let indexPaths = [indexPath]
-            tableView.deleteRows(at: indexPaths, with: .automatic)
+            let stillAtStore = self.dataModel.atStore
+            if wasAtStore == stillAtStore {
+                self.dataModel.lists.remove(at: indexPath.row)
+                let indexPaths = [indexPath]
+                tableView.deleteRows(at: indexPaths, with: .automatic)
+            } else {
+                self.dataModel.lists.remove(at: indexPath.row - 1)
+                let index = IndexPath(row: indexPath.row - 1, section: 0)
+                let indexPaths = [index]
+                tableView.deleteRows(at: indexPaths, with: .automatic)
+            }
+            
             self.dataModel.saveReminderItems()
         })
         alert.addAction(deleteAction)
@@ -176,22 +190,23 @@ class AllListsViewController: UITableViewController {
     // Cancels new list if there is one.  storyboard has segue to reminder list
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
-        // Segue to checklist
-        if indexPath.row < dataModel.lists.count {
-            dataModel.indexOfSelectedChecklist = indexPath.row
-            performSegue(withIdentifier: "ShowChecklist", sender: dataModel.lists[indexPath.row])
-        } else if atStore {
-            if indexPath.row == dataModel.lists.count {
-                performSegue(withIdentifier: "ShowStoreList", sender: nil)
+        // Segue to store list
+        if dataModel.atStore != -1 && indexPath.row == 0 {
+            performSegue(withIdentifier: "ShowStoreList", sender: dataModel.lists[indexPath.row])
+        } else {
+            // segue to regular checklist
+            if indexPath.row < dataModel.lists.count {
+                dataModel.indexOfSelectedChecklist = indexPath.row
+                performSegue(withIdentifier: "ShowChecklist", sender: dataModel.lists[indexPath.row])
             }
         }
     }
     // Don't allow editing of new cell or store list
     override func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
-        if indexPath.row < dataModel.lists.count {
-            return true
-        } else {
+        if indexPath.row == 0 && dataModel.atStore != -1 {
             return false
+        } else {
+            return true
         }
     }
     
@@ -200,6 +215,22 @@ class AllListsViewController: UITableViewController {
     // Update all the locations when a list is deleted
     func listDeleted(_ listIndex: Int) {
         for item in dataModel.lists[listIndex].checklist {
+            if dataModel.atStore != -1 {
+                var i = 0
+                for reminder in dataModel.lists[0].checklist {
+                    if reminder.myID == item.myID {
+                        dataModel.lists[0].checklist.remove(at: i)
+                    }
+                    i += 1
+                }
+                dataModel.saveReminderItems()
+                if dataModel.lists[0].countUncheckedItems() == 0 {
+                    dataModel.atStore = -1
+                    dataModel.lists.remove(at: 0)
+                    dataModel.saveReminderItems()
+                    tableView.reloadData()
+                }
+            }
             for location in dataModel.locations {
                 if location.myID == item.locationID {
                     location.remindersCount -= 1
@@ -250,8 +281,8 @@ class AllListsViewController: UITableViewController {
         if addingList {
             number += 1
         }
-        if atStore {
-            number += 1
+        if dataModel.atStore != -1 {
+            number += 0
         }
         return number
     }

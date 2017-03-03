@@ -98,75 +98,88 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 extension AppDelegate: CLLocationManagerDelegate {
     // Respond to entering geofence
     func locationManager(_ manager: CLLocationManager, didEnterRegion region: CLRegion) {
-        dataModel.loadLocationItems()
-        dataModel.loadReminderItems()
-        var locationEntered = Location()
-        let locationID = Int(region.identifier)
-        // Search location list for location that matches the ID set for the geofence
-        for location in dataModel.locations {
-            if location.myID == locationID {
-                locationEntered = location
-                break
+        if dataModel.atStore == -1 {
+            dataModel.loadLocationItems()
+            dataModel.loadReminderItems()
+            var locationEntered = Location()
+            let locationID = Int(region.identifier)
+            dataModel.atStore = locationID!
+            // Search location list for location that matches the ID set for the geofence
+            for location in dataModel.locations {
+                if location.myID == locationID {
+                    locationEntered = location
+                    break
+                }
             }
-        }
-        // Set up the notification
-        let date = Date(timeIntervalSinceNow: 1)
-        let localNotification = UILocalNotification()
-        localNotification.fireDate = date
-        localNotification.timeZone = TimeZone.current
-        let remindersForNotification = remindersForLocation(locationEntered)
-        let additionalReminders = remindersForNotification.count - 1
-        var alertString = "You have arried at " + locationEntered.name
-        alertString = alertString + ", you need to get \(remindersForNotification[0].reminderText)"
-        if additionalReminders > 0 {
-            alertString = alertString + " and \(additionalReminders) other items."
-        } else {
-            alertString = alertString + "."
-        }
-        localNotification.alertBody = alertString
-        if #available(iOS 8.2, *) {
-            localNotification.alertTitle = locationEntered.name
-        } else {
-            // Fallback on earlier versions
-        }
-        if dataModel.settings.playAlertSounds {
-            localNotification.soundName = UILocalNotificationDefaultSoundName
-        }
-        UIApplication.shared.scheduleLocalNotification(localNotification)
-        // Set up second notification if user wants it
-        if dataModel.settings.remindAgain {
-            let secondDate = Date(timeIntervalSinceNow: 600)
-            let secondNotification = UILocalNotification()
-            secondNotification.fireDate = secondDate
-            secondNotification.timeZone = TimeZone.current
-            secondNotification.alertBody = alertString
+            // Set up the notification
+            let date = Date(timeIntervalSinceNow: 1)
+            let localNotification = UILocalNotification()
+            localNotification.fireDate = date
+            localNotification.timeZone = TimeZone.current
+            let remindersForNotification = remindersForLocation(locationEntered)
+            let additionalReminders = remindersForNotification.count - 1
+            var alertString = "You have arried at " + locationEntered.name
+            alertString = alertString + ", you need to get \(remindersForNotification[0].reminderText)"
+            if additionalReminders > 0 {
+                alertString = alertString + " and \(additionalReminders) other items."
+            } else {
+                alertString = alertString + "."
+            }
+            localNotification.alertBody = alertString
             if #available(iOS 8.2, *) {
-                secondNotification.alertTitle = locationEntered.name
+                localNotification.alertTitle = locationEntered.name
             } else {
                 // Fallback on earlier versions
             }
             if dataModel.settings.playAlertSounds {
-                secondNotification.soundName = UILocalNotificationDefaultSoundName
+                localNotification.soundName = UILocalNotificationDefaultSoundName
             }
-            UIApplication.shared.scheduleLocalNotification(secondNotification)
+            UIApplication.shared.scheduleLocalNotification(localNotification)
+            // Set up second notification if user wants it
+            if dataModel.settings.remindAgain {
+                let secondDate = Date(timeIntervalSinceNow: 600)
+                let secondNotification = UILocalNotification()
+                secondNotification.fireDate = secondDate
+                secondNotification.timeZone = TimeZone.current
+                secondNotification.alertBody = alertString
+                if #available(iOS 8.2, *) {
+                    secondNotification.alertTitle = locationEntered.name
+                } else {
+                    // Fallback on earlier versions
+                }
+                if dataModel.settings.playAlertSounds {
+                    secondNotification.soundName = UILocalNotificationDefaultSoundName
+                }
+                UIApplication.shared.scheduleLocalNotification(secondNotification)
+            }
+            // Turn on the at store list
+            let navigationController = window?.rootViewController as! UINavigationController
+            let controller = navigationController.topViewController as! AllListsViewController
+            let reminderList = ReminderList()
+            reminderList.checklist = remindersForNotification
+            reminderList.name = "List for " + locationEntered.name
+            dataModel.lists.insert(reminderList, at: 0)
+            dataModel.saveReminderItems()
+            controller.tableView.reloadData()
+
         }
-        // Turn on the at store list
-        let navigationController = window?.rootViewController as! UINavigationController
-        let controller = navigationController.topViewController as! AllListsViewController
-        controller.atStore = true
-        let reminderList = ReminderList()
-        reminderList.checklist = remindersForNotification
-        reminderList.name = "List for " + locationEntered.name
-        controller.storeList = reminderList
-        controller.tableView.reloadData()
     }
     // Turn off the at store list
     func locationManager(_ manager: CLLocationManager, didExitRegion region: CLRegion) {
-        let navigationController = window?.rootViewController as! UINavigationController
-        let controller = navigationController.topViewController as! AllListsViewController
-        controller.storeList = nil
-        controller.atStore = false
-        controller.tableView.reloadData()
+        if dataModel.atStore != -1 {
+            dataModel.atStore = -1
+            let navigationController = window?.rootViewController as! UINavigationController
+            let allListsController = navigationController.viewControllers[0] as! AllListsViewController
+            if navigationController.visibleViewController!.isKind(of: RemindersViewController.self) {
+                let remindersController = navigationController.visibleViewController as! RemindersViewController
+                if remindersController.atStore {
+                    navigationController.popViewController(animated: true)
+                }
+            }
+            dataModel.lists.remove(at: 0)
+            dataModel.saveReminderItems()
+            allListsController.tableView.reloadData()
+        }
     }
     
     func locationManager(_ manager: CLLocationManager, monitoringDidFailFor region: CLRegion?, withError error: Error) {
